@@ -44,13 +44,13 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_CONF) ./root/etc/config/softwarecenter $(1)/etc/config/softwarecenter
 	
 	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
+	$(INSTALL_BIN) ./root/etc/init.d/softwarecenter $(1)/etc/init.d/softwarecenter
 
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
+	$(INSTALL_BIN) ./root/etc/uci-defaults/softwarecenter $(1)/etc/uci-defaults/softwarecenter
 	
   $(INSTALL_DIR) $(1)/usr/bin/softwarecenter
-  $(INSTALL_BIN) ./root//usr/bin/softwarecenter/* $(1)/usr/bin/softwarecenter/
+  $(INSTALL_BIN) ./root/usr/bin/softwarecenter/* $(1)/usr/bin/softwarecenter/
   
   $(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
   po2lmo ./po/zh-cn/softwarecenter.po $(1)/usr/lib/lua/luci/i18n/softwarecenter.zh-cn.lmo
