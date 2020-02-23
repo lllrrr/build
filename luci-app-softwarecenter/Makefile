@@ -37,18 +37,12 @@ define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./root/etc/config/softwarecenter $(1)/etc/config/softwarecenter
-	$(INSTALL_DIR) $(1)/etc/init.d
-	$(INSTALL_BIN) ./root/etc/init.d/softwarecenter $(1)/etc/init.d/softwarecenter
-	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/	
-	$(INSTALL_DIR) $(1)/usr/bin/softwarecenter
-	$(INSTALL_BIN) ./root/usr/bin/softwarecenter/* $(1)/usr/bin/softwarecenter/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	po2lmo ./po/zh-cn/softwarecenter.po $(1)/usr/lib/lua/luci/i18n/softwarecenter.zh-cn.lmo
+	  $(INSTALL_DIR) $(1)/usr/lib/lua/luci
+	  cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
+    $(INSTALL_DIR) $(1)/
+    $(INSTALL_BIN) ./root/* $(1)/
+	  $(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
+	  po2lmo ./po/zh-cn/softwarecenter.po $(1)/usr/lib/lua/luci/i18n/softwarecenter.zh-cn.lmo
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
