@@ -39,8 +39,8 @@ endef
 define Package/$(PKG_NAME)/install
 	  $(INSTALL_DIR) $(1)/usr/lib/lua/luci
 	  cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
-    $(INSTALL_DIR) $(1)/
-    $(INSTALL_BIN) ./root/* $(1)/
+      $(INSTALL_DIR) $(1)/
+      $(INSTALL_BIN) ./root/* $(1)/
 	  $(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 	  po2lmo ./po/zh-cn/softwarecenter.po $(1)/usr/lib/lua/luci/i18n/softwarecenter.zh-cn.lmo
 endef
