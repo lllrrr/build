@@ -5,12 +5,15 @@
 #
 
 include $(TOPDIR)/rules.mk
-PKG_NAME:=luci-app-softwarecenter
+
 LUCI_TITLE:=LuCI Support for Software Center
 LUCI_DEPENDS:=+softwarecenter
+PKG_NAME:=luci-app-softwarecenter
 PKG_VERSION:=1.0.6
 
 PKG_MAINTAINER:=Jianpeng Xiang <1505020109@mail.hnust.edu.cn>
 PKG_LICENSE:=GPLv3
 
-$(eval $(call BuildPackage,$(PKG_NAME)))
+include $(TOPDIR)/feeds/luci/luci.mk
+
+# call BuildPackage - OpenWrt buildroot signature
