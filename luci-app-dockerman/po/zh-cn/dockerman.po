@@ -241,11 +241,11 @@ msgstr "Docker根目录"
 msgid "Index Server Address"
 msgstr "默认服务器地址"
 
-msgid "Socket Path"
-msgstr "Socket路径"
+msgid "Docker Socket Path"
+msgstr "Docker Socket 路径"
 
 msgid "Action Status Tempfile Path"
-msgstr "docker 动作状态的临时文件路径"
+msgstr "Docker 操作状态临时文件路径"
 
 msgid "Where you want to save the docker status file"
 msgstr "保存docker status文件的位置"
@@ -334,24 +334,6 @@ msgstr "主机名称"
 msgid "The hostname to use for the container"
 msgstr "容器使用的主机名"
 
-msgid "Canceled"
-msgstr "已取消"
-
-msgid "Cancel"
-msgstr "取消"
-
-msgid "Submit"
-msgstr "提交"
-
-msgid "Command line"
-msgstr "命令行"
-
-msgid "Docker actions done."
-msgstr "Docker下载完成。"
-
-msgid "Reveal/hide password"
-msgstr "显示/隐藏 密码"
-
 msgid "File"
 msgstr "文件"
 
@@ -370,11 +352,38 @@ msgstr "上传错误"
 msgid "Upload Success"
 msgstr "上传成功"
 
+msgid "Remote Endpoint"
+msgstr "远程节点"
+
+msgid "Remote Host"
+msgstr "远程节点域名"
+
+msgid "Remote Port"
+msgstr "远程节点端口"
+
 msgid "Please input the PATH and select the file !"
 msgstr "请先输入路径，然后选择文件！"
 
 msgid "Please input the PATH !"
 msgstr "请输入路径！"
+
+msgid "Canceled"
+msgstr "已取消"
+
+msgid "Cancel"
+msgstr "取消"
+
+msgid "Submit"
+msgstr "提交"
+
+msgid "Command line"
+msgstr "命令行"
+
+msgid "Docker actions done."
+msgstr "Docker下载完成。"
+
+msgid "Reveal/hide password"
+msgstr "显示/隐藏 密码"
 
 msgid ""
 msgstr ""
