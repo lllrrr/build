@@ -41,7 +41,6 @@ local resolve_cli = function(cmd_line)
   local val = nil
   local is_cmd = false
 
-  luci.util.perror(key_with_val)
   cmd_line = cmd_line:match("^DOCKERCLI%s+(.+)")
   for w in cmd_line:gmatch("[^%s]+") do
     if w =='\\' then
@@ -202,7 +201,7 @@ m.redirect = luci.dispatcher.build_url("admin", "services","docker", "containers
 
 docker_status = m:section(SimpleSection)
 docker_status.template = "dockerman/apply_widget"
-docker_status.err=nixio.fs.readfile(dk.options.status_path)
+docker_status.err=docker:read_status()
 docker_status.err=docker_status.err and docker_status.err:gsub("\n","<br>"):gsub(" ","&nbsp;")
 if docker_status.err then docker:clear_status() end
 
@@ -548,10 +547,10 @@ m.handle = function(self, state, data)
   local pull_image = function(image)
     local server = "index.docker.io"
     local json_stringify = luci.jsonc and luci.jsonc.stringify
-    docker:append_status("Images: " .. "pulling" .. " " .. image .. "...")
+    docker:append_status("Images: " .. "pulling" .. " " .. image .. "...\n")
     local x_auth = nixio.bin.b64encode(json_stringify({serveraddress= server}))
-    local res = dk.images:create({query = {fromImage=image}, header={["X-Registry-Auth"]=x_auth}})
-    if res and res.code == 200 then
+    local res = dk.images:create({query = {fromImage=image}, header={["X-Registry-Auth"]=x_auth}}, docker.pull_image_show_status_cb)
+    if res and res.code == 200 and (res.body[#res.body].status:match("Status: Downloaded newer image for ".. image) or res.body[#res.body].status:match("Status: Image is up to date for ".. image)) then
       docker:append_status("done\n")
     else
       docker:append_status("fail code:" .. res.code.." ".. (res.body.message and res.body.message or res.message).. "\n")
