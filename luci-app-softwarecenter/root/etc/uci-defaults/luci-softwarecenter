@@ -5,6 +5,7 @@ uci -q batch <<-EOF >/dev/null
 	add ucitrack softwarecenter
 	set ucitrack.@softwarecenter[-1].init=softwarecenter
 	commit ucitrack
+	delete firewall.softwarecenter
 EOF
 
 /etc/init.d/softwarecenter enable
