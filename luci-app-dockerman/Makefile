@@ -28,6 +28,10 @@ define Package/$(PKG_NAME)
 	DEPENDS:=+luci-lib-docker +PACKAGE_$(PKG_NAME)_INCLUDE_ttyd:ttyd +e2fsprogs +fdisk
 endef
 
+define Package/$(PKG_NAME)/description
+	Docker Manager interface for LuCI
+endef
+
 define Build/Compile
 endef
 
