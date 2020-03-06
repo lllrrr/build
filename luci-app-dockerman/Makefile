@@ -5,6 +5,7 @@ PKG_VERSION:=v0.4.0
 PKG_RELEASE:=beta
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)/config
@@ -24,15 +25,7 @@ define Package/$(PKG_NAME)
 	SUBMENU:=3. Applications
 	TITLE:=Docker Manager interface for LuCI
 	PKGARCH:=all
-	DEPENDS:=+luci-lib-docker +PACKAGE_$(PKG_NAME)_INCLUDE_docker_ce:docker-ce +PACKAGE_$(PKG_NAME)_INCLUDE_ttyd:ttyd +e2fsprogs +fdisk
-endef
-
-define Package/$(PKG_NAME)/description
-	Docker Manager interface for LuCI
-endef
-
-define Build/Prepare
-	tar -xzvf $(DL_DIR)/$(PKG_SOURCE) -C $(BUILD_DIR)
+	DEPENDS:=+luci-lib-docker +PACKAGE_$(PKG_NAME)_INCLUDE_ttyd:ttyd +e2fsprogs +fdisk
 endef
 
 define Build/Compile
