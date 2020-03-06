@@ -1,12 +1,31 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-dockerman
-PKG_VERSION:=v0.3.3
+PKG_VERSION:=v0.4.0
 PKG_RELEASE:=beta
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
 
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/lisaac/luci-app-dockerman.git
+PKG_SOURCE_VERSION:=$(PKG_VERSION)
+
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)
+PKG_SOURCE:=$(PKG_SOURCE_SUBDIR)-$(PKG_VERSION).tar.gz
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+
 include $(INCLUDE_DIR)/package.mk
+
+define Package/$(PKG_NAME)/config
+menu "Configuration"
+config PACKAGE_$(PKG_NAME)_INCLUDE_docker_ce
+	bool "Include Docker-CE"
+	default y
+config PACKAGE_$(PKG_NAME)_INCLUDE_ttyd
+	bool "Include ttyd"
+	default y
+endmenu
+endef
 
 define Package/$(PKG_NAME)
 	SECTION:=luci
@@ -14,33 +33,37 @@ define Package/$(PKG_NAME)
 	SUBMENU:=3. Applications
 	TITLE:=Docker Manager interface for LuCI
 	PKGARCH:=all
-	DEPENDS:=+luci-lib-docker +docker-ce +e2fsprogs +fdisk
+	DEPENDS:=+luci-lib-docker +PACKAGE_$(PKG_NAME)_INCLUDE_docker_ce:docker-ce +PACKAGE_$(PKG_NAME)_INCLUDE_ttyd:ttyd +e2fsprogs +fdisk
 endef
 
+define Package/$(PKG_NAME)/description
+	Docker Manager interface for LuCI
+endef
+
+define Build/Prepare
+	tar -xzvf $(DL_DIR)/$(PKG_SOURCE) -C $(BUILD_DIR)
+endef
 
 define Build/Compile
 endef
 
-define Package/$(PKG_NAME)/conffiles
-/etc/config/dockerman
-endef
-
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
-rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
+rm -fr /tmp/luci-indexcache /tmp/luci-modulecache
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./root/etc/config/dockerman $(1)/etc/config
-	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_BIN) ./root/etc/docker-init $(1)/etc
-#	$(INSTALL_DIR) $(1)/etc/init.d
-#	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
+	$(INSTALL_DIR) $(1)/
+	cp -pR $(PKG_BUILD_DIR)/root/* $(1)/
+	# $(INSTALL_DIR) $(1)/www
+	# cp -pR $(PKG_BUILD_DIR)/htdoc/* $(1)/www
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	$(CP) ./luasrc/* $(1)/usr/lib/lua/luci
+	cp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)/usr/lib/lua/luci/
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	po2lmo ./po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
+	$$(foreach po,$$(shell find $(PKG_BUILD_DIR)/po/*/*.po), \
+		po2lmo $$(po) \
+		$(1)/usr/lib/lua/luci/i18n/dockerman.$$(shell echo $$(po) | awk -F'/' '{print $$$$(NF-1)}').lmo;)
+	#po2lmo $(PKG_BUILD_DIR)/po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
