@@ -5,15 +5,6 @@ PKG_VERSION:=v0.4.0
 PKG_RELEASE:=beta
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
-
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/lisaac/luci-app-dockerman.git
-PKG_SOURCE_VERSION:=$(PKG_VERSION)
-
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)
-PKG_SOURCE:=$(PKG_SOURCE_SUBDIR)-$(PKG_VERSION).tar.gz
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
-
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)/config
