@@ -1,60 +1,18 @@
 include $(TOPDIR)/rules.mk
 
+LUCI_TITLE:=Docker Manager interface for LuCI
+LUCI_DEPENDS:=+luci-lib-docker +docker-ce +e2fsprogs +fdisk +ttyd
 PKG_NAME:=luci-app-dockerman
 PKG_VERSION:=v0.4.0
-PKG_RELEASE:=beta
+PKG_RELEASE:=leanmod
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
 
-include $(INCLUDE_DIR)/package.mk
-
-define Package/$(PKG_NAME)/config
-menu "Configuration"
-config PACKAGE_$(PKG_NAME)_INCLUDE_docker_ce
-	bool "Include Docker-CE"
-	default y
-config PACKAGE_$(PKG_NAME)_INCLUDE_ttyd
-	bool "Include ttyd"
-	default y
-endmenu
-endef
-
-define Package/$(PKG_NAME)
-	SECTION:=luci
-	CATEGORY:=LuCI
-	SUBMENU:=3. Applications
-	TITLE:=Docker Manager interface for LuCI
-	PKGARCH:=all
-	DEPENDS:=+luci-lib-docker +PACKAGE_$(PKG_NAME)_INCLUDE_ttyd:ttyd +e2fsprogs +fdisk
-endef
-
-define Package/$(PKG_NAME)/description
-	Docker Manager interface for LuCI
-endef
-
-define Build/Compile
-endef
+include $(TOPDIR)/feeds/luci/luci.mk
 
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
-uci set uhttpd.main.script_timeout="600"
-uci commit uhttpd
-rm -fr /tmp/luci-indexcache /tmp/luci-modulecache
-/etc/init.d/uhttpd restart
+rm -rf /tmp/luci-indexcache /tmp/luci-modulecache
 endef
 
-define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/
-	cp -pR $(PKG_BUILD_DIR)/root/* $(1)/
-	# $(INSTALL_DIR) $(1)/www
-	# cp -pR $(PKG_BUILD_DIR)/htdoc/* $(1)/www
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	cp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)/usr/lib/lua/luci/
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	$$(foreach po,$$(shell find $(PKG_BUILD_DIR)/po/*/*.po), \
-		po2lmo $$(po) \
-		$(1)/usr/lib/lua/luci/i18n/dockerman.$$(shell echo $$(po) | awk -F'/' '{print $$$$(NF-1)}').lmo;)
-	#po2lmo $(PKG_BUILD_DIR)/po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
-endef
-
-$(eval $(call BuildPackage,$(PKG_NAME)))
+# call BuildPackage - OpenWrt buildroot signature
