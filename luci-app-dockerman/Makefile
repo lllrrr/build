@@ -1,14 +1,28 @@
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=Docker Manager interface for LuCI
-LUCI_DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
 PKG_NAME:=luci-app-dockerman
 PKG_VERSION:=v0.4.0
-PKG_RELEASE:=leanmod
+PKG_RELEASE:=beta
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include $(INCLUDE_DIR)/package.mk
+
+define Package/$(PKG_NAME)
+  SECTION:=luci
+  CATEGORY:=LuCI
+  SUBMENU:=3. Applications
+  DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
+  TITLE:=Docker Manager interface for LuCI
+  PKGARCH:=all
+endef
+
+define Build/Compile
+endef
+
+define Package/$(PKG_NAME)/conffiles
+/etc/config/dockerman
+endef
 
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
@@ -18,4 +32,18 @@ uci commit uhttpd
 rm -rf /tmp/luci-*
 endef
 
-# call BuildPackage - OpenWrt buildroot signature
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
+	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
+	
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
+	
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./root/etc/config/dockerman $(1)/etc/config/dockerman
+	
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
+	po2lmo ./po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
+endef
+
+$(eval $(call BuildPackage,$(PKG_NAME)))
