@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 LUCI_TITLE:=Docker Manager interface for LuCI
-LUCI_DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd
+LUCI_DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
 PKG_NAME:=luci-app-dockerman
 PKG_VERSION:=v0.4.0
 PKG_RELEASE:=leanmod
