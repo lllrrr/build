@@ -107,4 +107,8 @@ debug.enabled="true"
 debug.disabled="false"
 local debug_path = s:option(Value, "debug_path", translate("Debug Tempfile Path"), translate("Where you want to save the debug tempfile"))
 
+local wan_mode = s:option(Flag, "wan_mode", translate("Enable WAN access Dokcer"), translate("Enable WAN access docker mapped ports (need reload Docker-ce service)"))
+wan_mode.enabled="true"
+wan_mode.disabled="false"
+
 return m
