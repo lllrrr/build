@@ -1,7 +1,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-dockerman
-PKG_VERSION:=v0.4.1
+PKG_VERSION:=v0.4.2
 PKG_RELEASE:=beta
 PKG_MAINTAINER:=lisaac <https://github.com/lisaac/luci-app-dockerman>
 PKG_LICENSE:=AGPL-3.0
@@ -9,27 +9,36 @@ PKG_LICENSE:=AGPL-3.0
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-  SECTION:=luci
-  CATEGORY:=LuCI
-  SUBMENU:=3. Applications
-  DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
-  TITLE:=Docker Manager interface for LuCI
-  PKGARCH:=all
+	SECTION:=luci
+	CATEGORY:=LuCI
+	SUBMENU:=3. Applications
+	TITLE:=Docker Manager interface for LuCI
+	PKGARCH:=all
+	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
+endef
+
+define Package/$(PKG_NAME)/description
+	Docker Manager interface for LuCI
+endef
+define Build/Compile
 endef
 
 define Build/Compile
 endef
 
-define Package/$(PKG_NAME)/conffiles
-/etc/config/dockerman
-endef
-
 define Package/$(PKG_NAME)/postinst
 #!/bin/sh
-uci set uhttpd.main.script_timeout="600"
-uci commit uhttpd
-/etc/init.d/uhttpd restart
-rm -rf /tmp/luci-*
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	uci set uhttpd.main.script_timeout="600" >/dev/null 2>&1
+	uci commit uhttpd >/dev/null 2>&1
+	uci delete ucitrack.@dockerd[-1] >/dev/null 2>&1
+	uci add ucitrack dockerd >/dev/null 2>&1
+	uci set ucitrack.@dockerd[-1].init=dockerd >/dev/null 2>&1
+	uci commit ucitrack >/dev/null 2>&1
+	rm -fr /tmp/luci-indexcache /tmp/luci-modulecache >/dev/null 2>&1
+	chmod +x /etc/init.d/dockerd >/dev/null 2>&1
+	/etc/init.d/uhttpd restart >/dev/null 2>&1
+fi
 endef
 
 define Package/$(PKG_NAME)/install

@@ -523,7 +523,7 @@ elseif action == "console" then
       local kill_ttyd = 'netstat -lnpt | grep ":7682[ \t].*ttyd$" | awk \'{print $NF}\' | awk -F\'/\' \'{print "kill -9 " $1}\' | sh > /dev/null'
       local hosts
       local remote = uci:get("dockerman", "local", "remote_endpoint")
-      local socket_path = (remote == false) and  uci:get("dockerman", "local", "socket_path") or nil
+      local socket_path = (remote == "false") and  uci:get("dockerman", "local", "socket_path") or nil
       local host = (remote == "true") and uci:get("dockerman", "local", "remote_host") or nil
       local port = (remote == "true") and uci:get("dockerman", "local", "remote_port") or nil
       if remote and host and port then
@@ -535,7 +535,8 @@ elseif action == "console" then
       end
 
       local start_cmd = cmd_ttyd .. ' -d 2 -p 7682 '.. cmd_docker .. ' -H "'.. hosts ..'" exec -it ' .. (uid and uid ~= "" and (" -u ".. uid  .. ' ') or "").. container_id .. ' ' .. cmd .. ' &'
-      local res = luci.util.exec(start_cmd)local console = consolesection:option(DummyValue, "console")
+      local res = luci.util.exec(start_cmd)
+      local console = consolesection:option(DummyValue, "console")
       console.container_id = container_id
       console.template = "dockerman/container_console"
     end
