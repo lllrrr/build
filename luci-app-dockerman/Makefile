@@ -20,8 +20,6 @@ endef
 define Package/$(PKG_NAME)/description
 	Docker Manager interface for LuCI
 endef
-define Build/Compile
-endef
 
 define Build/Compile
 endef
