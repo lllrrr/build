@@ -538,7 +538,6 @@ elseif action == "console" then
       local res = luci.util.exec(start_cmd)local console = consolesection:option(DummyValue, "console")
       console.container_id = container_id
       console.template = "dockerman/container_console"
-      end
     end
   end
 elseif action == "stats" then
