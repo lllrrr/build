@@ -17,9 +17,6 @@ define Package/$(PKG_NAME)
 	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd +docker-ce
 endef
 
-define Package/$(PKG_NAME)/description
-	Docker Manager interface for LuCI
-endef
 define Build/Compile
 endef
 
@@ -34,7 +31,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
 	
 	$(INSTALL_DIR) $(1)/etc/config
-	$(INSTALL_CONF) ./root/etc/config/dockerman $(1)/etc/config/dockerman
+	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
 	
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 	po2lmo ./po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
