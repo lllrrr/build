@@ -35,4 +35,5 @@ define Package/$(PKG_NAME)/install
 	$(CP) ./luasrc/*.lua $(1)/usr/lib/lua/luci
 	
 endef
+
 $(eval $(call BuildPackage,$(PKG_NAME)))
