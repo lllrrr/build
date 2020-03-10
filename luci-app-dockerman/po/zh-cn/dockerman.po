@@ -274,8 +274,8 @@ msgstr "设置日志等级"
 msgid "Enable WAN access"
 msgstr "允许 WAN 访问"
 
-msgid "Enable WAN access container mapped ports, if disable Docker will not allow to add IP masquerading rules"
-msgstr "允许 WAN 访问容器映射的端口, 如果禁用，Docker 将不被允许添加 MASQUERADE iptables 规则"
+msgid "Enable WAN access container mapped ports"
+msgstr "允许 WAN 访问容器映射的端口"
 
 msgid "Server Host"
 msgstr "服务端"
@@ -412,68 +412,5 @@ msgstr "错误"
 msgid "Console"
 msgstr "控制台"
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-msgid "Please input the PATH and select the file !"
-msgstr "请先输入路径，然后选择文件！"
-
-msgid "Please input the PATH !"
-msgstr "请输入路径！"
-
-msgid "Canceled"
-msgstr "已取消"
-
-msgid "Cancel"
-msgstr "取消"
-
-msgid "Submit"
-msgstr "提交"
-
-msgid "Command line"
-msgstr "命令行"
-
-msgid "Docker actions done."
-msgstr "Docker下载完成。"
-
-msgid "Reveal/hide password"
-msgstr "显示/隐藏 密码"
-
-msgid "Unless stopped"
-msgstr "除非停止"
-
-msgid "Always"
-msgstr "总是"
-
-msgid "On failure"
-msgstr "失败时"
-
-msgid "No"
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
-
-msgid ""
-msgstr ""
+msgid "DockerMan is a Simple Docker manager client for LuCI, If you have any issue please visit:"
+msgstr "DockerMan 是一个简单的 Docker 管理客户端，如果您在使用过程中有问题，请访问："
