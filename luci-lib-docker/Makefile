@@ -21,13 +21,7 @@ define Package/$(PKG_NAME)/description
 	Docker Engine API for LuCI
 endef
 
-define Build/Configure
-endef
-
 define Build/Compile
-endef
-
-define Build/Install
 endef
 
 define Package/$(PKG_NAME)/postinst
@@ -35,10 +29,9 @@ define Package/$(PKG_NAME)/postinst
 rm -fr /tmp/luci-indexcache /tmp/luci-modulecache
 endef
 
-define Package/luci-lib-fs/install
+define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
-	$(CP) ./files/*.lua $(1)/usr/lib/lua/luci
-	
+	cp -pR $(PKG_BUILD_DIR)/luasrc/* $(1)/usr/lib/lua/luci/
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
