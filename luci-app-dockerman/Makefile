@@ -14,7 +14,7 @@ define Package/$(PKG_NAME)
 	SUBMENU:=3. Applications
 	TITLE:=Docker Manager interface for LuCI
 	PKGARCH:=all
-	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +ttyd
+	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk
 endef
 
 define Build/Compile
