@@ -33,6 +33,9 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
 	
+	$(INSTALL_DIR) $(1)/usr/share/dockerman
+	cp -pR ./root/usr/share/dockerman/* $(1)/usr/share/dockerman/
+	
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 	po2lmo ./po/zh-cn/dockerman.po $(1)/usr/lib/lua/luci/i18n/dockerman.zh-cn.lmo
 endef
