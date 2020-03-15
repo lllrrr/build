@@ -24,8 +24,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
 	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci/
 	
-	$(INSTALL_DIR) $(1)/etc/hotplug.d
-	cp -pR ./root/etc/hotplug.d/* $(1)/etc/hotplug.d/
+	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
+	cp -pR ./root/etc/hotplug.d/iface/* $(1)/etc/hotplug.d/iface/
 	
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
@@ -35,6 +35,9 @@ define Package/$(PKG_NAME)/install
 	
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
+	
+	$(INSTALL_DIR) $(1)/usr/share/dockerman
+	cp -pR ./root/usr/share/dockerman/* $(1)/usr/share/dockerman/
 	
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
 	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci/
