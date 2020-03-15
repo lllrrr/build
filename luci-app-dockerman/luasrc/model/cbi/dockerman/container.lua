@@ -396,7 +396,7 @@ if action == "info" then
     else
       docker:clear_status()
     end
-    luci.http.redirect(luci.dispatcher.build_url("admin/docker/container/"..container_id.."/info"))
+    luci.http.redirect(luci.dispatcher.build_url("admin/services/docker/container/"..container_id.."/info"))
   end
   
 -- info end

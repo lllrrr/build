@@ -270,7 +270,7 @@ if dm.command.mdadm then
       return
     end
     dm.gen_mdadm_config()
-    luci.http.redirect(luci.dispatcher.build_url("admin/system/diskman"))
+    luci.http.redirect(luci.dispatcher.build_url("admin/nas/diskman"))
   end
 end
 
