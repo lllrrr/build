@@ -480,3 +480,9 @@ msgstr ""
 
 msgid ""
 msgstr "" 
+
+msgid "Dockerman connect to remote endpoint"
+msgstr "Dockerman 将连接到远程节点"
+
+msgid "Access Control"
+msgstr "访问控制"
