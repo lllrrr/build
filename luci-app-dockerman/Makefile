@@ -9,11 +9,11 @@ PKG_LICENSE:=AGPL-3.0
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
-	SECTION:=luci
-	CATEGORY:=LuCI
-	SUBMENU:=3. Applications
-	TITLE:=Docker Manager interface for LuCI
-	PKGARCH:=all
+	 SECTION:=luci
+	 CATEGORY:=LuCI
+	 SUBMENU:=3. Applications
+	 TITLE:=Docker Manager interface for LuCI
+	 PKGARCH:=all
 	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk
 endef
 
