@@ -33,6 +33,9 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/www
 	cp -pR ./htdocs/* $(1)/www/
 	
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
+	
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) ./root/usr/bin/* $(1)/usr/bin/
 endef
