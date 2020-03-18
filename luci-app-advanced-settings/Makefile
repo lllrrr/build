@@ -20,12 +20,6 @@ define Package/$(PKG_NAME)
 	 DEPENDS:=
 endef
 
-define Build/Prepare
-endef
- 
-define Build/Configure
-endef
- 
 define Build/Compile
 endef
 
@@ -39,7 +33,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
 
-        $(INSTALL_DIR) $(1)/bin
+    $(INSTALL_DIR) $(1)/bin
 	$(INSTALL_BIN) ./root/bin/* $(1)/bin/
 	
 	$(INSTALL_DIR) $(1)/www
