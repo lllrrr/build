@@ -9,7 +9,7 @@ PKG_NAME:=luci-app-advanced-settings
 PKG_VERSION:=2.0-20200317
 PKG_RELEASE:=1
 
-include $(TOPDIR)/feeds/luci/luci.mk
+include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
 	 SECTION:=luci
@@ -18,6 +18,15 @@ define Package/$(PKG_NAME)
 	 TITLE:=LuCI support for white or black list
 	 PKGARCH:=all
 	 DEPENDS:=
+endef
+
+define Build/Prepare
+endef
+ 
+define Build/Configure
+endef
+ 
+define Build/Compile
 endef
 
 define Package/$(PKG_NAME)/install	
@@ -30,7 +39,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
 
-  $(INSTALL_DIR) $(1)/bin
+        $(INSTALL_DIR) $(1)/bin
 	$(INSTALL_BIN) ./root/bin/* $(1)/bin/
 	
 	$(INSTALL_DIR) $(1)/www
