@@ -293,10 +293,10 @@ msgid "Logs"
 msgstr "日志"
 
 msgid "TX/RX"
-msgstr "发送/接收"
+msgstr "(累计)发送/接收"
 
 msgid "Upload/Download"
-msgstr "上传/下载"
+msgstr "(当前)上传/下载"
 
 msgid "CPU Useage"
 msgstr "CPU用量"
