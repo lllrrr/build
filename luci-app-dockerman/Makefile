@@ -17,7 +17,18 @@ define Package/$(PKG_NAME)
 	 DEPENDS:=+luci-lib-docker +e2fsprogs +fdisk +docker-ce
 endef
 
+define Package/$(PKG_NAME)/description
+	Docker Manager interface for LuCI
+endef
 define Build/Compile
+endef
+
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+if [ -z "$${IPKG_INSTROOT}" ]; then
+	( . /etc/uci-defaults/luci-app-dockerman ) && rm -f /etc/uci-defaults/luci-app-dockerman
+fi
+exit 0
 endef
 
 define Package/$(PKG_NAME)/install
