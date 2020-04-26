@@ -220,29 +220,6 @@ e.disabled="false"
 e.default=e.disabled
 e=t:taboption("webgui",DynamicList,"AuthSubnetWhitelist",translate("Subnet Whitelist"))
 e:depends("AuthSubnetWhitelistEnabled","true")
-e=t:tab("log",translate("运行日志"),translate("本页是qBittorrent的日志文档内容。"))
-e=t:taboption("log",TextValue,"log",translate(""))
-e.rows=20
-e.wrap="off"
-e.rmempty=false
-e.readonly=true
-e.cfgvalue=function(t,t)
-return i.readfile("/tmp/qBittorrent/data/logs/qbittorrent.log")or""
-end
-e.write=function(t,t,t)
-end
-e=t:tab("config",translate("配置文件"),translate("本页是/etc/config/qbittorrent下的配置文档内容。"))
-e=t:taboption("config",TextValue,"config")
-e.template="cbi/tvalue"
-e.rows=20
-e.wrap="off"
-e.rmempty=false
-e.readonly=true
-e.cfgvalue=function(t,t)
-return i.readfile("/etc/config/qbittorrent")or""
-end
-e.write=function(e,e,e)
-end
 t:tab("advanced",translate("Advance Settings"))
 e=t:taboption("advanced",Flag,"AnonymousMode",translate("Anonymous Mode"),translate("When enabled, qBittorrent will take certain measures to try"))
 e.enabled="true"
