@@ -506,29 +506,29 @@ msgstr "打开 Web 管理界面"
 msgid "Global settings"
 msgstr "全局设置"
 
-msgid ""
-msgstr ""
+msgid "Collecting data..."
+msgstr "正在收集数据..."
 
-msgid ""
-msgstr ""
+msgid "Last 30 lines of log file:"
+msgstr "日志文件的最新 30 行："
 
-msgid ""
-msgstr ""
+msgid "Last 30 lines of syslog:"
+msgstr "系统日志的最新 30 行："
 
-msgid ""
-msgstr ""
+msgid "Failed to load log data."
+msgstr "获取日志数据失败。"
 
-msgid ""
-msgstr ""
+msgid "Loading"
+msgstr "正在加载"
 
-msgid ""
-msgstr ""
+msgid "Log Data"
+msgstr "日志数据"
 
-msgid ""
-msgstr ""
+msgid "No log data."
+msgstr "无日志数据。"
 
-msgid ""
-msgstr ""
+msgid "Refresh every 10 seconds."
+msgstr "每 10 秒刷新。"
 
 msgid ""
 msgstr ""

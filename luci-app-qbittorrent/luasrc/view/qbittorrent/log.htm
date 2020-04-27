@@ -31,9 +31,9 @@
 				logElm.innerHTML = data
 					? String.format(
 						'<pre>%s%s%s%s</pre>',
-						'<span class="description"><%:Last 50 lines of log file:%></span><br/><br/>',
+						'<span class="description"><%:Last 30 lines of log file:%></span><br/><br/>',
 						data.log || '<%:No log data.%>',
-						'<br/><br/><span class="description"><%:Last 50 lines of syslog:%></span><br/><br/>',
+						'<br/><br/><span class="description"><%:Last 30 lines of syslog:%></span><br/><br/>',
 						data.syslog || '<%:No log data.%>'
 					)
 					: '<strong><%:Failed to load log data.%></strong>';
