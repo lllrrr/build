@@ -30,10 +30,6 @@ e=t:taboption("basic",Value,"Locale",translate("Locale Language"))
 e:value("zh",translate("Chinese"))
 e:value("en",translate("English"))
 e.default="zh"
-e=t:taboption("basic",Value,"Username",translate("Username"),translate("The login name for WebUI."))
-e.placeholder="admin"
-e=t:taboption("basic",Value,"Password",translate("Password"),translate("The login password for WebUI."))
-e.password=true
 e=t:taboption("basic",Value,"Port",translate("Listen Port"),translate("The listening port for WebUI."))
 e.datatype="port"
 e.default="8080"

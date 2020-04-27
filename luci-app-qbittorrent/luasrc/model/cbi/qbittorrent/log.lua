@@ -7,7 +7,7 @@ local fs   = require "nixio.fs"
 local util = require "luci.util"
 local uci  = require "luci.model.uci".cursor()
 
-local config_dir = uci:get("qbittorrent", "main", "Path") or "/tmp"
+local config_dir = uci:get("qbittorrent", "main", "profile") or "/tmp"
 local config_file = "%s/qBittorrent/data/logs/qbittorrent.log" % config_dir
 
 m = SimpleForm("qbittorrent", "%s - %s" % { translate("qBittorrent"), translate("日志文件") },

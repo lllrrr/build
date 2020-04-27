@@ -22,10 +22,11 @@ function index()
 		form("qbittorrent/files"), _("configuration file"), 2)
 
 	entry({"admin", "nas", "qbittorrent", "log"},
+--		form("qbittorrent/log"), _("Operation log"), 3)
 		firstchild(), _("Operation log"), 3)
 
 	entry({"admin", "nas", "qbittorrent", "log", "view"},
-		template("qbittorrent/log_template"))
+		template("qbittorrent/log"))
 
 	entry({"admin", "nas", "qbittorrent", "log", "read"},
 		call("action_log_read"))
@@ -43,14 +44,9 @@ end
 
 function action_log_read()
 	local data = { log = "", syslog = "" }
-
-	local log_file = uci:get("qbittorrent", "main", "Path") or "/var/log/aria2.log"
-	if fs.access(log_file) then
-		data.log = util.trim(sys.exec("cat '%s/qbittorrent.log'" % log_file))
-	end
-
-	data.syslog = util.trim(sys.exec("logread | grep qbittorrent | tail -n 50 | sed 'x;1!H;$!d;x'"))
-
+	local a = uci:get("qbittorrent", "main", "profile") or "/tmp"
+	data.log = util.trim(sys.exec(string.format("cat '%s/qBittorrent/data/logs/qbittorrent.log' | tail -n 30 ",a)))
+	data.syslog = util.trim(sys.exec("logread | grep qbittorrent | tail -n 30 | sed 'x;1!H;$!d;x'"))
 	http.prepare_content("application/json")
 	http.write_json(data)
 end
