@@ -9,8 +9,8 @@ LUCI_TITLE:=LuCI support for cow B ping by wulishui
 PKG_NAME:=luci-app-cowbping
 LUCI_DEPENDS:=+libc
 LUCI_PKGARCH:=all
-PKG_VERSION:=v1.2
-PKG_RELEASE:=v1.2-20200210
+PKG_VERSION:=v1.6
+PKG_RELEASE:=v1.6-20200421
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
