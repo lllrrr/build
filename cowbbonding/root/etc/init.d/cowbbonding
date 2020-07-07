@@ -100,10 +100,11 @@ sum=`grep -c 'config manual' /etc/config/cowbbonding`
   MAC=`uci get cowbbonding.@manual[$i].MAC 2>/dev/null`
   IP=`uci get cowbbonding.@manual[$i].IP 2>/dev/null`
   hostname=`uci get cowbbonding.@manual[$i].hostname 2>/dev/null`
-  echo ""$MAC" "$IP" "$hostname"" >> /tmp/cowbbonding/list.cfg
+  [ -n "$MAC" -a -n "$IP" ] && echo ""$MAC" "$IP" "$hostname"" >> /tmp/cowbbonding/list.cfg
   uci del cowbbonding.@manual[]
  done
  echo "" >> /tmp/cowbbonding/list.cfg
+# uci add cowbbonding manual
  uci commit cowbbonding
 }
 
@@ -177,6 +178,7 @@ restart() {
 stop 
 start
 }
+
 
 
 
