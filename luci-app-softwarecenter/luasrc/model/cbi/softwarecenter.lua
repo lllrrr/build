@@ -12,10 +12,6 @@ local UTIL = require "luci.util"
 local uci = require("luci.model.uci").cursor()
 local m
 
-font_green = [[<font color="green">]]
-font_off = [[</font>]]
-bold_on  = [[<strong>]]
-bold_off = [[</strong>]]
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m=Map("softwarecenter",translate("Software Center"),translate("The software center is designed for the automated and unified configuration of software applications. It provides us with a simple and friendly interactive interface, which aims to make the configuration process easier and simpler!"))
 --各个软件的状态
@@ -30,30 +26,32 @@ nginx_tab=s:tab("nginx",translate("Nginx Settings"))
 mysql_tab=s:tab("mysql",translate("MySQL Settings"))
 
 deploy_entware=s:taboption("entware",Flag,"deploy_entware",translate("Deploy Entware"),translate("This is a software repository for network attached storages, routers and other embedded devices.Browse through 2000+ packages for different platforms."))
-local cpu_model = luci.sys.exec("opkg status libc 2>/dev/null |grep 'Architecture' |awk -F ': ' '{print $2}' 2>/dev/null")
-cpu_architecture = s:taboption("entware",ListValue,"cpu_architecture",translate("Select CPU model"))
-cpu_architecture.description = translate("Current CPU model")..font_green..bold_on..cpu_model..bold_off..font_off..' '
-cpu_architecture:value("mipsel","mipsel")
-cpu_architecture:value("mips","mips")
-cpu_architecture:value("armv7","armv7")
-cpu_architecture:value("x64","x64")
-cpu_architecture:value("x86","x86")
-cpu_architecture:value("aarch64","aarch64")
-cpu_architecture:depends("deploy_entware",1)
-entware_disk_mount=s:taboption("entware",ListValue,"entware_disk_mount",translate("Entware install path"),translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4"))
-for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("mount | awk '{print $3}' | grep mnt"))) do
-	if(string.len(list_disk_mount) > 0)
+local model = luci.sys.exec("uname -m 2>/dev/null")
+cpu_model = s:taboption("entware",ListValue,"cpu_model",translate("Select CPU model"))
+cpu_model.description = translate("Current CPU model")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '
+
+for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
+	if(string.len(list_cpu_mode) > 0)
 	then
-		entware_disk_mount:value(list_disk_mount)
+		cpu_model:value(list_cpu_mode)
 	end
 end
-entware_disk_mount:depends("deploy_entware",1)
-entware_enable=s:taboption("entware",Flag,"entware_enable",translate("Enabled"),translate("You must enable this option,otherwise the nginx and mysql settings will not be available"))
-entware_enable:depends("deploy_entware",1)
+cpu_model:depends("deploy_entware",1)
+local disk_size=luci.util.trim(luci.sys.exec("a=`uci get softwarecenter.main.disk_mount 2>/dev/null` && lsblk -s | grep $a | awk '{print $4}'"))
+disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前磁盘容量为：<b style=\"color:red\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
+for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
+	if(string.len(list_disk_mount) > 0)
+	then
+		disk_mount:value(list_disk_mount)
+	end
+end
+disk_mount:depends("deploy_entware",1)
+enable=s:taboption("entware",Flag,"enable",translate("Enabled"),translate("You must enable this option,otherwise the nginx and mysql settings will not be available"))
+enable:depends("deploy_entware",1)
 deploy_nginx=s:taboption("entware",Flag,"deploy_nginx",translate("Deploy Nginx"),translate("If enabled,it will auto deploy the Nginx server and the php7 environment from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
-deploy_nginx:depends("entware_enable",1)
+deploy_nginx:depends("enable",1)
 deploy_mysql=s:taboption("entware",Flag,"deploy_mysql",translate("Deploy MySQL"),translate("If enabled,it will auto deploy the MySQL server from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
-deploy_mysql:depends("entware_enable",1)
+deploy_mysql:depends("enable",1)
 
 nginx_enable=s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"))
 nginx_enable:depends("deploy_nginx",1)

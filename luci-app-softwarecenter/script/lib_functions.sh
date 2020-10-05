@@ -11,13 +11,6 @@
 
 pkglist_base="wget unzip e2fsprogs ca-certificates coreutils-whoami"
 
-_make_dir() {
-for p in "$@"; do
-	[ -d "$p" ] || mkdir -p $p
-done
-return 0
-}
-
 ##### entware环境设定 #####
 ##参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
@@ -34,25 +27,24 @@ entware_set(){
 	install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
 	
-	if _make_dir $USB_PATH/opt
-	_make_dir /opt
-	mount -o bind $USB_PATH/opt /opt; then
-		if [ "$1" = "mipsel" ]; then
-			wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
-		elif [ "$1" = "mips" ]; then
-			wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
-		elif [ "$1" = "armv7" ]; then
-			wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
-		elif [ "$1" = "x64" ]; then
-			wget -O - http://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
-		elif [ "$1" = "x86" ]; then
-			wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
-		elif [ "$1" = "aarch64" ]; then
-			wget http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
-		else
-			echo "未输入安装的架构！"
-			exit 1
-		fi
+	mkdir -p $USB_PATH/opt
+	mkdir -p /opt
+	mount -o bind $USB_PATH/opt /opt
+	if [ "$1" == "mipsel" ]; then
+		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
+	elif [ "$1" == "mips" ]; then
+		wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
+	elif [ "$1" == "armv7" ]; then
+		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
+	elif [ "$1" == "x86_64" ]; then
+		wget -O - http://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
+	elif [ "$1" == "x86" ]; then
+		wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
+	elif [ "$1" == "aarch64" ]; then
+		wget -O - http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
+	else
+		echo "未输入安装的架构！"
+		exit 1
 	fi
 	rm /etc/init.d/entware
 	cat > "/etc/init.d/entware" <<-\ENTWARE
@@ -62,7 +54,7 @@ START=51
 ##### 获取外置挂载点 #####
 ##说明：该功能为新增功能，推荐使用此功能获取外置挂载点，get_usb_path的替代品
 get_externel_mount_point(){
-	mount_list=`lsblk -p | awk '{print $7}' | grep mnt`
+	mount_list=`lsblk -s | grep mnt | awk '{print $7}'`
 	echo "$mount_list"
 }
 
@@ -111,7 +103,7 @@ entware_unset(){
 	/etc/init.d/entware stop
 	/etc/init.d/entware disable
 	rm /etc/init.d/entware
-	sed -i "/export PATH=\/opt\/bin:\/opt\/sbin:\$PATH/d" /etc/profile
+	sed -i "export PATH=\/opt\/bin:\/opt\/sbin:\$PATH/d" /etc/profile
 	source /etc/profile
 	rm -rf /opt/*
 	umount -lf /opt
@@ -141,7 +133,7 @@ install_soft(){
 ##说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
 	for data in $1 ; do
-		echo "$data 正在卸载..."
+		echo "正在卸载$data ..."
 		opkg remove --force-depends $data > /dev/null 2>&1
 		opkg_return=$?
 		if [ $opkg_return -eq 0 ]; then
@@ -259,15 +251,15 @@ config_swap_del(){
 ##### 获取外置挂载点 #####
 ##说明：该功能为新增功能，推荐使用此功能获取外置挂载点，get_usb_path的替代品
 get_externel_mount_point(){
-	mount_list=`mount | awk '{print $3}' | grep mnt`
+	mount_list=`lsblk -s | grep mnt | awk '{print $7}'`
 	echo "$mount_list"
 }
 
 ##### 获取USB存储点 #####
-##说明：获取USB存储点，推荐使用get_externel_mount_point替代
+##说明：获取USB存储点，推荐使用 get_externel_mount_point 替代
 get_usb_path(){
 	# 获取USB外置存储挂载根目录，多次重复匹配，防止重复
-	USB_PATH=`mount | awk '{print $3}' | grep mnt`
+	USB_PATH=`lsblk -s | grep mnt | awk '{print $7}'`
 	if [ -z "$USB_PATH" ]; then 
 		echo "未探测到已挂载的USB分区"
 		return 255
@@ -284,7 +276,7 @@ get_env()
     elif [[ -n $(whoami 2>/dev/null) ]]; then
         username=$(whoami 2>/dev/null)
     else
-        username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{printf $1}')
+        username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{print $1}')
     fi
 
     # 获取路由器IP
@@ -311,7 +303,7 @@ get_entware_path()
 ##参数：$1：目标位置
 ##说明：本函数判断对于GB级别，并不会很精确
 check_available_size(){
-	available_size=`lsblk -p | grep ${USB_PATH} |awk '{print $4}'`
-	[ -z "$available_size" ] && echo "$available_size"
+	available_size=`lsblk -s | grep $1 | awk '{print $4}'`
+	[ $available_size ] && echo "$available_size"
 }
 
