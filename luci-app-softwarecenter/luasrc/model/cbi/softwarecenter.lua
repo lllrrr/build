@@ -4,11 +4,11 @@ Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 This is free software, licensed under the GNU General Public License v3.
 ]]--
 
-local NXFS = require "nixio.fs"
-local SYS  = require "luci.sys"
-local HTTP = require "luci.http"
-local DISP = require "luci.dispatcher"
-local UTIL = require "luci.util"
+local nxfs = require "nixio.fs"
+local sys  = require "luci.sys"
+local http = require "luci.http"
+local disp = require "luci.dispatcher"
+local util = require "luci.util"
 local uci = require("luci.model.uci").cursor()
 local m
 
@@ -37,7 +37,7 @@ for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
 	end
 end
 cpu_model:depends("deploy_entware",1)
-local disk_size=luci.util.trim(luci.sys.exec("a=`uci get softwarecenter.main.disk_mount 2>/dev/null` && lsblk -s | grep $a | awk '{print $4}'"))
+local disk_size=luci.util.trim(luci.sys.exec("lsblk -s | grep mnt | awk '{print $4}'"))
 disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前磁盘容量为：<b style=\"color:red\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
 for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
 	if(string.len(list_disk_mount) > 0)
@@ -46,12 +46,12 @@ for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk
 	end
 end
 disk_mount:depends("deploy_entware",1)
-enable=s:taboption("entware",Flag,"enable",translate("Enabled"),translate("You must enable this option,otherwise the nginx and mysql settings will not be available"))
-enable:depends("deploy_entware",1)
+entware_enable=s:taboption("entware",Flag,"entware_enable",translate("Enabled"),translate("You must enable this option,otherwise the nginx and mysql settings will not be available"))
+entware_enable:depends("deploy_entware",1)
 deploy_nginx=s:taboption("entware",Flag,"deploy_nginx",translate("Deploy Nginx"),translate("If enabled,it will auto deploy the Nginx server and the php7 environment from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
-deploy_nginx:depends("enable",1)
+deploy_nginx:depends("entware_enable",1)
 deploy_mysql=s:taboption("entware",Flag,"deploy_mysql",translate("Deploy MySQL"),translate("If enabled,it will auto deploy the MySQL server from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
-deploy_mysql:depends("enable",1)
+deploy_mysql:depends("entware_enable",1)
 
 nginx_enable=s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"))
 nginx_enable:depends("deploy_nginx",1)
