@@ -127,9 +127,9 @@ entware_unset(){
 install_soft(){
     echo "正在更新软件源"
     opkg update >/dev/null  2>&1 
-    for data in $1 ; do
-		echo -e "正在安装 $data\c"
-		opkg install $data > /dev/null 2>&1
+    for ipk in $@ ; do
+		echo -e "正在安装 $ipk\c"
+		opkg install $ipk > /dev/null 2>&1
 		status
     done
 }
@@ -138,15 +138,10 @@ install_soft(){
 ##参数: $1:卸载列表
 ##说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
-	for data in $1 ; do
-		echo "正在卸载$data ..."
-		opkg remove --force-depends $data > /dev/null 2>&1
-		opkg_return=$?
-		if [ $opkg_return -eq 0 ]; then
-			echo "$data 卸载成功"
-		else
-			echo "$data 卸载失败，opkg返回值$opkg_return"
-		fi
+	for ipk in $@ ; do
+		echo -e "正在卸载 $ipk\c"
+		opkg remove --force-depends $ipk > /dev/null 2>&1
+		status
 	done
 
 }
@@ -157,9 +152,9 @@ tz_check(){
     cd /tmp
     # 如果探针下载失败，采用备用地址下载修复
     if [ -f "/opt/wwwroot/tz/tz.php" ]; then
-        echo 探针正常
+        echo "探针正常"
     else
-        echo 检测到探针异常，采用备用地址下载
+        echo "检测到探针异常，采用备用地址下载"
         wget --no-check-certificate -O $1/tz.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php
     fi
 }
@@ -182,7 +177,7 @@ disk_format_ext(){
     echo "开始调整分区为ext$3格式"、
 	umount -l $1 
 	echo y | mkfs.ext$3 $1
-	mount -t ext4 $1 $2
+	mount -t ext$3 $1 $2
 }
 
 ##### 通用型二元浮点运算（适用于ash） #####
