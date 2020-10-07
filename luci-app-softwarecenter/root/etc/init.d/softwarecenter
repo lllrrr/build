@@ -112,7 +112,7 @@ handle_website(){
 }
 
 start(){
-	local deploy_entware entware_enable entware_disk_mount deploy_nginx deploy_mysql nginx_enabled mysql_enabled
+	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled disk_mount cpu_model
 
 	config_load softwarecenter
 
@@ -123,8 +123,8 @@ start(){
 	config_get_bool	nginx_enabled	main nginx_enabled
 	config_get_bool mysql_enabled	main mysql_enabled
 
-	config_get entware_disk_mount	main entware_disk_mount
-	config_get cpu_architecture		main cpu_architecture
+	config_get disk_mount	main disk_mount
+	config_get cpu_model	main cpu_model
 
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
@@ -137,7 +137,7 @@ start(){
 	# 检查entware是否被安装（通过检查启动项来判断）
 	if [ ! -x /etc/init.d/entware ]; then
 		# entware未安装
-		entware_set $cpu_architecture $entware_disk_mount
+		entware_set $cpu_model $disk_mount
 		source /etc/profile
 	fi
 
