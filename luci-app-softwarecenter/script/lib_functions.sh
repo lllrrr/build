@@ -11,6 +11,17 @@
 
 pkglist_base="wget unzip e2fsprogs ca-certificates coreutils-whoami"
 
+status() {
+  local CHECK=$?
+  echo -en "\\033[40G[ "
+  if [[ "$CHECK" == "0" ]]; then
+	echo -en "\\033[1;33m成功"
+  else
+	echo -en "\\033[1;31m失败"
+  fi
+  echo -e "\\033[0;39m ]"
+}
+
 ##### entware环境设定 #####
 ##参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
@@ -117,14 +128,9 @@ install_soft(){
     echo "正在更新软件源"
     opkg update >/dev/null  2>&1 
     for data in $1 ; do
-		echo "$data 正在安装..."
+		echo -e "正在安装 $data\c"
 		opkg install $data > /dev/null 2>&1
-		opkg_return=$?
-		if [ $opkg_return -eq 0 ]; then
-			echo "$data 安装成功"
-		else
-			echo "$data 安装失败，opkg返回值$opkg_return"
-		fi
+		status
     done
 }
 
