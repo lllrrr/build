@@ -1,5 +1,5 @@
 #!/bin/sh
-#Write for Almquist Shell 
+#Write for Almquist Shell
 #version: 1.8
 
 #
@@ -8,18 +8,24 @@
 # This is free software, licensed under the GNU General Public License v3.
 #
 
-
 pkglist_base="wget unzip e2fsprogs ca-certificates coreutils-whoami"
 
-status() {
-  local CHECK=$?
-  echo -en "\\033[40G[ "
-  if [[ "$CHECK" == "0" ]]; then
-	echo -en "\\033[1;33m成功"
-  else
-	echo -en "\\033[1;31m失败"
-  fi
-  echo -e "\\033[0;39m ]"
+status(){
+	local p=$?
+	echo -en "\\033[40G[ "
+	if [ "$p" = "0" ]; then
+		echo -en "\\033[1;33m成功"
+	else
+		echo -en "\\033[1;31m失败"
+	fi
+	echo -e "\\033[0;39m ]"
+}
+
+_make_dir(){
+for p in "$@"; do
+	[ -d "$p" ] || { mkdir -p $p && echo "创建$p目录成功！";}
+done
+return 0
 }
 
 ##### entware环境设定 #####
@@ -28,18 +34,17 @@ status() {
 entware_set(){
 	entware_unset
 	get_usb_path
-	
+
 	# 修补以适应外部传参
 	if [ -n "$2" ]; then
 		USB_PATH="$2"
 	fi
-	
+
 	# 安装基本软件支持
 	install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
-	
-	mkdir -p $USB_PATH/opt
-	mkdir -p /opt
+
+	_make_dir $USB_PATH/opt /opt
 	mount -o bind $USB_PATH/opt /opt
 	if [ "$1" == "mipsel" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
@@ -79,7 +84,7 @@ get_entware_path()
 			echo "$mount_point/opt"
 			break
 		fi
-    done
+	done
 }
 
 start(){
@@ -125,13 +130,13 @@ entware_unset(){
 ##参数: $1:安装列表
 ##说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-    echo "正在更新软件源"
-    opkg update >/dev/null  2>&1 
-    for ipk in $@ ; do
+	echo "正在更新软件源"
+	opkg update >/dev/null  2>&1
+	for ipk in $@ ; do
 		echo -e "正在安装 $ipk\c"
 		opkg install $ipk > /dev/null 2>&1
 		status
-    done
+	done
 }
 
 ##### 软件包卸载 #####
@@ -149,14 +154,14 @@ remove_soft(){
 ##### 探针状态检测 #####
 ##参数: $1:探针存放目录
 tz_check(){
-    cd /tmp
-    # 如果探针下载失败，采用备用地址下载修复
-    if [ -f "/opt/wwwroot/tz/tz.php" ]; then
-        echo "探针正常"
-    else
-        echo "检测到探针异常，采用备用地址下载"
-        wget --no-check-certificate -O $1/tz.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php
-    fi
+	cd /tmp
+	# 如果探针下载失败，采用备用地址下载修复
+	if [ -f "/opt/wwwroot/tz/tz.php" ]; then
+		echo "探针正常"
+	else
+		echo "检测到探针异常，采用备用地址下载"
+		wget --no-check-certificate -O $1/tz.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php
+	fi
 }
 
 ##### 文件系统检查 #####
@@ -174,8 +179,8 @@ filesystem_check(){
 ##参数: $1:设备dev路径 $2:设备挂载点 $3:磁盘ext格式版本（eg:2、3、4）
 ##该功能依赖e2fsprogs软件包
 disk_format_ext(){
-    echo "开始调整分区为ext$3格式"、
-	umount -l $1 
+	echo "开始调整分区为ext$3格式"、
+	umount -l $1
 	echo y | mkfs.ext$3 $1
 	mount -t ext$3 $1 $2
 }
@@ -183,7 +188,7 @@ disk_format_ext(){
 ##### 通用型二元浮点运算（适用于ash） #####
 ##参数: $1:被除数 $2:运算符号 $3:除数
 float_calculate(){
-    echo "$(awk 'BEGIN{print '$1$2$3'}')"
+	echo "$(awk 'BEGIN{print '$1$2$3'}')"
 }
 
 ##### 浮点数转整形 #######
@@ -198,48 +203,48 @@ float_to_int(){
 ##说明：执行一次输出一次，外部需要套用循环来实现进度条的更新
 ##      对于浮点的处理非四舍五入，而是直接去掉小数点后的所有位数，因为在shell中所存的类型其实是字符型
 progress_bar(){
-    str=""
-    cnt=0
+	str=""
+	cnt=0
 	integer=`float_to_int $float`
-    while [ $cnt -le $1 ]
-        do
-            str="$str#"
-            let cnt=cnt+1
-        done
-    if  [ $1 -le 20 ]; then
-        let color=41
-        let bg=31
-    elif [ $1 -le 45 ]; then
-        let color=43
-        let bg=33
-    elif [ $1 -le 75 ]; then
-        let color=44
-        let bg=34
-    else
-    let color=42
-    let bg=32
-  fi    
-  printf "\033[${color};${bg}m%-s\033[0m %.2f%c\r" "$str" "$integer" "%"
+	while [ $cnt -le $1 ]
+		do
+			str="$str#"
+			let cnt=cnt+1
+		done
+	if  [ $1 -le 20 ]; then
+		let color=41
+		let bg=31
+	elif [ $1 -le 45 ]; then
+		let color=43
+		let bg=33
+	elif [ $1 -le 75 ]; then
+		let color=44
+		let bg=34
+	else
+	let color=42
+	let bg=32
+	fi
+	printf "\033[${color};${bg}m%-s\033[0m %.2f%c\r" "$str" "$integer" "%"
 }
 
 ##### 配置交换分区文件 #####
 ##参数: $1:交换分区挂载点 $2:交换空间大小(M)
 config_swap_init(){
-    let swapsize=$2*1024*1024
-    filesize=0
-    echo "配置交换分区（$2M），写入文件中..."
-    dd if=/dev/zero of=$1 bs=1M count=$2 > /dev/null 2>&1 &
-    sleep 1
-    while [ $filesize -lt $swapsize ]
-    do
-        filesize=`ls -l $1 | awk '{print $5}'`
-        float_cal=$(float_calculate `expr $filesize \* 100` / $swapsize)
-        progress_bar $float_cal
-    done
-    echo -e "\n文件写入完成！"
-    exit 0 
+	let swapsize=$2*1024*1024
+	filesize=0
+	echo "配置交换分区（$2M），写入文件中..."
+	dd if=/dev/zero of=$1 bs=1M count=$2 > /dev/null 2>&1 &
+	sleep 1
+	while [ $filesize -lt $swapsize ]
+	do
+		filesize=`ls -l $1 | awk '{print $5}'`
+		float_cal=$(float_calculate `expr $filesize \* 100` / $swapsize)
+		progress_bar $float_cal
+	done
+	echo -e "\n文件写入完成！"
+	exit 0
 	mkswap $1 > /dev/null 2>&1
-    swapon $1
+	swapon $1
 }
 
 ##### 删除交换分区文件 #####
@@ -261,7 +266,7 @@ get_externel_mount_point(){
 get_usb_path(){
 	# 获取USB外置存储挂载根目录，多次重复匹配，防止重复
 	USB_PATH=`lsblk -s | grep mnt | awk '{print $7}'`
-	if [ -z "$USB_PATH" ]; then 
+	if [ -z "$USB_PATH" ]; then
 		echo "未探测到已挂载的USB分区"
 		return 255
 	fi
@@ -269,35 +274,33 @@ get_usb_path(){
 }
 
 ##### 获取通用环境变量 #####
-get_env()
-{
-    # 获取用户名
-    if [[ $USER ]]; then
-        username=$USER
-    elif [[ -n $(whoami 2>/dev/null) ]]; then
-        username=$(whoami 2>/dev/null)
-    else
-        username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{print $1}')
-    fi
+get_env(){
+	# 获取用户名
+	if [[ $USER ]]; then
+		username=$USER
+	elif [[ -n $(whoami 2>/dev/null) ]]; then
+		username=$(whoami 2>/dev/null)
+	else
+		username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{print $1}')
+	fi
 
-    # 获取路由器IP
-    localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
-    if [[ ! -n "$localhost" ]]; then
-        localhost="你的路由器IP"
-    fi
+	# 获取路由器IP
+	localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
+	if [[ ! -n "$localhost" ]]; then
+		localhost="你的路由器IP"
+	fi
 }
 
 ##### 获取entware安装路径 #####
 ##说明：解决entware开机脚本找不到路径的问题，该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
-get_entware_path()
-{
+get_entware_path(){
 	mount_list=`get_externel_mount_point`
 	for mount_point in $mount_list ; do
 		if [ -d "$mount_point/opt" ]; then
 			echo "$mount_point/opt"
 			break
 		fi
-    done
+	done
 }
 
 ###### 容量验证 ########

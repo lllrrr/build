@@ -19,12 +19,11 @@
 dblist="mariadb-server mariadb-server-extra mariadb-client mariadb-client-extra"
 
 ############## 重置、初始化MySQL #############
-init_mysql()
-{
+init_mysql(){
 	get_env
 	install_soft "$dblist"
 	# MySQL设置
-	mkdir -p /opt/etc/mysql
+	_make_dir /opt/etc/mysql
 	cat > "/opt/etc/mysql/my.cnf" <<-\MMM
 [client-server]
 port               = 3306
@@ -68,7 +67,7 @@ MMM
 
 	chmod 644 /opt/etc/mysql/my.cnf
 
-	mkdir -p /opt/var/mysql
+	_make_dir /opt/var/mysql
 
 	# 数据库安装，同步方式，无需延时等待
 	echo -e "\n正在初始化数据库，请稍等1分钟"
@@ -89,10 +88,10 @@ del_mysql(){
 	/opt/etc/init.d/S70mysqld stop
 	echo "正在停止MySQL"
 	sleep 10
-	
+
 	# 卸载相关的软件包
 	remove_soft "`opkg list-installed| grep mariadb`"
-	
+
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql
 	rm -rf /opt/var/mariadb/
