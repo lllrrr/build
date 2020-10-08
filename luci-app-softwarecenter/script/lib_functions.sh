@@ -44,7 +44,7 @@ entware_set(){
 	install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
 
-	_make_dir $USB_PATH/opt /opt
+	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 	if [ "$1" == "mipsel" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
