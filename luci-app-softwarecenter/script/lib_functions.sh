@@ -14,11 +14,12 @@ status(){
 	local p=$?
 	echo -en "\\033[40G[ "
 	if [ "$p" = "0" ]; then
-		echo -en "\\033[1;33m成功"
+		echo -en "\\033[1;33m成功\\033[0;39m ]"
+                return 0
 	else
-		echo -en "\\033[1;31m失败"
+		echo -en "\\033[1;31m失败\\033[0;39m ]"
+                return 1
 	fi
-	echo -e "\\033[0;39m ]"
 }
 
 _make_dir(){
