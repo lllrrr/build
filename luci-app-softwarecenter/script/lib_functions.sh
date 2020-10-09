@@ -131,7 +131,7 @@ entware_unset(){
 ##参数: $1:安装列表
 ##说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	[ `history | grep "opkg update"` -gt 0 ] || { echo "正在更新软件源" && opkg update > /dev/null 2>&1; }
+	[ `history | grep "opkg update"` = 0 ] || { echo "正在更新软件源" && opkg update > /dev/null 2>&1; }
 	for ipk in $@ ; do
 		echo -e "正在安装 $ipk\c"
 		opkg install $ipk > /dev/null 2>&1
