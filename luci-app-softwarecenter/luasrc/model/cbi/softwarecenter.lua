@@ -37,7 +37,7 @@ for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
 	end
 end
 cpu_model:depends("deploy_entware",1)
-local disk_size=luci.util.trim(luci.sys.exec("lsblk -s | grep mnt | awk '{print $4}'"))
+local disk_size=luci.util.trim(luci.sys.exec("a=`uci get softwarecenter.main.disk_mount 2>/dev/null` && lsblk -s | grep $a | awk '{print $4}'"))
 disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前磁盘容量为：<b style=\"color:red\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
 for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
 	if(string.len(list_disk_mount) > 0)
