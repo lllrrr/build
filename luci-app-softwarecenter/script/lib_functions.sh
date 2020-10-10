@@ -44,13 +44,18 @@ entware_set(){
 	# 安装基本软件支持
 	install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
+	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 	if [ "$1" == "mipsel" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
 	elif [ "$1" == "mips" ]; then
-		wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
+		if [ $Kernel_V == "2.6" ]; then
+			wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
+		elif
+			wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
+		fi
 	elif [ "$1" == "armv7" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
 	elif [ "$1" == "x86_64" ]; then
@@ -59,6 +64,8 @@ entware_set(){
 		wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
 	elif [ "$1" == "aarch64" ]; then
 		wget -O - http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
+	elif [ "$1" == "armv7l" ]; then
+		wget -O - http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh | /bin/sh
 	else
 		echo "未输入安装的架构！"
 		exit 1
