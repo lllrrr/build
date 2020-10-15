@@ -14,17 +14,17 @@ status(){
 	local p=$?
 	echo -en "\\033[40G[ "
 	if [ "$p" = "0" ]; then
-		echo -en "\\033[1;33m成功\\033[0;39m ]"
+		echo -e "\\033[1;33m成功\\033[0;39m ]"
 		return 0
 	else
-		echo -en "\\033[1;31m失败\\033[0;39m ]"
+		echo -e "\\033[1;31m失败\\033[0;39m ]"
 		return 1
 	fi
 }
 
 _make_dir(){
 for p in "$@"; do
-	[ -d "$p" ] || { mkdir -p $p && echo "创建$p目录成功！";}
+	[ -d "$p" ] || { mkdir -p $p && echo "创建$p成功！";}
 done
 return 0
 }
@@ -138,7 +138,7 @@ entware_unset(){
 ##参数: $1:安装列表
 ##说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	[ `history | grep "opkg update"` = 0 ] || { echo "正在更新软件源" && opkg update > /dev/null 2>&1; }
+	echo "正在更新软件源" && opkg update > /dev/null 2>&1
 	for ipk in $@ ; do
 		echo -e "正在安装 $ipk\c"
 		opkg install $ipk > /dev/null 2>&1

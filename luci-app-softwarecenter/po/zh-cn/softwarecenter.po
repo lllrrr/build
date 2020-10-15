@@ -108,3 +108,12 @@ msgstr "端口号"
 
 msgid "Website access port,this option must be set and make sure the port number uniquely!"
 msgstr "网站访问端口，该选项必须被设置且端口号不能重复"
+
+msgid "Only Owncloud and Nextcloud can use"
+msgstr "只有Owncloud和Nextcloud可以使用"
+
+msgid "Enable Redis"
+msgstr "启用 远程字典服务"
+
+msgid ""
+msgstr ""

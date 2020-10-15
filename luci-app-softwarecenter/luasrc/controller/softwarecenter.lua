@@ -10,8 +10,33 @@ function index()
 	local page = entry({"admin","services","softwarecenter"},cbi("softwarecenter"),_("Software Center"))
 	page.i18n="softwarecenter"
 	page.dependent=true
+	-- entry({"admin","services", "softwarecenter"}, post_on({ exec = "1"},"action_debug"), _("Product Management"), 2)
 	
 	entry({"admin","services","softwarecenter","status"}, call("connection_status"))
+
+end
+
+function action_debug()
+	local dlog
+	local fs = require "nixio.fs"
+	local submit = (luci.http.formvalue("exec")=="1")
+	if submit then
+		local clear = (luci.http.formvalue("clear")=="1")
+		if clear then
+			if nixio.fs.access("/tmp/debuglog") then
+				file = io.open("/tmp/debuglog", "w+")
+            	io.close(file)
+			end	
+		end
+	end
+	if nixio.fs.access("/tmp/debuglog") then
+		file = io.open("/tmp/debuglog", "r")
+		dlog = file:read("*a")
+		io.close(file)
+	else
+		dlog = "NONE!\n"	
+	end	
+	luci.template.render("softwarecenter/log",{dlog=dlog})
 end
 
 local function nginx_status_report()

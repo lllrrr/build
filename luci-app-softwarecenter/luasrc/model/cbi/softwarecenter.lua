@@ -4,7 +4,7 @@ Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 This is free software, licensed under the GNU General Public License v3.
 ]]--
 
-local nxfs = require "nixio.fs"
+local fs = require "nixio.fs"
 local sys  = require "luci.sys"
 local http = require "luci.http"
 local disp = require "luci.dispatcher"
@@ -15,7 +15,7 @@ local m
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m=Map("softwarecenter",translate("Software Center"),translate("The software center is designed for the automated and unified configuration of software applications. It provides us with a simple and friendly interactive interface, which aims to make the configuration process easier and simpler!"))
 --各个软件的状态
-m:section(SimpleSection).template="software_status"
+m:section(SimpleSection).template="softwarecenter/software_status"
 
 s=m:section(TypedSection,"softwarecenter",translate("Software Center Settings"))
 s.addremove=false
@@ -26,6 +26,10 @@ nginx_tab=s:tab("nginx",translate("Nginx Settings"))
 mysql_tab=s:tab("mysql",translate("MySQL Settings"))
 
 deploy_entware=s:taboption("entware",Flag,"deploy_entware",translate("Deploy Entware"),translate("This is a software repository for network attached storages, routers and other embedded devices.Browse through 2000+ packages for different platforms."))
+
+m:section(SimpleSection).template="softwarecenter/disc_status"
+m:section(SimpleSection).template="softwarecenter/log"
+
 local model = luci.sys.exec("uname -m 2>/dev/null")
 cpu_model = s:taboption("entware",ListValue,"cpu_model",translate("Select CPU model"))
 cpu_model.description = translate("Current CPU model")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '
@@ -36,9 +40,10 @@ for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
 		cpu_model:value(list_cpu_mode)
 	end
 end
+
 cpu_model:depends("deploy_entware",1)
-local disk_size=luci.util.trim(luci.sys.exec("a=`uci get softwarecenter.main.disk_mount 2>/dev/null` && lsblk -s | grep $a | awk '{print $4}'"))
-disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前磁盘容量为：<b style=\"color:red\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
+local disk_size=luci.util.trim(luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh"))
+disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前可用磁盘：<br><b style=\"color:green\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
 for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
 	if(string.len(list_disk_mount) > 0)
 	then
@@ -86,4 +91,27 @@ website_dir=website_section:option(Value,"website_dir",translate("Website dir na
 website_dir:depends("customdeploy_enabled",1)
 port=website_section:option(Value,"port",translate("Port number"),translate("Website access port,this option must be set and make sure the port number uniquely!"))
 port.rmempty=false
+
+function action_debug()
+	local dlog
+	local fs = require "nixio.fs"
+	local submit = (luci.http.formvalue("exec")=="1")
+	if submit then
+		local clear = (luci.http.formvalue("clear")=="1")
+		if clear then
+			if nixio.fs.access("/tmp/debuglog") then
+				file = io.open("/tmp/debuglog", "w+")
+            	io.close(file)
+			end	
+		end
+	end
+	if nixio.fs.access("/tmp/debuglog") then
+		file = io.open("/tmp/debuglog", "r")
+		dlog = file:read("*a")
+		io.close(file)
+	else
+		dlog = "NONE!\n"	
+	end	
+	luci.template.render("softwarecenter/log",{dlog=dlog})
+end
 return m
