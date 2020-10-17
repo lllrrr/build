@@ -6,37 +6,25 @@ This is free software, licensed under the GNU General Public License v3.
 
 module("luci.controller.softwarecenter",package.seeall)
 
-function index() 
-	local page = entry({"admin","services","softwarecenter"},cbi("softwarecenter"),_("Software Center"))
+function index()
+	if not nixio.fs.access("/etc/config/softwarecenter")then return end
+	page = entry({"admin", "services", "softwarecenter"},firstchild(), _("Software Center"), 30)
 	page.i18n="softwarecenter"
-	page.dependent=true
-	-- entry({"admin","services", "softwarecenter"}, post_on({ exec = "1"},"action_debug"), _("Product Management"), 2)
-	
-	entry({"admin","services","softwarecenter","status"}, call("connection_status"))
+	page.dependent = true
+	entry({"admin","services","softwarecenter", "general"},cbi("softwarecenter/softwarecenter"),_("Configuration"), 40).leaf = true
+	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("Log"), 99).leaf = true
+	entry({"admin", "services", "softwarecenter", "get_log"}, call("get_log")).leaf = true
+	entry({"admin", "services", "softwarecenter", "clear_log"}, call("clear_log")).leaf = true
+	entry({"admin","services","softwarecenter","status"}, call("connection_status")).leaf = true
 
 end
 
-function action_debug()
-	local dlog
-	local fs = require "nixio.fs"
-	local submit = (luci.http.formvalue("exec")=="1")
-	if submit then
-		local clear = (luci.http.formvalue("clear")=="1")
-		if clear then
-			if nixio.fs.access("/tmp/debuglog") then
-				file = io.open("/tmp/debuglog", "w+")
-            	io.close(file)
-			end	
-		end
-	end
-	if nixio.fs.access("/tmp/debuglog") then
-		file = io.open("/tmp/debuglog", "r")
-		dlog = file:read("*a")
-		io.close(file)
-	else
-		dlog = "NONE!\n"	
-	end	
-	luci.template.render("softwarecenter/log",{dlog=dlog})
+function get_log()
+	luci.http.write(luci.sys.exec("[ -f '/tmp/log/softwarecenter.log' ] && cat /tmp/log/softwarecenter.log"))
+end
+
+function clear_log()
+	luci.sys.call("cat > /tmp/log/softwarecenter.log")
 end
 
 local function nginx_status_report()

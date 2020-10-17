@@ -23,10 +23,10 @@ status(){
 }
 
 _make_dir(){
-for p in "$@"; do
-	[ -d "$p" ] || { mkdir -p $p && echo "创建$p成功！";}
-done
-return 0
+	for p in "$@"; do
+		[ -d "$p" ] || { mkdir -p $p && echo "成功创建$p";}
+	done
+	return 0
 }
 
 ##### entware环境设定 #####
@@ -48,14 +48,14 @@ entware_set(){
 
 	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
-	if [ "$1" == "mipsel" ]; then
+  if [ "$1" == "mipsel" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
-	elif [ "$1" == "mips" ]; then
-		if [ $Kernel_V == "2.6" ]; then
-			wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
-		elif
-			wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
-		fi
+  elif [ "$1" == "mips" ]; then
+    if [ $Kernel_V == "2.6" ]; then
+      wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
+  else
+      wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
+    fi
 	elif [ "$1" == "armv7" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
 	elif [ "$1" == "x86_64" ]; then
