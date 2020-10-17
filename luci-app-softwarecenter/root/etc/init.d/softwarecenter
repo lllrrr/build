@@ -69,12 +69,12 @@ handle_website(){
 	config_get website_dir $1 website_dir
 	config_get port $1 port
 
-	if [ "$enabled" != "1" ]; then
-		echo "softwarecenter disabled!"
+	if [ "$entware_enable" != "1" ]; then
+		echo "softwarecenter 没有启动"
 		exit 0
 	fi
 
-	# 获取网站配置文件名
+	echo "获取网站配置文件名"
 	if [ -n "$autodeploy_enable" ]; then
 		#install_website $website_select $port
 		website_name=`website_name_mapping $website_select`
@@ -85,16 +85,16 @@ handle_website(){
 	fi
 
 	if [ -z "$website_enabled" ]; then
-		# 网站未启用
+		echo "网站未启用"
 		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
 		fi
 	else
 		if [ -f /opt/etc/nginx/no_use/$website_name.conf ]; then
-			# 网站已安装但被禁用了
+			echo "网站已安装但被禁用了"
 			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
-			# 网站没有安装，执行初始化部署
+			echo "网站没有安装，执行初始化部署"
 			if [ -n "$autodeploy_enable" ]; then
 				install_website $website_select $port
 			elif [ -n "$customdeploy_enabled" ]; then
@@ -111,7 +111,7 @@ handle_website(){
 	website_config_list="$website_config_list $website_name"
 }
 
-start(){
+cdg(){
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled disk_mount cpu_model
 
 	config_load softwarecenter
@@ -134,9 +134,9 @@ start(){
 		return
 	fi
 
-	# 检查entware是否被安装（通过检查启动项来判断）
+	echo "检查entware是否被安装（通过检查启动项来判断）"
 	if [ ! -x /etc/init.d/entware ]; then
-		# entware未安装
+		echo "entware未安装"
 		entware_set $cpu_model $disk_mount
 		source /etc/profile
 	fi
@@ -147,35 +147,35 @@ start(){
 
 	### Nginx ###
 	if [ -n "$deploy_nginx" ];then
-		# 检查Nginx部署情况
+		echo "检查Nginx部署情况"
 		if [ ! -x /opt/etc/init.d/S80nginx ]; then
-			##Nginx未安装
+			echo "Nginx未安装"
 			init_nginx
 		fi
 		if [ -z $nginx_enabled ]; then
-			# 未启用Nginx服务器
+			echo "未启用Nginx服务器"
 			nginx_manage stop
 		else
-			# 启用Nginx服务器
+			echo "启用Nginx服务器"
 			if [ -z "`pgrep nginx`" ]; then
 				nginx_manage start
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
-			# 清理多余的配置
+			echo "清理多余的配置"
 			clean_vhost_config
 			/opt/etc/init.d/S80nginx reload
 		fi
 	else
 		if [ -x /opt/etc/init.d/S80nginx ]; then
-			# Nginx已安装
+			echo "Nginx已安装"
 			del_nginx
 		fi
 	fi
 
 	### MySQL ###
 	if [ -n "$deploy_mysql" ]; then
-		# 检查MySQL部署情况
+		echo "检查MySQL部署情况"
 		if [ ! -x /opt/etc/init.d/S70mysqld ]; then
 			# MySQL未安装
 			init_mysql
@@ -189,10 +189,14 @@ start(){
 		fi
 	else
 		if [ -x /opt/etc/init.d/S70mysqld ]; then
-			# MySQL已安装
+			echo "MySQL已安装"
 			del_mysql
 		fi
 	fi
+}
+
+start(){   
+cdg | tee -a /tmp/log/softwarecenter.log
 }
 
 stop(){
