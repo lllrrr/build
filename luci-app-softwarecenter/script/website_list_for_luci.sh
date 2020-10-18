@@ -16,10 +16,9 @@ if [[ ! -n "$localhost" ]]; then
 fi
 if [ "1" == "$1" ]; then 
 	if [ "`ls /opt/etc/nginx/vhost/| wc -l`" -gt 0 ]; then
-		for conf in /opt/etc/nginx/vhost/*;
-		do
-			name=`echo $conf |awk -F"[/ .]" '{print $(NF-1)}'`
-			port=`cat $conf | awk 'NR==2' | awk '{print $2}' | sed 's/;//'`
+		for conf in /opt/etc/nginx/vhost/*; do
+			name=`echo $conf | awk -F"[/ .]" '{print $(NF-1)}'`
+			port=`grep listen $conf | awk '{print $2}' | sed 's/;//'`
 			echo -n "$localhost:$port $name "
 		done
 	fi

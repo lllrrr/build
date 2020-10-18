@@ -27,9 +27,6 @@ mysql_tab=s:tab("mysql",translate("MySQL Settings"))
 
 deploy_entware=s:taboption("entware",Flag,"deploy_entware",translate("Deploy Entware"),translate("This is a software repository for network attached storages, routers and other embedded devices.Browse through 2000+ packages for different platforms."))
 
- m:section(SimpleSection).template="softwarecenter/disc_status"
--- m:section(SimpleSection).template="softwarecenter/log"
-
 local model = luci.sys.exec("uname -m 2>/dev/null")
 cpu_model = s:taboption("entware",ListValue,"cpu_model",translate("Select CPU model"))
 cpu_model.description = translate("Current CPU model")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '
@@ -42,7 +39,7 @@ for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
 end
 
 cpu_model:depends("deploy_entware",1)
-local disk_size=luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh")
+local disk_size=luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
 disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前可用磁盘：<br><b style=\"color:green\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
 for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
 	if(string.len(list_disk_mount) > 0)

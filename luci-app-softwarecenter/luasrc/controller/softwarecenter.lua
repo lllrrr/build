@@ -52,7 +52,7 @@ local function php_install_report()
 end 
 
 local function get_website_list()
-	return luci.sys.exec("sh /usr/bin/softwarecenter/website_list_for_luci.sh 1")
+	return luci.sys.exec("sh /usr/bin/softwarecenter/website_list_for_luci.sh 1 2")
 end
 
 local function get_website_list_size()
