@@ -15,13 +15,13 @@
 
 # Web程序
 # (1) phpMyAdmin（数据库管理工具）
-url_phpMyAdmin="https://files.phpmyadmin.net/phpMyAdmin/5.0.1/phpMyAdmin-5.0.1-all-languages.zip"
+url_phpMyAdmin="https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-all-languages.zip"
 # (2) WordPress（使用最广泛的CMS）
 url_WordPress="https://cn.wordpress.org/latest-zh_CN.zip"
 # (3) Owncloud（经典的私有云）
-url_Owncloud="https://download.owncloud.org/community/owncloud-10.2.0.zip"
+url_Owncloud="https://download.owncloud.org/community/owncloud-complete-20200731.zip"
 # (4) Nextcloud（Owncloud团队的新作，美观强大的个人云盘）
-url_Nextcloud="https://download.nextcloud.com/server/releases/nextcloud-13.0.6.zip"
+url_Nextcloud="https://download.nextcloud.com/server/releases/nextcloud-20.0.0.zip"
 # (5) h5ai（优秀的文件目录）
 url_h5ai="https://release.larsjung.de/h5ai/h5ai-0.29.2.zip"
 # (6) Lychee（一个很好看，易于使用的Web相册）
@@ -31,7 +31,7 @@ url_Kodexplorer="http://static.kodcloud.com/update/download/kodexplorer4.40.zip"
 # (8) Typecho (流畅的轻量级开源博客程序)
 url_Typecho="http://typecho.org/downloads/1.1-17.10.30-release.tar.gz"
 # (9) Z-Blog (体积小，速度快的PHP博客程序)
-url_Zblog="https://update.zblogcn.com/zip/Z-BlogPHP_1_5_2_1935_Zero.zip"
+url_Zblog="https://update.zblogcn.com/zip/Z-BlogPHP_1_6_5_2140_Valyria.zip"
 # (10) DzzOffice (开源办公平台)
 url_DzzOffice="https://codeload.github.com/zyx0814/dzzoffice/zip/master"
 
@@ -100,33 +100,12 @@ delete_website_byauto(){
 	delete_website /opt/etc/nginx/vhost/$name.conf /opt/wwwroot/$name
 }
 
-install_tz(){
-	port=81
-	if [[ $nport ]]; then
-		port=$nport
-	fi
-	# 添加探针
-	_make_dir "/opt/wwwroot/tz"
-	echo "开始下载雅黑PHP探针"
-	wget --no-check-certificate -O /opt/wwwroot/tz/index.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php > /dev/null 2>&1
-	if [ $? != 0 ]; then
-		echo "下载异常"
-		rm -r /opt/wwwroot/tz
-		return 1
-	fi
-	echo "正在配置雅黑PHP探针"
-	add_vhost $port tz
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/tz.conf
-	chmod -R 777 /opt/wwwroot/tz
-}
-
 ############### WEB程序安装器 ##############
 ##已修正适配(简易处理)
 web_installer(){
-	echo "----------------------------------------"
-	echo "|***********  WEB程序安装器  ***********|"
-	echo "----------------------------------------"
-	echo "安装 $name："
+	echo -e "\n============================="
+	echo -e "***********  WEB程序安装器  ***********"
+	echo -e "=============================\n"
 
 	# 获取用户自定义设置
 	if [[ $nport ]]; then
@@ -136,7 +115,7 @@ web_installer(){
 
 	# 检查目录是否存在
 	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
-		echo "开始安装..."
+		echo "开始安装$webdir"
 	else
 		rm -rf /opt/wwwroot/$webdir; echo "已删除"
 	fi
@@ -160,7 +139,7 @@ web_installer(){
 			mv /opt/tmp/$name.* /opt/wwwroot/
 		fi
 		if [[ ! -f "/opt/wwwroot/$name.$suffix" ]]; then
-			echo "下载未成功"
+			echo "下载未成功" && return 1
 		else
 			echo "正在解压..."
 		if [[ -n "$hookdir" ]]; then
@@ -208,6 +187,26 @@ web_installer(){
 	# echo "$name安装完成"
 	# echo "浏览器地址栏输入：$localhost:$port 即可访问"
 # }
+
+install_tz(){
+	port=81
+	if [[ $nport ]]; then
+		port=$nport
+	fi
+	# 添加探针
+	_make_dir "/opt/wwwroot/tz"
+	echo "开始下载雅黑PHP探针"
+	wget --no-check-certificate -O /opt/wwwroot/tz/index.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php > /dev/null 2>&1
+	if [ $? != 0 ]; then
+		echo "下载异常"
+		rm -r /opt/wwwroot/tz
+		return 1
+	fi
+	echo "正在配置雅黑PHP探针"
+	add_vhost $port tz
+	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/tz.conf
+	chmod -R 777 /opt/wwwroot/tz
+}
 
 ############# 安装phpMyAdmin ############
 install_phpmyadmin(){
@@ -399,7 +398,7 @@ install_typecho(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf		# 添加php-fpm支持
+	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
 	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/typecho.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
 
 	echo "$name安装完成"
@@ -419,11 +418,11 @@ install_zblog(){
 	# 运行安装程序
 	web_installer
 	echo "正在配置$name..."
-	chmod -R 777 /opt/wwwroot/$webdir		# 目录权限看情况使用
+	chmod -R 777 /opt/wwwroot/$webdir
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf		# 添加php-fpm支持
+	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
 
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
@@ -440,7 +439,7 @@ install_dzzoffice(){
 	# 运行安装程序
 	web_installer
 	echo "正在配置$name..."
-	chmod -R 777 /opt/wwwroot/$webdir		# 目录权限看情况使用
+	chmod -R 777 /opt/wwwroot/$webdir
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir

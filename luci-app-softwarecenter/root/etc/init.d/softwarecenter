@@ -74,7 +74,7 @@ handle_website(){
 		exit 0
 	fi
 
-	echo "获取网站配置文件名"
+	# echo "获取网站配置文件名"
 	if [ -n "$autodeploy_enable" ]; then
 		#install_website $website_select $port
 		website_name=`website_name_mapping $website_select`
@@ -91,10 +91,10 @@ handle_website(){
 		fi
 	else
 		if [ -f /opt/etc/nginx/no_use/$website_name.conf ]; then
-			echo "网站已安装但被禁用了"
+			echo "$website_name已安装但被禁用了"
 			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
-			echo "网站没有安装，执行初始化部署"
+			# echo -e "\n开始安装$website_name"
 			if [ -n "$autodeploy_enable" ]; then
 				install_website $website_select $port
 			elif [ -n "$customdeploy_enabled" ]; then
@@ -129,14 +129,12 @@ cdg(){
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
-			entware_unset
+			echo "开始安装entware环境" && entware_unset
 		fi
 		return
 	fi
 
-	echo "检查entware是否被安装（通过检查启动项来判断）"
 	if [ ! -x /etc/init.d/entware ]; then
-		echo "entware未安装"
 		entware_set $cpu_model $disk_mount
 		source /etc/profile
 	fi
@@ -147,18 +145,15 @@ cdg(){
 
 	### Nginx ###
 	if [ -n "$deploy_nginx" ];then
-		echo "检查Nginx部署情况"
 		if [ ! -x /opt/etc/init.d/S80nginx ]; then
-			echo "Nginx未安装"
-			init_nginx
+			echo "开始安装Nginx" && init_nginx
 		fi
 		if [ -z $nginx_enabled ]; then
-			echo "未启用Nginx服务器"
+			echo "没有启用Nginx服务器"
 			nginx_manage stop
 		else
-			echo "启用Nginx服务器"
 			if [ -z "`pgrep nginx`" ]; then
-				nginx_manage start
+				nginx_manage start && echo "Nginx服务器已运行"
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
@@ -175,16 +170,15 @@ cdg(){
 
 	### MySQL ###
 	if [ -n "$deploy_mysql" ]; then
-		echo "检查MySQL部署情况"
+		# echo "检查MySQL部署情况"
 		if [ ! -x /opt/etc/init.d/S70mysqld ]; then
-			# MySQL未安装
-			init_mysql
+			echo "开始安装MySQL" && init_mysql
 		fi
 		if [ -z $mysql_enabled ]; then
 			/opt/etc/init.d/S70mysqld stop
 		else
 			if [ -z "`pgrep mysqld`" ]; then
-				/opt/etc/init.d/S70mysqld start
+				/opt/etc/init.d/S70mysqld start && echo "MySQL数据库已运行"
 			fi
 		fi
 	else
@@ -195,8 +189,8 @@ cdg(){
 	fi
 }
 
-start(){   
-cdg | tee -a /tmp/log/softwarecenter.log
+start(){
+	cdg | tee -a /tmp/log/softwarecenter.log
 }
 
 stop(){
@@ -204,5 +198,5 @@ stop(){
 }
 
 restart(){
-stop;start
+	stop;start
 }

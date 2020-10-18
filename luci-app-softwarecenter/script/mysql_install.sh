@@ -80,7 +80,7 @@ MMM
 
 	# 设置数据库密码
 	mysqladmin -u root password 123456
-	echo -e "\033[41;37m 数据库用户：root, 初始密码：123456 \033[0m"
+	echo -e "数据库用户：root, 初始密码：123456"
 }
 
 del_mysql(){
@@ -90,7 +90,7 @@ del_mysql(){
 	sleep 10
 
 	# 卸载相关的软件包
-	remove_soft "`opkg list-installed| grep mariadb`"
+	remove_soft "`opkg list-installed | grep mariadb`"
 
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql
