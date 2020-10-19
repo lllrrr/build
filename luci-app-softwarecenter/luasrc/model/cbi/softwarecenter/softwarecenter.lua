@@ -13,23 +13,23 @@ local uci = require("luci.model.uci").cursor()
 local m
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
-m=Map("softwarecenter",translate("Software Center"),translate("The software center is designed for the automated and unified configuration of software applications. It provides us with a simple and friendly interactive interface, which aims to make the configuration process easier and simpler!"))
+m=Map("softwarecenter",translate("Entware软件中心"),translate("软件中心负责软件和应用的自动化统一配置部署，提供一个简单友好的交互页面，旨在使应用的配置流程更轻松、更简单！<br>用于NAS，路由器和其他嵌入式设备的软件仓库。提供超过2000多个不同平台的软件包。<br>原项目地址：https://github.com/jsp1256/openwrt-package<br>"))
 --各个软件的状态
 m:section(SimpleSection).template="softwarecenter/software_status"
 
-s=m:section(TypedSection,"softwarecenter",translate("Software Center Settings"))
+s=m:section(TypedSection,"softwarecenter",translate("软件中心设置"))
 s.addremove=false
 s.anonymous=true
 
-s:tab("entware",translate("Entware Settings"))
-nginx_tab=s:tab("nginx",translate("Nginx Settings"))
-mysql_tab=s:tab("mysql",translate("MySQL Settings"))
+s:tab("entware",translate("Entware设置"))
+nginx_tab=s:tab("nginx",translate("Nginx服务器设置"))
+mysql_tab=s:tab("mysql",translate("MySQL服务器设置"))
 
-deploy_entware=s:taboption("entware",Flag,"deploy_entware",translate("Deploy Entware"),translate("This is a software repository for network attached storages, routers and other embedded devices.Browse through 2000+ packages for different platforms."))
+deploy_entware=s:taboption("entware",Flag,"deploy_entware",translate("启用"),translate("开始部署Entware环境"))
 
 local model = luci.sys.exec("uname -m 2>/dev/null")
-cpu_model = s:taboption("entware",ListValue,"cpu_model",translate("Select CPU model"))
-cpu_model.description = translate("Current CPU model")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '
+cpu_model = s:taboption("entware",ListValue,"cpu_model",translate("CPU架构"))
+cpu_model.description = translate("当前检测到CPU架构：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '
 
 for _, list_cpu_mode in luci.util.vspairs(luci.util.split(model)) do
 	if(string.len(list_cpu_mode) > 0)
@@ -40,7 +40,7 @@ end
 
 cpu_model:depends("deploy_entware",1)
 local disk_size=luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("Entware install path"),"%s %s"%{translatef("当前可用磁盘：<br><b style=\"color:green\">%s",disk_size).."</b><br>",translate("The select mount point will be reformat to ext4 filesystem,make sure that certain software can running normally<br>Warning: If select disk filesystem is not ext4,the disk will be reformat,please make sure there are no important data on the disk or make sure the disk's filesystem already is ext4")})
+disk_mount=s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),"%s %s"%{translatef("当前可用磁盘：<br><b style=\"color:green\">%s",disk_size).."</b><br>",translate("安装路径下的磁盘可能被重新格式化为EXT4文件系统来确保正常运行<br>警告：请保证磁盘上没有重要数据或者磁盘已经是EXT4文件系统")})
 for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
 	if(string.len(list_disk_mount) > 0)
 	then
@@ -48,25 +48,25 @@ for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk
 	end
 end
 disk_mount:depends("deploy_entware",1)
-entware_enable=s:taboption("entware",Flag,"entware_enable",translate("Enabled"),translate("You must enable this option,otherwise the nginx and mysql settings will not be available"))
+entware_enable=s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>没有安装Nginx服务器和MySQL数据库服务器的设置将不可用"))
 entware_enable:depends("deploy_entware",1)
-deploy_nginx=s:taboption("entware",Flag,"deploy_nginx",translate("Deploy Nginx"),translate("If enabled,it will auto deploy the Nginx server and the php7 environment from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
+deploy_nginx=s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("启用后将自动部署Nginx服务器和其所需的PHP7运行环境<br>此安装过程可能需要大量时间，你可以在日志中查看到服务器的安装过程"))
 deploy_nginx:depends("entware_enable",1)
-deploy_mysql=s:taboption("entware",Flag,"deploy_mysql",translate("Deploy MySQL"),translate("If enabled,it will auto deploy the MySQL server from the Entware software source<br>the installation process will cost lots of time,but when it finish installation and installed sucessful,you can see the server runing status in this page"))
+deploy_mysql=s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("启用后将自动部署MySQL数据库服务器（依赖Entware软件仓库）<br>此安装过程可能需要大量时间，你可以在日志中查看到服务器的安装过程"))
 deploy_mysql:depends("entware_enable",1)
 
 nginx_enable=s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"))
 nginx_enable:depends("deploy_nginx",1)
 
-mysql_enable=s:taboption("mysql",Flag,"mysql_enabled",translate("Enabled"),translate("First runing,the default user is 'root' and password is '123456'"))
+mysql_enable=s:taboption("mysql",Flag,"mysql_enabled",translate("Enabled"),translate("第一次运行时，默认的登录用户是'root'，密码是'123456'"))
 mysql_enable:depends("deploy_mysql",1)
 
-website_section=m:section(TypedSection,"website",translate("Website Manager"))
+website_section=m:section(TypedSection,"website",translate("网站管理"),translate("这里先添加名称确认后再选择要安装的应用软件"))
 website_section.addremove=true
-website_enabled=website_section:option(Flag,"website_enabled",translate("Enabled"),translate("Make sure that Nginx has installed and running!<br>Some website need the database server"))
-autodeploy_enable=website_section:option(Flag,"autodeploy_enable",translate("Enable website auto deploy"))
+website_enabled=website_section:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器正常安装并且已运行！<br>某些还网站需要MySQL数据库服务器的支持"))
+autodeploy_enable=website_section:option(Flag,"autodeploy_enable",translate("启用自动部署"))
 autodeploy_enable:depends("customdeploy_enabled",0)
-website_select=website_section:option(ListValue,"website_select",translate("website"),translate("Select you website to deploy!"))
+website_select=website_section:option(ListValue,"website_select",translate("website"),translate("请选择你需要部署的网站"))
 website_select:value("0","tz（雅黑PHP探针）")
 website_select:value("1","phpMyAdmin（数据库管理工具）")
 website_select:value("2","WordPress（使用最广泛的CMS）")
@@ -79,14 +79,15 @@ website_select:value("8","Typecho (流畅的轻量级开源博客程序)")
 website_select:value("9","Z-Blog (体积小，速度快的PHP博客程序)")
 website_select:value("10","DzzOffice (开源办公平台)")
 website_select:depends("autodeploy_enable",1)
-redis_enabled=website_section:option(Flag,"redis_enabled",translate("Enable Redis"),translate("Only Owncloud and Nextcloud can use"))
+redis_enabled=website_section:option(Flag,"redis_enabled",translate("启用Redis"),translate("只有Owncloud和Nextcloud才可以使用。<br>需要先在web界面配置完成后，才能使用开启Redis"))
 redis_enabled:depends("website_select","3")
 redis_enabled:depends("website_select","4")
-customdeploy_enabled=website_section:option(Flag,"customdeploy_enabled",translate("Enable website custom deploy"))
+customdeploy_enabled=website_section:option(Flag,"customdeploy_enabled",translate("启用自定义部署"))
 customdeploy_enabled:depends("autodeploy_enable",0)
-website_dir=website_section:option(Value,"website_dir",translate("Website dir name"),translate("This is your custom website dir name, this dir must be put in USB_DEVICE/opt/wwwroot/<br>The USB_DEVICE is the root path in you usb device, like /mnt/sda"))
+website_dir=website_section:option(Value,"website_dir",translate("网站目录"),translate("此选项设定您自定义网站的目录名，该目录必须放置在USB_DEVICE/opt/wwwroot/下<br>USB_DEVICE表示您USB设备的根目录，例如/mnt/sda"))
 website_dir:depends("customdeploy_enabled",1)
-port=website_section:option(Value,"port",translate("Port number"),translate("Website access port,this option must be set and make sure the port number uniquely!"))
-port.rmempty=false
+port=website_section:option(Value,"port",translate("设定访问端口"),translate("自动获取是脚本已定义的端口，自定义端口不能重复前面已有的"))
+port:value("",translate("自动获取"))
+-- port:depends("website_enabled",1)
 
 return m

@@ -129,13 +129,13 @@ cdg(){
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
-			echo "开始安装entware环境" && entware_unset
+			echo "entware环境初始化" && entware_unset
 		fi
 		return
 	fi
 
 	if [ ! -x /etc/init.d/entware ]; then
-		entware_set $cpu_model $disk_mount
+		echo "开始安装entware环境" && entware_set $cpu_model $disk_mount
 		source /etc/profile
 	fi
 
@@ -157,8 +157,7 @@ cdg(){
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
-			echo "清理多余的配置"
-			clean_vhost_config
+			clean_vhost_config && echo "清理多余的配置"
 			/opt/etc/init.d/S80nginx reload
 		fi
 	else
