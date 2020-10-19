@@ -148,22 +148,20 @@ cdg(){
 		if [ ! -x /opt/etc/init.d/S80nginx ]; then
 			echo "开始安装Nginx" && init_nginx
 		fi
-		if [ -z $nginx_enabled ]; then
-			echo "没有启用Nginx服务器"
-			nginx_manage stop
+		if [ -z "$nginx_enabled" ]; then
+			nginx_manage stop && echo "关闭Nginx服务器"
 		else
 			if [ -z "`pgrep nginx`" ]; then
 				nginx_manage start && echo "Nginx服务器已运行"
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
-			clean_vhost_config && echo "清理多余的配置"
+			clean_vhost_config && echo "清理未写入配置的网站"
 			/opt/etc/init.d/S80nginx reload
 		fi
 	else
 		if [ -x /opt/etc/init.d/S80nginx ]; then
-			echo "Nginx已安装"
-			del_nginx
+			del_nginx && echo "已卸载Nginx相关的软件包"
 		fi
 	fi
 
@@ -174,7 +172,7 @@ cdg(){
 			echo "开始安装MySQL" && init_mysql
 		fi
 		if [ -z $mysql_enabled ]; then
-			/opt/etc/init.d/S70mysqld stop
+			/opt/etc/init.d/S70mysqld stop && echo "关闭MySQL服务器"
 		else
 			if [ -z "`pgrep mysqld`" ]; then
 				/opt/etc/init.d/S70mysqld start && echo "MySQL数据库已运行"
@@ -182,8 +180,7 @@ cdg(){
 		fi
 	else
 		if [ -x /opt/etc/init.d/S70mysqld ]; then
-			echo "MySQL已安装"
-			del_mysql
+			del_mysql && echo "已卸载MySQL相关的软件包"
 		fi
 	fi
 }

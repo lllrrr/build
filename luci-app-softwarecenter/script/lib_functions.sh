@@ -39,7 +39,7 @@ entware_set(){
 	fi
 
 	# 安装基本软件支持
-	install_soft "$pkglist_base" && echo "安装基本软件" 
+	echo "安装基本软件" && install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
@@ -126,6 +126,7 @@ entware_unset(){
 	rm -rf /opt/*
 	umount -lf /opt
 	rm -r /opt
+	# rm -rf $disk_mount/opt
 }
 
 ##### 软件包安装 #####

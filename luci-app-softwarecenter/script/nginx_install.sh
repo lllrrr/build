@@ -75,7 +75,6 @@ http {
 EOF
 
 	sed -e "s/theOne/$username/g" -i /opt/etc/nginx/nginx.conf
-
 	# 特定程序的nginx配置
 	nginx_special_conf
 

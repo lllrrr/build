@@ -233,25 +233,18 @@ sed -e "s/.*\/opt\/wwwroot\/www\/.*/    root \/opt\/wwwroot\/$2\/\;/g" -i /opt/e
 
 ############## 开启 Redis ###############
 ##参数: $1: 安装目录
-redis(){
-	file=/opt/wwwroot/$name
-	case $1 in
-	1)
-	sed -e "/);/d" -i $file/config/config.php
-	cat >> "$file/config/config.php" <<-\EOF
-	'memcache.locking' => '\OC\Memcache\Redis',
-	'memcache.local' => '\OC\Memcache\Redis',
-	'redis' => array(
-		'host' => '/opt/var/run/redis.sock',
-		'port' => 0,
-		),
-	);
-	EOF
-	;;
-	2)
-	cat > $file/config/config.php
-	;;
-	esac
+redis()
+{
+sed -e "/);/d" -i $1/config/config.php
+cat >> "$1/config/config.php" <<-\EOF
+'memcache.locking' => '\OC\Memcache\Redis',
+'memcache.local' => '\OC\Memcache\Redis',
+'redis' => array(
+    'host' => '/opt/var/run/redis.sock',
+    'port' => 0,
+    ),
+);
+EOF
 }
 
 ############## 网站删除 ##############
@@ -446,12 +439,6 @@ install_owncloud(){
 	# Owncloud的配置文件中有php-fpm了, 不需要外部引入
 	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/owncloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
 
-	if [ "$redis_enabled" = 1 ]; then
-		redis 1 && echo "已开启Redis"
-	else
-		redis 2 && echo "已清空Redis"
-	fi
-
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo "首次打开会要配置用户和数据库信息"
@@ -477,13 +464,6 @@ install_nextcloud(){
 	add_vhost $port $webdir
 	# nextcloud的配置文件中有php-fpm了, 不需要外部引入
 	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/nextcloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-
-	if [ "$redis_enabled" = 1 ]; then
-		file=/opt/wwwroot/$name
-		redis 1 && echo "已开启Redis"
-	else
-		redis 2 && echo "已清空Redis"
-	fi
 
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"

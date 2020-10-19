@@ -64,9 +64,7 @@ interactive-timeout
 MMM
 
 	sed -e "s/theOne/$username/g" -i /opt/etc/mysql/my.cnf
-
 	chmod 644 /opt/etc/mysql/my.cnf
-
 	_make_dir "/opt/var/mysql"
 
 	# 数据库安装，同步方式，无需延时等待
