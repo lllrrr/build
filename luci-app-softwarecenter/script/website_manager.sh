@@ -122,7 +122,7 @@ web_installer(){
 			if [ $? != 0 ]; then
 				echo "下载异常"
 				rm /opt/tmp/$name.$suffix
-				return 1
+				exit 1
 			fi
 			mv /opt/tmp/$name.* /opt/wwwroot/
 		fi
@@ -133,7 +133,6 @@ web_installer(){
 		if [[ -n "$hookdir" ]]; then
 			_make_dir /opt/wwwroot/$hookdir
 		fi
-
 			if [[ -n "$istar" ]]; then
 				tar zxf /opt/wwwroot/$name.$suffix -C /opt/wwwroot/$hookdir > /dev/null 2>&1
 			else
@@ -147,7 +146,7 @@ web_installer(){
 
 	# 检测是否解压成功
 	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
-		echo "安装未成功"
+		echo "安装不成功"
 		delete_website /opt/etc/nginx/vhost/$webdir.conf
 		return
 	fi
@@ -233,8 +232,7 @@ sed -e "s/.*\/opt\/wwwroot\/www\/.*/    root \/opt\/wwwroot\/$2\/\;/g" -i /opt/e
 
 ############## 开启 Redis ###############
 ##参数: $1: 安装目录
-redis()
-{
+redis(){
 sed -e "/);/d" -i $1/config/config.php
 cat >> "$1/config/config.php" <<-\EOF
 'memcache.locking' => '\OC\Memcache\Redis',
@@ -245,6 +243,7 @@ cat >> "$1/config/config.php" <<-\EOF
     ),
 );
 EOF
+echo "$webdir已开启Redis"
 }
 
 ############## 网站删除 ##############
@@ -282,13 +281,13 @@ vhost_list(){
 ############## 自定义部署通用函数 ##########
 ##参数：$1:文件目录 $2:端口号
 install_custom(){
-	# 基本配置
 	webdir=$1
 	port=$2
 	# 运行安装程序
 	echo "正在配置$webdir..."
 
 	# 目录检查
+	# _make_dir /opt/wwwroot/$webdir
 	if [ ! -d /opt/wwwroot/$webdir ]; then
 		echo "目录不存在，部署中断"
 		return 1
@@ -342,6 +341,7 @@ install_phpmyadmin(){
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	onmp_restart
 
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
@@ -419,57 +419,6 @@ install_lychee(){
 	echo "首次打开会要配置数据库信息"
 	echo "地址：127.0.0.1 用户、密码你自己设置的或者默认是root 123456"
 	echo "下面的可以不配置，然后下一步创建个用户就可以用了"
-}
-
-################# 安装Owncloud ###############
-install_owncloud(){
-	# 默认配置
-	filelink=$url_Owncloud
-	name="Owncloud"
-	dirname="owncloud"
-	port=98
-
-	# 运行安装程序
-	web_installer
-	echo "正在配置$name..."
-	chmod -R 777 /opt/wwwroot/$webdir
-
-	# 添加到虚拟主机
-	add_vhost $port $webdir
-	# Owncloud的配置文件中有php-fpm了, 不需要外部引入
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/owncloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-
-	echo "$name安装完成"
-	echo "浏览器地址栏输入：$localhost:$port 即可访问"
-	echo "首次打开会要配置用户和数据库信息"
-	echo "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"
-	echo "安装好之后可以点击左上角三条杠进入market安装丰富的插件，比如在线预览图片、视频等"
-	echo "需要先在web界面配置完成后，才能使用开启Redis"
-}
-
-################# 安装Nextcloud ##############
-install_nextcloud(){
-	# 默认配置
-	filelink=$url_Nextcloud
-	name="Nextcloud"
-	dirname="nextcloud"
-	port=99
-
-	# 运行安装程序
-	web_installer
-	echo "正在配置$name..."
-	chmod -R 777 /opt/wwwroot/$webdir
-
-	# 添加到虚拟主机
-	add_vhost $port $webdir
-	# nextcloud的配置文件中有php-fpm了, 不需要外部引入
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/nextcloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-
-	echo "$name安装完成"
-	echo "浏览器地址栏输入：$localhost:$port 即可访问"
-	echo "首次打开会要配置用户和数据库信息"
-	echo "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"
-	echo "需要先在 web 界面配置完成后，才能使用开启Redis"
 }
 
 ############## 安装kodexplorer芒果云 ##########
@@ -560,4 +509,55 @@ install_dzzoffice(){
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo "DzzOffice应用市场中，某些应用无法自动安装的，请自行参看官网给的手动安装教程"
+}
+
+################# 安装Owncloud ###############
+install_owncloud(){
+	# 默认配置
+	filelink=$url_Owncloud
+	name="Owncloud"
+	dirname="owncloud"
+	port=98
+
+	# 运行安装程序
+	web_installer
+	echo "正在配置$name..."
+	chmod -R 777 /opt/wwwroot/$webdir
+
+	# 添加到虚拟主机
+	add_vhost $port $webdir
+	# Owncloud的配置文件中有php-fpm了, 不需要外部引入
+	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/owncloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+
+	echo "$name安装完成"
+	echo "浏览器地址栏输入：$localhost:$port 即可访问"
+	echo "首次打开会要配置用户和数据库信息"
+	echo "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"
+	echo "安装好之后可以点击左上角三条杠进入market安装丰富的插件，比如在线预览图片、视频等"
+	echo "需要先在web界面配置完成后，才能使用开启Redis"
+}
+
+################# 安装Nextcloud ##############
+install_nextcloud(){
+	# 默认配置
+	filelink=$url_Nextcloud
+	name="Nextcloud"
+	dirname="nextcloud"
+	port=99
+
+	# 运行安装程序
+	web_installer
+	echo "正在配置$name..."
+	chmod -R 777 /opt/wwwroot/$webdir
+
+	# 添加到虚拟主机
+	add_vhost $port $webdir
+	# nextcloud的配置文件中有php-fpm了, 不需要外部引入
+	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/nextcloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+
+	echo "$name安装完成"
+	echo "浏览器地址栏输入：$localhost:$port 即可访问"
+	echo "首次打开会要配置用户和数据库信息"
+	echo "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"
+	echo "需要先在 web 界面配置完成后，才能使用开启Redis"
 }

@@ -22,7 +22,7 @@
 				eval value$m=`df -h | grep $mounted | awk '{print $(eval echo '$n')}'`
 				eval pp$m=`/bin/mount | grep $mounted | awk '{print $5}'`
 			done
-			echo -e "[$i] $value5 [ 文件系统:$pp5 容量:$value1 已用比例:$value4(已用:$value2 可用:$value3) ]"
+			echo "[$i] $value5 [ 文件系统:$pp5 容量:$value1 已用比例:$value4(已用:$value2 可用:$value3) ]"
 			i=$((i + 1))
 		done
 	;;
