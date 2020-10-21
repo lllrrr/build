@@ -27,12 +27,9 @@ local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构")
 cpu_model:value(model)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-disk_mount = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),"%s %s"%{translatef("当前可用磁盘：<br><b style=\"color:green\">%s",disk_size).."</b><br>",translate("选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b><br>")})
-for _, list_disk_mount in luci.util.vspairs(luci.util.split(luci.sys.exec("lsblk -s | grep mnt | awk '{print $7}'"))) do
-	if(string.len(list_disk_mount) > 0)
-	then
-		disk_mount:value(list_disk_mount)
-	end
+disk_mount = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("当前可用磁盘：<br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
+for list_disk_mount in luci.util.execi("lsblk -s | grep mnt | awk '{print $7}'") do
+	disk_mount:value(list_disk_mount)
 end
 -- disk_mount:depends("deploy_entware",1)
 
