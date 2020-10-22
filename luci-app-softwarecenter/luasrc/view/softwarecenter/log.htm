@@ -1,7 +1,28 @@
 <%
 local dsp = require "luci.dispatcher"
 -%>
+<% css = [[
 
+	#log_textarea {
+		padding: 15px;
+		text-align: left;
+	}
+	#log_textarea pre {
+		word-break: break-all;
+		margin: 0;
+		font-size : 10pt;
+		font-family :Arial;
+		<!-- background-color:#F0F0F0; -->
+		<!-- color : #202020; -->
+	}
+	.description {
+		background-color: #93ccff;
+		font-size : 15pt;
+
+]]
+-%>
+
+<%+header%>
 <script type="text/javascript">
 	//<![CDATA[
 	function clearlog(btn) {

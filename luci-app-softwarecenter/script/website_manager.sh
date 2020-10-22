@@ -140,7 +140,7 @@ web_installer(){
 			fi
 
 			mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir
-			echo "解压完成..."
+			echo "解压完成..." && rm /opt/wwwroot/$name.$suffix
 		fi
 	fi
 

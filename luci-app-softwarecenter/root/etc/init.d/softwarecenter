@@ -102,11 +102,23 @@ handle_website(){
 				install_custom $website_dir $port
 			fi
 		fi
-		if [ -n "$autodeploy_enable" ] && [ -n "$redis_enabled" ] && [ -d /opt/wwwroot/$website_name ] && [ ! -f /opt/wwwroot/$website_name/redis_enabled ] && [ "$website_name" == "Nextcloud" ] || [ "$website_name" == "Owncloud" ]; then
-			redis /opt/wwwroot/$website_name/
-			/bin/touch /opt/wwwroot/$website_name/redis_enabled
+		if [[ -n "$autodeploy_enable" ]]; then
+			if [[ -n "$redis_enabled" ]]; then
+				if [[ -d /opt/wwwroot/$website_name ]]; then
+					if [[ ! -f /opt/wwwroot/$website_name/redis_enabled ]]; then
+						if [[ "$website_name" == "Nextcloud" ]] || [[ "$website_name" == "Owncloud" ]]; then
+							/bin/touch /opt/wwwroot/$website_name/redis_enabled
+							redis /opt/wwwroot/$website_name
+						fi
+					fi
+				fi
+			else
+				rm -rf /opt/wwwroot/$website_name/config/config.php
+				rm -rf /opt/wwwroot/$website_name/redis_enabled
+			fi
 		fi
 	fi
+
 
 	website_config_list="$website_config_list $website_name"
 }
