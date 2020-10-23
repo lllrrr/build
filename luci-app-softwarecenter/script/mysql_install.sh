@@ -63,9 +63,6 @@ key_buffer_size    = 24M
 interactive-timeout
 EOF
 
-	if [[ $user ]]; then
-		username=$user
-	fi
 	sed -e "s/theOne/$username/g" -i /opt/etc/mysql/my.cnf
 	chmod 644 /opt/etc/mysql/my.cnf
 	_make_dir "/opt/var/mysql"
@@ -74,18 +71,19 @@ EOF
 	echo -e "\n正在初始化数据库，请稍等1分钟"
 	mysql_install_db --user=$username --basedir=/opt --datadir=/opt/var/mariadb/ > /dev/null 2>&1
 
+	[ -e /opt/etc/init.d/S70 ] && mv /opt/etc/init.d/S70 /opt/etc/init.d/S70mysqld
 	# 初次启动MySQL，异步方式，加延时等待
 	/opt/etc/init.d/S70mysqld start
 	echo "正在启动MySQL"
 	sleep 10
 
 	# 设置数据库密码
-	if [[ $pass ]]; then
-		mysqladmin -u $username password $pass
-		echo -e "使用自定义数据库用户：$username, 初始密码：$pass"
+	if [[ $user ]] && [[ $user ]]; then
+		mysqladmin -u $user password $pass
+		echo -e "使用自定义数据库用户：$user, 密码：$pass"
 	else
 		mysqladmin -u root password 123456
-		echo -e "使用默认数据库用户：root, 初始密码：123456"
+		echo -e "使用默认数据库用户：root, 密码：123456"
 	fi
 }
 
@@ -96,14 +94,13 @@ del_mysql(){
 	sleep 10
 
 	# 卸载相关的软件包
-	mariadb_remove="`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
-	# remove_soft $mariadb_remove
-	remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
+	# remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
+	remove_soft "$dblist"
 
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql
 	rm -rf /opt/var/mariadb/
 	rm -rf /opt/var/mysql
-	rm -rf /opt/etc/init.d/S70mysqld
+	mv /opt/etc/init.d/S70mysqld  /opt/etc/init.d/S70
 }
 
