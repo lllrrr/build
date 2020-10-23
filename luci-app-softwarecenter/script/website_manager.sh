@@ -520,7 +520,7 @@ install_owncloud(){
 	port=98
 
 	# 运行安装程序
-	web_installer && [ $? = 0 ] || { echo "安装$webdir出错，请检查网络！" && exit 1; }
+	web_installer
 	echo "正在配置$name..."
 	chmod -R 777 /opt/wwwroot/$webdir
 

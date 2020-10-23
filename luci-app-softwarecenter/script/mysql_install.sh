@@ -63,8 +63,6 @@ key_buffer_size    = 24M
 interactive-timeout
 EOF
 
-	echo $user $pass
-	# [ ${user} ] && username=$user
 	if [[ $user ]]; then
 		username=$user
 	fi
@@ -82,9 +80,9 @@ EOF
 	sleep 10
 
 	# 设置数据库密码
-	if [ ${pass} ]; then
+	if [[ $pass ]]; then
 		mysqladmin -u $username password $pass
-		echo -e "使用自定义数据库用户：$a, 初始密码：$Password"
+		echo -e "使用自定义数据库用户：$username, 初始密码：$pass"
 	else
 		mysqladmin -u root password 123456
 		echo -e "使用默认数据库用户：root, 初始密码：123456"
@@ -106,6 +104,6 @@ del_mysql(){
 	rm -rf /opt/etc/mysql
 	rm -rf /opt/var/mariadb/
 	rm -rf /opt/var/mysql
-	# rm -rf /opt/etc/init.d/S70mysqld
+	rm -rf /opt/etc/init.d/S70mysqld
 }
 
