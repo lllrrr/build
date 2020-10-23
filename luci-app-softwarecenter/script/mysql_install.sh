@@ -24,7 +24,7 @@ init_mysql(){
 	install_soft "$dblist"
 	# MySQL设置
 	_make_dir "/opt/etc/mysql"
-	cat > "/opt/etc/mysql/my.cnf" <<-\MMM
+	cat > "/opt/etc/mysql/my.cnf" <<-EOF
 [client-server]
 port               = 3306
 socket             = /opt/var/run/mysqld.sock
@@ -61,8 +61,13 @@ key_buffer_size    = 24M
 
 [mysqlhotcopy]
 interactive-timeout
-MMM
+EOF
 
+	echo $user $pass
+	# [ ${user} ] && username=$user
+	if [[ $user ]]; then
+		username=$user
+	fi
 	sed -e "s/theOne/$username/g" -i /opt/etc/mysql/my.cnf
 	chmod 644 /opt/etc/mysql/my.cnf
 	_make_dir "/opt/var/mysql"
@@ -77,8 +82,13 @@ MMM
 	sleep 10
 
 	# 设置数据库密码
-	mysqladmin -u root password 123456
-	echo -e "数据库用户：root, 初始密码：123456"
+	if [ ${pass} ]; then
+		mysqladmin -u $username password $pass
+		echo -e "使用自定义数据库用户：$a, 初始密码：$Password"
+	else
+		mysqladmin -u root password 123456
+		echo -e "使用默认数据库用户：root, 初始密码：123456"
+	fi
 }
 
 del_mysql(){
@@ -88,10 +98,14 @@ del_mysql(){
 	sleep 10
 
 	# 卸载相关的软件包
-	remove_soft "`opkg list-installed | grep mariadb`"
+	mariadb_remove="`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
+	# remove_soft $mariadb_remove
+	remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
 
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql
 	rm -rf /opt/var/mariadb/
+	rm -rf /opt/var/mysql
+	# rm -rf /opt/etc/init.d/S70mysqld
 }
 

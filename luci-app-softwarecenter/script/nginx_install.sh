@@ -37,7 +37,7 @@ init_nginx(){
 	_make_dir "/opt/etc/nginx/vhost" "/opt/etc/nginx/no_use" "/opt/etc/nginx/conf"
 
 	# 初始化nginx配置文件
-	cat > "/opt/etc/nginx/nginx.conf" <<-\EOF
+	cat > "/opt/etc/nginx/nginx.conf" <<-EOF
 user theOne root;
 pid /opt/var/run/nginx.pid;
 worker_processes auto;
@@ -96,7 +96,7 @@ del_nginx(){
 ##### 特定程序的nginx配置 #####
 nginx_special_conf(){
 # php-fpm
-cat > "/opt/etc/nginx/conf/php-fpm.conf" <<-\OOO
+cat > "/opt/etc/nginx/conf/php-fpm.conf" <<-EOF
 location ~ \.php(?:$|/) {
 	fastcgi_split_path_info ^(.+\.php)(/.+)$;
 	fastcgi_pass unix:/opt/var/run/php7-fpm.sock;
@@ -104,10 +104,10 @@ location ~ \.php(?:$|/) {
 	fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
 	include fastcgi_params;
 }
-OOO
+EOF
 
 # nextcloud
-cat > "/opt/etc/nginx/conf/nextcloud.conf" <<-\OOO
+cat > "/opt/etc/nginx/conf/nextcloud.conf" <<-EOF
 add_header X-Content-Type-Options nosniff;
 add_header X-XSS-Protection "1; mode=block";
 add_header X-Robots-Tag none;
@@ -178,10 +178,10 @@ location ~ \.(?:png|html|ttf|ico|jpg|jpeg)$ {
 	try_files $uri /index.php$request_uri;
 	access_log off;
 }
-OOO
+EOF
 
 # owncloud
-cat > "/opt/etc/nginx/conf/owncloud.conf" <<-\OOO
+cat > "/opt/etc/nginx/conf/owncloud.conf" <<-EOF
 add_header X-Content-Type-Options nosniff;
 add_header X-Frame-Options "SAMEORIGIN";
 add_header X-XSS-Protection "1; mode=block";
@@ -256,10 +256,10 @@ location ~ \.(?:svg|gif|png|html|ttf|woff|ico|jpg|jpeg|map)$ {
 	try_files $uri /index.php$uri$is_args$args;
 	access_log off;
 }
-OOO
+EOF
 
 # wordpress
-cat > "/opt/etc/nginx/conf/wordpress.conf" <<-\OOO
+cat > "/opt/etc/nginx/conf/wordpress.conf" <<-EOF
 location = /favicon.ico {
 	log_not_found off;
 	access_log off;
@@ -295,14 +295,14 @@ location ~* \.(js|css|png|jpg|jpeg|gif|ico)$ {
 	expires max;
 	log_not_found off;
 	}
-OOO
+EOF
 
 # typecho
-cat > "/opt/etc/nginx/conf/typecho.conf" <<-\OOO
+cat > "/opt/etc/nginx/conf/typecho.conf" <<-EOF
 if (!-e $request_filename) {
 		rewrite ^(.*)$ /index.php$1 last;
 	}
-OOO
+EOF
 
 }
 

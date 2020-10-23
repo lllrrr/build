@@ -79,22 +79,21 @@ handle_website(){
 		#install_website $website_select $port
 		website_name=`website_name_mapping $website_select`
 	elif [ -n "$customdeploy_enabled" ]; then
-		website_name="`echo $website_dir |awk -F"[/]" '{print $NF}'`"
+		website_name="`echo $website_dir | awk -F"[/]" '{print $NF}'`"
 	else
 		return
 	fi
 
 	if [ -z "$website_enabled" ]; then
-		echo "网站未启用"
+		echo "$website_name 网站未启用"
 		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
 		fi
 	else
 		if [ -f /opt/etc/nginx/no_use/$website_name.conf ]; then
-			echo "$website_name已安装但被禁用了"
+			echo "$website_name已安装但被禁用"
 			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
-			# echo -e "\n开始安装$website_name"
 			if [ -n "$autodeploy_enable" ]; then
 				install_website $website_select $port
 			elif [ -n "$customdeploy_enabled" ]; then
@@ -124,7 +123,7 @@ handle_website(){
 }
 
 cdg(){
-	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled disk_mount cpu_model
+	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled disk_mount cpu_model user pass
 
 	config_load softwarecenter
 
@@ -137,6 +136,8 @@ cdg(){
 
 	config_get disk_mount	main disk_mount
 	config_get cpu_model	main cpu_model
+	config_get user			main user
+	config_get pass			main pass
 
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
@@ -147,7 +148,7 @@ cdg(){
 	fi
 
 	if [ ! -x /etc/init.d/entware ]; then
-		echo "开始安装entware环境" && entware_set $cpu_model $disk_mount
+		entware_set $cpu_model $disk_mount
 		source /etc/profile
 	fi
 
@@ -168,8 +169,8 @@ cdg(){
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
-			clean_vhost_config && echo "清理未写入配置的网站"
-			/opt/etc/init.d/S80nginx reload
+			clean_vhost_config
+			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
 	else
 		if [ -x /opt/etc/init.d/S80nginx ]; then
@@ -195,6 +196,22 @@ cdg(){
 			del_mysql && echo "已卸载MySQL相关的软件包"
 		fi
 	fi
+	
+	num=0
+    for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
+        if [ -n "`pidof $PROC`" ]; then
+            echo "$PROC 启动成功";
+        else
+            echo "$PROC 启动失败";
+            num=`expr $num + 1`
+        fi 
+    done
+
+    if [[ $num -gt 0 ]]; then
+        echo "onmp 启动失败"
+    else
+        echo "onmp 已启动"
+    fi
 }
 
 start(){

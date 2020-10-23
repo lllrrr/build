@@ -31,12 +31,11 @@ _make_dir(){
 ##参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
 entware_set(){
+	echo "开始安装entware环境"
 	entware_unset && echo "删除原来OPKG配置设定"
 
 	# 修补以适应外部传参
-	if [ -n "$2" ]; then
-		USB_PATH="$2"
-	fi
+	if [ -n "$2" ]; then USB_PATH="$2"; fi
 
 	# 安装基本软件支持
 	echo "安装基本软件" && install_soft "$pkglist_base"
@@ -69,7 +68,7 @@ entware_set(){
 		exit 1
 	fi
 
-	cat > "/etc/init.d/entware" <<-\ENTWARE
+	cat > "/etc/init.d/entware" <<-EOF
 #!/bin/sh /etc/rc.common
 START=51
 
@@ -108,7 +107,7 @@ stop(){
 restart(){
 	stop;start
 }
-ENTWARE
+EOF
 
 	chmod a+x /etc/init.d/entware
 	/etc/init.d/entware enable

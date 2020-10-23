@@ -25,26 +25,32 @@ deploy_entware = s:taboption("entware",Flag,"deploy_entware",translate("启用")
 local model = luci.sys.exec("uname -m 2>/dev/null")
 local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' ')
 cpu_model:value(model)
+cpu_model:depends("deploy_entware",1)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
 disk_mount = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("当前可用磁盘：<br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
 for list_disk_mount in luci.util.execi("lsblk -s | grep mnt | awk '{print $7}'") do
 	disk_mount:value(list_disk_mount)
 end
--- disk_mount:depends("deploy_entware",1)
+disk_mount:depends("deploy_entware",1)
 
 entware_enable = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>此安装过程可能需要大量时间，可以在日志中查看到安装的过程"))
 entware_enable:depends("deploy_entware",1)
 deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
-deploy_nginx:depends("entware_enable",1)
-deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("自动部署MySQL数据库服务器(依赖Entware软件仓库)"))
-deploy_mysql:depends("entware_enable",1)
-
-nginx_enable = s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"))
+nginx_enable = s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx"))
 nginx_enable:depends("deploy_nginx",1)
+deploy_nginx:depends("entware_enable",1)
 
-mysql_enable = s:taboption("mysql",Flag,"mysql_enabled",translate("Enabled"),translate("第一次运行时，默认的登录用户是'root'，密码是'123456'"))
+deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("自动部署MySQL数据库服务器(依赖Entware软件仓库)"))
+mysql_enable = s:taboption("mysql",Flag,"mysql_enabled",translate("Enabled"),translate("留空是默认登录用户  root  密码  123456 "))
 mysql_enable:depends("deploy_mysql",1)
+mysql_enable = s:taboption("mysql",Value,"user",translate("用户"),translate("MySQL数据库服务器登录用户"))
+mysql_enable.placeholder="root"
+mysql_enable:depends("mysql_enabled",1)
+mysql_enable = s:taboption("mysql",Value,"pass",translate("密码"),translate("MySQL数据库服务器登录密码"))
+mysql_enable.password=true
+mysql_enable:depends("mysql_enabled",1)
+deploy_mysql:depends("entware_enable",1)
 
 website_section = m:section(TypedSection,"website",translate("网站管理"),translate("这里先添加名称确认后再选择要安装的应用软件"))
 website_section.addremove = true

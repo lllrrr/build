@@ -117,17 +117,18 @@ web_installer(){
 		rm -rf /opt/etc/nginx/vhost/$webdir.conf
 		if [[ ! -f /opt/wwwroot/$name.$suffix ]]; then
 			echo "正在下载安装包$name.$suffix，请耐心等待..."
-			rm -rf /opt/tmp/$name.$suffix
+			[ -e /opt/tmp/$name.$suffix ] && rm -rf /opt/tmp/$name.$suffix
 			wget --no-check-certificate -O /opt/tmp/$name.$suffix $filelink
 			if [ $? != 0 ]; then
 				echo "下载异常"
 				rm /opt/tmp/$name.$suffix
 				exit 1
 			fi
+			_make_dir /opt/wwwroot
 			mv /opt/tmp/$name.* /opt/wwwroot/
 		fi
 		if [[ ! -f "/opt/wwwroot/$name.$suffix" ]]; then
-			echo "下载未成功" && return 1
+			echo "下载文件出错" && exit 1
 		else
 			echo "正在解压..."
 		if [[ -n "$hookdir" ]]; then
@@ -148,7 +149,7 @@ web_installer(){
 	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
 		echo "安装不成功"
 		delete_website /opt/etc/nginx/vhost/$webdir.conf
-		return
+		exit 1
 	fi
 }
 
@@ -264,7 +265,7 @@ vhost_config_list(){
 	if [ "$#" -eq "1" ]; then
 		path=$(cat $1 | awk 'NR==4' | awk '{print $2}' | sed 's/;//')
 		port=$(cat $1 | awk 'NR==2' | awk '{print $2}' | sed 's/;//')
-		echo "$path        $localhost:$port"
+		echo "$path $localhost:$port"
 	fi
 }
 
@@ -290,7 +291,7 @@ install_custom(){
 	# _make_dir /opt/wwwroot/$webdir
 	if [ ! -d /opt/wwwroot/$webdir ]; then
 		echo "目录不存在，部署中断"
-		return 1
+		exit 1
 	fi
 	chmod -R 777 /opt/wwwroot/$webdir
 
@@ -312,7 +313,7 @@ install_tz(){
 	if [ $? != 0 ]; then
 		echo "下载异常"
 		rm -r /opt/wwwroot/tz
-		return 1
+		exit 1
 	fi
 	echo "正在配置雅黑PHP探针"
 	add_vhost $port tz
@@ -334,14 +335,13 @@ install_phpmyadmin(){
 	cp /opt/wwwroot/$webdir/config.sample.inc.php /opt/wwwroot/$webdir/config.inc.php
 	chmod 644 /opt/wwwroot/$webdir/config.inc.php
 	# 取消-p参数，必须要求webdir创建才可创建文件夹，为部署检测做准备
-	mkdir /opt/wwwroot/$webdir/tmp
+	_make_dir /opt/wwwroot/$webdir/tmp
 	chmod 777 /opt/wwwroot/$webdir/tmp
 	sed -e "s/.*blowfish_secret.*/\$cfg['blowfish_secret'] = 'softwarecentersoftwarecentersoftwarecenter';/g" -i /opt/wwwroot/$webdir/config.inc.php
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-	onmp_restart
 
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
@@ -520,7 +520,7 @@ install_owncloud(){
 	port=98
 
 	# 运行安装程序
-	web_installer
+	web_installer && [ $? = 0 ] || { echo "安装$webdir出错，请检查网络！" && exit 1; }
 	echo "正在配置$name..."
 	chmod -R 777 /opt/wwwroot/$webdir
 
