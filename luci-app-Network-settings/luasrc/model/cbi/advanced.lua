@@ -300,11 +300,11 @@ if nixio.fs.access("/bin/nuc")then
 	o.inputstyle="reload"
 
 	o.write=function()
-	luci.sys.call("/bin/normalmode")
+	luci.sys.call("/bin/nuc")
 	end
-end
 
-if nixio.fs.access("/bin/nuc")then
+
+
 	o=s:taboption("mode",Button,"normalmode",translate("切换成正常模式"),translate("<font color=\"green\"><strong>本模式适合于有两个网口或以上的设备使用，如多网口软路由或者虚拟了两个以上网口的虚拟机使用！</strong></font><br/>"))
 	o.inputtitle=translate("正常模式")
 	o.inputstyle="reload"
