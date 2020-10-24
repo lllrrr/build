@@ -31,12 +31,12 @@ _make_dir(){
 ##参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
 entware_set(){
-	echo "开始安装entware环境"
 	entware_unset && echo "删除原来OPKG配置设定"
 
 	# 修补以适应外部传参
-	if [ -n "$2" ]; then USB_PATH="$2"; fi
-
+	[ "$1" ] || { echo "未选择CPU架构！" && exit 1; }
+	[ "$2" ] && USB_PATH="$2"
+	echo "开始安装entware环境"
 	# 安装基本软件支持
 	echo "安装基本软件" && install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
@@ -64,27 +64,19 @@ entware_set(){
 	elif [ "$1" == "armv7l" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh | /bin/sh
 	else
-		echo "未输入安装的架构！"
+		echo "没有找到你选择的CPU架构！"
 		exit 1
 	fi
 
-	cat > "/etc/init.d/entware" <<-EOF
+	cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
 START=51
 
-##### 获取外置挂载点 #####
-##说明：该功能为新增功能，推荐使用此功能获取外置挂载点，get_usb_path的替代品
-get_externel_mount_point(){
-	mount_list=`lsblk -s | grep mnt | awk '{print $7}'`
-	echo "$mount_list"
-}
-
 ##### 获取entware安装路径 #####
-##说明：解决entware开机脚本找不到路径的问题，该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
+##该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
 get_entware_path()
 {
-	mount_list=`get_externel_mount_point`
-	for mount_point in $mount_list ; do
+	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
 		if [ -d "$mount_point/opt/etc/nginx" ]; then
 			echo "$mount_point/opt"
 			break
@@ -102,12 +94,13 @@ stop(){
 	/opt/etc/init.d/rc.unslung stop
 	umount -lf /opt
 	rm -r /opt
+	rm -rf `get_entware_path`
 }
 
 restart(){
 	stop;start
 }
-EOF
+ENTWARE
 
 	chmod a+x /etc/init.d/entware
 	/etc/init.d/entware enable
