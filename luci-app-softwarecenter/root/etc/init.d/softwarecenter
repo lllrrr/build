@@ -1,24 +1,24 @@
-#!/bin/sh /etc/rc.common
-START=52
-STOP=10
+	#!/bin/sh /etc/rc.common
+	START=52
+	STOP=10
 
-#
-# Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
-# This is free software, licensed under the GNU General Public License v3.
-#
+	#
+	# Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
+	#
+	# This is free software, licensed under the GNU General Public License v3.
+	#
 
 
-# 导入函数库
-. /usr/bin/softwarecenter/website_manager.sh
-. /usr/bin/softwarecenter/mysql_install.sh
-. /usr/bin/softwarecenter/nginx_install.sh
+	# 导入函数库
+	. /usr/bin/softwarecenter/website_manager.sh
+	. /usr/bin/softwarecenter/mysql_install.sh
+	. /usr/bin/softwarecenter/nginx_install.sh
 
-website_config_list=""
+	website_config_list=""
 
-####### 网站清理 ########
-##本函数负责清理未写入配置的网站
-clean_vhost_config(){
+	####### 网站清理 ########
+	##本函数负责清理未写入配置的网站
+	clean_vhost_config(){
 	local_config_list="`ls /opt/etc/nginx/vhost | sed "s/.conf//g"`"
 	local_no_use_config_list="`ls /opt/etc/nginx/no_use | sed "s/.conf//g"`"
 	delete_config_list=""
@@ -53,11 +53,11 @@ clean_vhost_config(){
 		webdir=`vhost_config_list $conf | awk '{print $1}'`
 		delete_website $conf $webdir
 	done
-}
+	}
 
-####### 网站迭代处理 ########
-##本函数迭代的配置网站（处理逻辑也许可以更好的优化？）
-handle_website(){
+	####### 网站迭代处理 ########
+	##本函数迭代的配置网站（处理逻辑也许可以更好的优化？）
+	handle_website(){
 	local website_enabled autodeploy_enable website_select port customdeploy_enabled website_dir
 
 	config_get_bool website_enabled $1 website_enabled
@@ -120,9 +120,9 @@ handle_website(){
 
 
 	website_config_list="$website_config_list $website_name"
-}
+	}
 
-cdg(){
+	cdg(){
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
 	disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
@@ -201,32 +201,32 @@ cdg(){
 		fi
 	fi
 	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
-	
+
 	num=0
-    for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
-        if [ -n "`pidof $PROC`" ]; then
-            echo "$PROC 启动成功";
-        else
-            echo "$PROC 启动失败";
-            num=`expr $num + 1`
-        fi 
-    done
+	for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
+		if [ -n "`pidof $PROC`" ]; then
+			echo "$PROC 启动成功";
+		else
+			echo "$PROC 启动失败";
+			num=`expr $num + 1`
+		fi 
+	done
 
-    if [[ $num -gt 0 ]]; then
-        echo "onmp 启动失败"
-    else
-        echo "onmp 已启动"
-    fi
-}
+	if [[ $num -gt 0 ]]; then
+		echo "onmp 启动失败"
+	else
+		echo "onmp 已启动"
+	fi
+	}
 
-start(){
+	start(){
 	cdg | tee -a /tmp/log/softwarecenter.log
-}
+	}
 
-stop(){
+	stop(){
 	:
-}
+	}
 
-restart(){
+	restart(){
 	stop;start
-}
+	}
