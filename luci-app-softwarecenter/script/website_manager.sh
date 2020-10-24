@@ -306,7 +306,7 @@ install_tz(){
 	if [[ $nport ]]; then
 		port=$nport
 	fi
-	# 添加探针
+
 	_make_dir "/opt/wwwroot/tz"
 	echo "开始下载雅黑PHP探针"
 	wget --no-check-certificate -O /opt/wwwroot/tz/index.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php > /dev/null 2>&1

@@ -18,8 +18,9 @@ s.addremove = false
 s.anonymous = true
 
 s:tab("entware",translate("Entware设置"))
-nginx_tab = s:tab("nginx",translate("Nginx服务器设置"))
-mysql_tab = s:tab("mysql",translate("MySQL服务器设置"))
+s:tab("swap",translate("交换分区设置"))
+s:tab("nginx",translate("Nginx服务器设置"))
+s:tab("mysql",translate("MySQL服务器设置"))
 
 deploy_entware = s:taboption("entware",Flag,"deploy_entware",translate("启用"),translate("开始部署Entware环境"))
 local model = luci.sys.exec("uname -m 2>/dev/null")
@@ -36,6 +37,18 @@ disk_mount:depends("deploy_entware",1)
 
 entware_enable = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>此安装过程可能需要大量时间，可以在日志中查看到安装的过程"))
 entware_enable:depends("deploy_entware",1)
+
+swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("配置交换分区"))
+swap_enabled = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点，默认可选是opt安装的所在盘"))
+swap_enabled:value(luci.sys.exec("uci get softwarecenter.main.disk_mount"))
+swap_enabled:depends("swap_enabled",1)
+
+swap_enabled = s:taboption("swap",Value,"swap_size",translate("设置大小"),translate("交换空间大小(M)，默认512M"))
+swap_enabled.default='512'
+swap_enabled:depends("swap_enabled",1)
+
+swap_enable:depends("entware_enable",1)
+
 deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
 nginx_enable = s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx"))
 nginx_enable:depends("deploy_nginx",1)

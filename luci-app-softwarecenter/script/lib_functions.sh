@@ -210,30 +210,31 @@ progress_bar(){
 }
 
 ##### 配置交换分区文件 #####
-##参数: $$disk_mount:交换分区挂载点 $1:交换空间大小(M)
+##参数: $1:交换空间大小(M) $2:交换分区挂载点
 config_swap_init(){
-	let swapsize=$1*1024*1024
-	filesize=0
-	echo "配置交换分区（$1M），写入文件中..."
-	dd if=/dev/zero of=$disk_mount bs=1M count=$1 > /dev/null 2>&1 &
-	sleep 1
-	while [ $filesize -lt $swapsize ]
-	do
-		filesize=`ls -l $disk_mount | awk '{print $5}'`
-		float_cal=$(float_calculate `expr $filesize \* 100` / $swapsize)
-		progress_bar $float_cal
-	done
-	echo -e "\n文件写入完成！"
-	exit 0
-	mkswap $disk_mount > /dev/null 2>&1
-	swapon $disk_mount
+status=$(cat /proc/swaps |  awk 'NR==2')
+    if [[ -n "$status" ]]; then
+        echo "Swap已启用"
+    else
+        if [[ ! -e "/opt/.swap" ]]; then
+            echo "正在生成swap文件，请耐心等待..."
+            dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
+            # 设置交换文件
+            mkswap $2/opt/.swap
+            chmod 0600 $2/opt/.swap
+        fi
+        # 启用交换分区
+        swapon $2/opt/.swap
+        echo "现在你可以使用free命令查看swap是否启用"
+    fi
 }
 
 ##### 删除交换分区文件 #####
 ##参数: $disk_mount:交换分区挂载点
 config_swap_del(){
-	swapoff $2
-	rm -f $2
+	swapoff $1/opt/.swap
+	rm -f $1/opt/.swap
+	echo -e "\n$1/opt/.swap文件已删除！\n"
 }
 
 ##### 获取通用环境变量 #####

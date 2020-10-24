@@ -123,7 +123,8 @@ handle_website(){
 }
 
 cdg(){
-	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled disk_mount cpu_model user pass
+	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
+	disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
 	config_load softwarecenter
 
@@ -133,9 +134,12 @@ cdg(){
 	config_get_bool deploy_mysql	main deploy_mysql
 	config_get_bool	nginx_enabled	main nginx_enabled
 	config_get_bool mysql_enabled	main mysql_enabled
+	config_get_bool swap_enabled	main swap_enabled
 
 	config_get disk_mount	main disk_mount
 	config_get cpu_model	main cpu_model
+	config_get swap_size	main swap_size
+	config_get swap_path	main swap_path
 	config_get user			main user
 	config_get pass			main pass
 
@@ -196,6 +200,7 @@ cdg(){
 			del_mysql && echo "已卸载MySQL相关的软件包"
 		fi
 	fi
+	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 	
 	num=0
     for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
