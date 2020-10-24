@@ -31,13 +31,10 @@ _make_dir(){
 ##参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
 entware_set(){
-	entware_unset && echo "删除原来OPKG配置设定"
-
-	# 修补以适应外部传参
-	[ "$1" ] || { echo "未选择CPU架构！" && exit 1; }
-	[ "$2" ] && USB_PATH="$2"
-	echo "开始安装entware环境"
-	# 安装基本软件支持
+	entware_unset
+	[ "$1" ] && USB_PATH="$1"
+	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
+	echo -e "\n开始安装entware环境\n"
 	echo "安装基本软件" && install_soft "$pkglist_base"
 	filesystem_check $USB_PATH
 	Kernel_V=$(expr substr `uname -r` 1 3)
@@ -45,23 +42,23 @@ entware_set(){
 	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 
-	if [ "$1" == "mipsel" ]; then
+	if [ "$2" == "mipsel" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
-	elif [ "$1" == "mips" ]; then
+	elif [ "$2" == "mips" ]; then
 	if [ $Kernel_V == "2.6" ]; then
 		wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
 	else
 		wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
 	fi
-	elif [ "$1" == "armv7" ]; then
+	elif [ "$2" == "armv7" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$1" == "x86_64" ]; then
+	elif [ "$2" == "x86_64" ]; then
 		wget -O - http://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$1" == "x86" ]; then
+	elif [ "$2" == "x86" ]; then
 		wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
-	elif [ "$1" == "aarch64" ]; then
+	elif [ "$2" == "aarch64" ]; then
 		wget -O - http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
-	elif [ "$1" == "armv7l" ]; then
+	elif [ "$2" == "armv7l" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh | /bin/sh
 	else
 		echo "没有找到你选择的CPU架构！"
@@ -74,8 +71,7 @@ START=51
 
 ##### 获取entware安装路径 #####
 ##该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
-get_entware_path()
-{
+get_entware_path(){
 	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
 		if [ -d "$mount_point/opt/etc/nginx" ]; then
 			echo "$mount_point/opt"
@@ -94,7 +90,6 @@ stop(){
 	/opt/etc/init.d/rc.unslung stop
 	umount -lf /opt
 	rm -r /opt
-	rm -rf `get_entware_path`
 }
 
 restart(){
@@ -118,7 +113,7 @@ entware_unset(){
 	rm -rf /opt/*
 	umount -lf /opt
 	rm -r /opt
-	# rm -rf $disk_mount/opt
+	rm -rf $disk_mount/opt
 }
 
 ##### 软件包安装 #####
@@ -249,7 +244,7 @@ get_env(){
 	elif [[ -n $(whoami 2>/dev/null) ]]; then
 		username=$(whoami 2>/dev/null)
 	else
-		username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{print $1}')
+		username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1' | awk '{print $1}')
 	fi
 
 	# 获取路由器IP

@@ -148,7 +148,7 @@ cdg(){
 	fi
 
 	if [ ! -x /etc/init.d/entware ]; then
-		entware_set $cpu_model $disk_mount
+		entware_set $disk_mount $cpu_model
 		source /etc/profile
 	fi
 
