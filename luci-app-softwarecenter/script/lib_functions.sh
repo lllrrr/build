@@ -167,48 +167,6 @@ filesystem_check(){
 	fi
 }
 
-##### 通用型二元浮点运算（适用于ash） #####
-##参数: $1:被除数 $2:运算符号 $3:除数
-float_calculate(){
-	echo "$(awk 'BEGIN{print '$1$2$3'}')"
-}
-
-##### 浮点数转整形 #######
-##参数：$1：待转换的浮点数
-##说明：本转换只是单纯的去掉小数点后面的数字，不考虑四舍五入
-float_to_int(){
-	echo "$(echo $1 | cut -f 1 -d.)"
-}
-
-##### 进度条 #####
-##参数: $1:当前任务完成率（浮点）
-##说明：执行一次输出一次，外部需要套用循环来实现进度条的更新
-##      对于浮点的处理非四舍五入，而是直接去掉小数点后的所有位数，因为在shell中所存的类型其实是字符型
-progress_bar(){
-	str=""
-	cnt=0
-	integer=`float_to_int $float`
-	while [ $cnt -le $1 ]
-		do
-			str="$str#"
-			let cnt=cnt+1
-		done
-	if  [ $1 -le 20 ]; then
-		let color=41
-		let bg=31
-	elif [ $1 -le 45 ]; then
-		let color=43
-		let bg=33
-	elif [ $1 -le 75 ]; then
-		let color=44
-		let bg=34
-	else
-	let color=42
-	let bg=32
-	fi
-	printf "\033[${color};${bg}m%-s\033[0m %.2f%c\r" "$str" "$integer" "%"
-}
-
 ##### 配置交换分区文件 #####
 ##参数: $1:交换空间大小(M) $2:交换分区挂载点
 config_swap_init(){
@@ -247,7 +205,6 @@ get_env(){
 	else
 		username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1' | awk '{print $1}')
 	fi
-
 	# 获取路由器IP
 	localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
 	if [[ ! -n "$localhost" ]]; then
