@@ -160,8 +160,8 @@ filesystem_check(){
 		mount -t ext$3 $1 $2
 	}
 
-	local dev_path="`mount | grep "$1" | awk '{print $1}'`"
-	local filesystem="`mount | grep "$1" | awk '{print $5}'`"
+	local dev_path=${1/mnt/dev}
+	local filesystem="`blkid -s TYPE | grep $dev_path | cut -d'"' -f2`"
 	if [ "ext4" != $filesystem ]; then
 		disk_format_ext $dev_path $1 4
 	fi

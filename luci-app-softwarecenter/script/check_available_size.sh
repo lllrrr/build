@@ -26,4 +26,13 @@
 			i=$((i + 1))
 		done
 	;;
+	3)
+	if [[ -n `which lsscsi` ]]; then
+		lsscsi | grep disk | awk '{print $NF}'
+	elif [ -n `which mount` ]; then
+		mount | grep mnt | awk '{print $3}'
+	else
+		blkid -s PARTLABEL | cut -d: -f1
+	fi
+	;;
 	esac
