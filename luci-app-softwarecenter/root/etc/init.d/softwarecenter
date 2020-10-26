@@ -143,7 +143,6 @@ cdg(){
 	config_get user			main user
 	config_get pass			main pass
 
-	disk_mount=${disk_mount/dev/mnt}
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
@@ -153,7 +152,6 @@ cdg(){
 	fi
 
 	if [ ! -x /etc/init.d/entware ]; then
-	
 		entware_set $disk_mount $cpu_model
 		source /etc/profile
 	fi
@@ -204,21 +202,21 @@ cdg(){
 	fi
 	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 	
-	# num=0
+	num=0
     for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
-        if [ -n "`pgrep $PROC`" ]; then
-            echo "$PROC 已启动";
+        if [ -n "`pidof $PROC`" ]; then
+            echo "$PROC 启动成功";
         else
-            echo "$PROC 未启动";
+            echo "$PROC 启动失败";
             num=`expr $num + 1`
         fi 
     done
 
-    # if [[ $num -gt 0 ]]; then
-        # echo "onmp 启动失败"
-    # else
-        # echo "onmp 已启动"
-    # fi
+    if [[ $num -gt 0 ]]; then
+        echo "onmp 启动失败"
+    else
+        echo "onmp 已启动"
+    fi
 }
 
 start(){

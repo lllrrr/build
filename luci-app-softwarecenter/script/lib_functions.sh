@@ -36,7 +36,7 @@ entware_set(){
 	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
 	echo -e "\n开始安装entware环境\n"
 	echo "安装基本软件" && install_soft "$pkglist_base"
-	filesystem_check $USB_PATH
+	filesystem_check $Partition_disk
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	_make_dir "$USB_PATH/opt" "/opt"
@@ -148,6 +148,56 @@ remove_soft(){
 ##### 文件系统检查 #####
 ##参数: $1:设备挂载点
 ##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
+function system_check(){
+	# get_config "Partition_disk"
+	# echo "`date "+%Y-%m-%d %H:%M:%S"` 【定时数据】创建定时任务" >> /tmp/log/softwarecenter.log
+	Partition_disk=/dev/sdb
+	##### 磁盘格式化及重挂载(ext) #####
+	##参数: $1:设备dev路径 $2:设备挂载点 $3:磁盘ext格式版本（eg:2、3、4）
+	##该功能依赖e2fsprogs软件包
+	disk_format_ext(){
+		echo "开始调整分区为ext$3格式"、
+		umount -l $1
+		echo y | mkfs.ext$3 $1
+		mount -t ext$3 $1 $2
+	}
+
+	Hot_disk(){
+		echo 热插拔磁盘
+		op=`lsblk -S | grep ${Partition_disk##*/} | awk '{print $2}'`
+		ax=${op:0:1}; ay=${op:2:1}; az=${op:4:1}; au=${op:6:1}
+		echo "scsi remove-single-device $ax $ay $az $au" > /proc/scsi/scsi
+		echo "scsi add-single-device $ax $ay $az $au" > /proc/scsi/scsi
+	}
+
+	if [ `fdisk -l $Partition_disk | grep "^${Partition_disk}" | wc -l` -gt 0 ]; then
+		echo "磁盘$Partition_disk$没有找到分区，进行格式化并分区。"
+		parted $Partition_disk mktable gpt \
+		#分区
+		mkpart primary ext4 2048s -2048s
+		sync; sleep 2
+		#格式化
+		mkfs.ext4 ${Partition_disk}1
+		Hot_disk
+		#建立挂载点
+		mkdir -p /1
+		#修改/etc/fstab文件
+		echo  "${Partition_disk}1  /1  ext4  defaults  0 0" >>/etc/fstab
+		#挂载
+		mount -a
+	else
+		echo "磁盘$Partition_disk分区。"
+		local filesystem="`blkid -s TYPE | grep $Partition_disk | cut -d'"' -f2`"
+		if [ "ext4" != $filesystem ]; then
+			disk_format_ext $Partition_disk ${Partition_disk/dev/mnt} 4
+		fi
+	fi
+	
+}
+
+##### 文件系统检查 #####
+##参数: $1:设备挂载点
+##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
 filesystem_check(){
 
 	##### 磁盘格式化及重挂载(ext) #####
@@ -160,11 +210,37 @@ filesystem_check(){
 		mount -t ext$3 $1 $2
 	}
 
-	local dev_path=${1/mnt/dev}
-	local filesystem="`blkid -s TYPE | grep $dev_path | cut -d'"' -f2`"
-	if [ "ext4" != $filesystem ]; then
-		disk_format_ext $dev_path $1 4
+	Hot_disk(){
+		# 热插拔磁盘
+		op=`lsblk -S | grep ${1##*/} | awk '{print $2}'`
+		ax=${op:0:1}; ay=${op:2:1}; az=${op:4:1}; au=${op:6:1}
+		echo "scsi remove-single-device $ax $ay $az $au" > /proc/scsi/scsi
+		echo "scsi add-single-device $ax $ay $az $au" > /proc/scsi/scsi
+	}
+
+	if [ `fdisk -l $1 | grep "^${1}" | wc -l` -gt 0 ]; then
+		echo "磁盘$1$没有找到分区，进行格式化并分区。"
+		#建立分区表
+		parted $1 mktable gpt \
+		#分区
+		mkpart primary ext4 2048s -2048s
+		sync; sleep 2
+		#格式化
+		mkfs.ext4 ${1}1
+		Hot_disk
+		#建立挂载点
+		mkdir -p /1
+		#修改/etc/fstab文件
+		echo  "${1}1  /1  ext4  defaults  0 0" >>/etc/fstab
+		#挂载
+		mount -a
+	else
+		local filesystem="`blkid -s TYPE | grep $1 | cut -d'"' -f2`"
+		if [ "ext4" != $filesystem ]; then
+			disk_format_ext $1 ${1/dev/mnt} 4
+		fi
 	fi
+	
 }
 
 ##### 配置交换分区文件 #####
@@ -220,3 +296,6 @@ check_available_size(){
 	[ $available_size ] && echo "$available_size"
 }
 
+if [ "$1" ] ;then
+	[ $1 == "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
+fi

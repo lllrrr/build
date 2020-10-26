@@ -24,8 +24,8 @@ cpu_model:value(model)
 cpu_model:depends("deploy_entware",1)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("当前可用磁盘：<br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
-for list_disk_mount in luci.util.execi("/usr/bin/softwarecenter/check_available_size.sh 3") do
+p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到磁盘先用磁盘分区分区和挂载)<br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
+for list_disk_mount in luci.util.execi("lsblk -s | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
 p:depends("deploy_entware",1)
@@ -33,7 +33,23 @@ p:depends("deploy_entware",1)
 p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>此安装过程可能需要大量时间，可以在日志中查看到安装的过程"))
 p:depends("deploy_entware",1)
 
-s:tab("swap",translate("swap交换分区设置"))
+s:tab("Partition", translate("磁盘分区"))
+-- swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("空区的磁盘简单分区和格式化"))
+p = s:taboption("Partition",ListValue,"Partition_disk",translate("检测到磁盘"),translate(" "))
+for list_disk_mount in luci.util.execi("/usr/bin/softwarecenter/check_available_size.sh 3 | grep -v sda") do
+	p:value(list_disk_mount)
+end
+p = s:taboption("Partition", Button,"_add",translate("开始分区"))
+-- p.inputtitle=translate("开始分区")
+p.inputstyle = "apply"
+function p.write(self, section)
+luci.sys.call("cbi.apply")
+	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
+end
+-- p:depends("Partition_enabled",1)
+-- swap_enable:depends("entware_enable",1)
+
+s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("使用小内存时，把磁盘部分空间虚拟成内存使用"))
 -- p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点，默认可选是opt安装的所在盘"))
 -- p:value(luci.sys.exec("uci get softwarecenter.main.disk_mount"))
