@@ -118,30 +118,19 @@ handle_website(){
 		fi
 	fi
 
-
 	website_config_list="$website_config_list $website_name"
 }
 
+# 读取设置文件
+get_config(){
+	while [[ "$*" != "" ]]; do
+		eval ${1}='`uci get softwarecenter.main.$1`' 2>/dev/null
+		shift
+	done
+}
+
 cdg(){
-	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
-	disk_mount cpu_model user pass swap_enabled swap_size swap_path
-
-	config_load softwarecenter
-
-	config_get_bool deploy_entware 	main deploy_entware
-	config_get_bool entware_enable	main entware_enable
-	config_get_bool deploy_nginx	main deploy_nginx
-	config_get_bool deploy_mysql	main deploy_mysql
-	config_get_bool	nginx_enabled	main nginx_enabled
-	config_get_bool mysql_enabled	main mysql_enabled
-	config_get_bool swap_enabled	main swap_enabled
-
-	config_get disk_mount	main disk_mount
-	config_get cpu_model	main cpu_model
-	config_get swap_size	main swap_size
-	config_get swap_path	main swap_path
-	config_get user			main user
-	config_get pass			main pass
+	get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_disk"
 
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
@@ -201,22 +190,14 @@ cdg(){
 		fi
 	fi
 	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
-	
-	num=0
-    for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
+
+    for PROC in mysqld nginx php-fpm; do 
         if [ -n "`pidof $PROC`" ]; then
             echo "$PROC 启动成功";
         else
             echo "$PROC 启动失败";
-            num=`expr $num + 1`
         fi 
     done
-
-    if [[ $num -gt 0 ]]; then
-        echo "onmp 启动失败"
-    else
-        echo "onmp 已启动"
-    fi
 }
 
 start(){

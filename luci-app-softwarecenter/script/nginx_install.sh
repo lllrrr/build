@@ -63,7 +63,7 @@ http {
 }
 EOF
 
-	sed -e "s/theOne/$username/g" -i /opt/etc/nginx/nginx.conf
+	sed -i "s/theOne/$username/g" /opt/etc/nginx/nginx.conf
 
 	# 特定程序的nginx配置
 	nginx_special_conf
@@ -308,7 +308,7 @@ opcache.revalidate_freq=60
 opcache.fast_shutdown=1
 mysqli.default_socket=/opt/var/run/mysqld.sock
 pdo_mysql.default_socket=/opt/var/run/mysqld.sock
-	PHPINI
+PHPINI
 
 	cat >> "/opt/etc/php7-fpm.d/www.conf" <<-\PHPFPM
 env[HOSTNAME] = $HOSTNAME
@@ -316,7 +316,7 @@ env[PATH] = /opt/bin:/usr/local/bin:/usr/bin:/bin
 env[TMP] = /opt/tmp
 env[TMPDIR] = /opt/tmp
 env[TEMP] = /opt/tmp
-	PHPFPM
+PHPFPM
 }
 
 ############## 卸载PHP #############

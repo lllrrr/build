@@ -24,7 +24,7 @@ init_mysql(){
 	install_soft "$dblist"
 	# MySQL设置
 	_make_dir "/opt/etc/mysql"
-	cat > "/opt/etc/mysql/my.cnf" <<-EOF
+	cat > "/opt/etc/mysql/my.cnf" <<-\MMM
 [client-server]
 port               = 3306
 socket             = /opt/var/run/mysqld.sock
@@ -61,9 +61,9 @@ key_buffer_size    = 24M
 
 [mysqlhotcopy]
 interactive-timeout
-EOF
+MMM
 
-	sed -e "s/theOne/$username/g" -i /opt/etc/mysql/my.cnf
+	sed -i "s/theOne/$username/g" /opt/etc/mysql/my.cnf
 	chmod 644 /opt/etc/mysql/my.cnf
 	_make_dir "/opt/var/mysql"
 
@@ -93,8 +93,8 @@ del_mysql(){
 	sleep 10
 
 	# 卸载相关的软件包
-	# remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
-	remove_soft "$dblist"
+	remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
+	# remove_soft "$dblist"
 
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql
