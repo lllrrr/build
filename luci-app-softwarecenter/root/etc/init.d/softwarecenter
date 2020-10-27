@@ -122,16 +122,35 @@ handle_website(){
 }
 
 # 读取设置文件
-get_config(){
-	while [[ "$*" != "" ]]; do
-		eval ${1}='`uci get softwarecenter.main.$1`' 2>/dev/null
-		shift
-	done
-}
+# get_config(){
+	# while [[ "$*" != "" ]]; do
+		# eval ${1}='`uci get softwarecenter.main.$1`' 2>/dev/null
+		# shift
+	# done
+# }
 
 cdg(){
-	get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "swap_path" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_enabled" "Partition_disk"
+	# get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "swap_path" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_enabled" "Partition_disk"
+	
+	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
+	disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
+	config_load softwarecenter
+
+	config_get_bool deploy_entware 	main deploy_entware
+	config_get_bool entware_enable	main entware_enable
+	config_get_bool deploy_nginx	main deploy_nginx
+	config_get_bool deploy_mysql	main deploy_mysql
+	config_get_bool	nginx_enabled	main nginx_enabled
+	config_get_bool mysql_enabled	main mysql_enabled
+	config_get_bool swap_enabled	main swap_enabled
+
+	config_get disk_mount	main disk_mount
+	config_get cpu_model	main cpu_model
+	config_get swap_size	main swap_size
+	config_get swap_path	main swap_path
+	config_get user			main user
+	config_get pass			main pass
 	### entware ###
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
