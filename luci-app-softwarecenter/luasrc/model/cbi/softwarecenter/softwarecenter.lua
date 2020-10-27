@@ -48,7 +48,7 @@ p:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
 swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当插入的盘没有分区这工具可简单的分区挂载"))
-p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("默许只分一个区，默认不显示sda盘"))
+p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("默许只分一个区，默认不显示sda盘符"))
 for i, d in ipairs(devices) do
 	p:value(d, size[d] and "%s ( %s GB )" % {d, size[d]})
 end
@@ -63,6 +63,11 @@ p:depends("Partition_enabled",1)
 
 s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
+p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点，默认可选是opt安装的所在盘"))
+for i, d in ipairs(devices) do
+	p:value(d, size[d] and "%s ( %s GB )" % {d, size[d]})
+end
+p:depends("swap_enabled",1)
 p = s:taboption("swap",Value,"swap_size",translate("空间大小"),translate("交换空间大小(M)，默认512M"))
 p.default='512'
 p:depends("swap_enabled",1)

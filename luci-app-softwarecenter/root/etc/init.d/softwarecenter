@@ -130,7 +130,7 @@ get_config(){
 }
 
 cdg(){
-	get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_disk"
+	get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "swap_path" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_enabled" "Partition_disk"
 
 	### entware ###
 	if [ -z "$deploy_entware" ]; then

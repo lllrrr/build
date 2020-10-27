@@ -32,11 +32,11 @@ _make_dir(){
 ##说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
-	# filesystem_check system_check
 	[ "$1" ] && USB_PATH="$1"
 	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
 	echo -e "\n开始安装entware环境\n"
 	echo "安装基本软件" && install_soft "$pkglist_base"
+	system_check $USB_PATH
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	_make_dir "$USB_PATH/opt" "/opt"
@@ -149,7 +149,8 @@ remove_soft(){
 ##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
 function system_check(){
 	local Partition_disk=`uci get softwarecenter.main.Partition_disk`
-
+	echo $1
+	[ $1 ] && Partition_disk=$1
 	Hot_disk(){
 		echo "热插拔磁盘"
 		op=`lsblk -S | grep ${Partition_disk##*/} | awk '{print $2}'`
@@ -158,7 +159,7 @@ function system_check(){
 		echo "scsi add-single-device $ax $ay $az $au" > /proc/scsi/scsi
 	}
 
-	if [ -n "$(lsblk -p | grep ${Partition_disk}1)" ]; then
+	if [ `fdisk -l $Partition_disk | grep "^${Partition_disk}" | wc -l` -gt 0 ]; then
 		filesystem="`blkid -s TYPE | grep $Partition_disk | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
 			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk重新格式化ext4。"
@@ -168,6 +169,7 @@ function system_check(){
 		fi
 	else
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行格式化并分区。"
+		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
 		sync; sleep 2
@@ -201,9 +203,11 @@ status=$(cat /proc/swaps | awk 'NR==2')
 ##### 删除交换分区文件 #####
 ##参数: $disk_mount:交换分区挂载点
 config_swap_del(){
+	[ -e /opt/.swap ] && {
 	swapoff $1/opt/.swap
 	rm -f $1/opt/.swap
 	echo -e "\n$1/opt/.swap文件已删除！\n"
+	}
 }
 
 ##### 获取通用环境变量 #####
