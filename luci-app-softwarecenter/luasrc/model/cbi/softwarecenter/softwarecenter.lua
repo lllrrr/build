@@ -8,18 +8,6 @@ local fs   = require "nixio.fs"
 local util = require "nixio.util"
 local p = require("luci.model.uci").cursor()
 
-local devices = {}
-util.consume((fs.glob("/dev/sd[b-e]")), devices)
-util.consume((fs.glob("/dev/hd[a-e]")), devices)
-util.consume((fs.glob("/dev/scd[a-e]")), devices)
-util.consume((fs.glob("/dev/mmc[a-e]")), devices)
-
-local size = {}
-for i, dev in ipairs(devices) do
-	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
-	size[dev] = s and math.floor(s / 2048 / 1024)
-end
-
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m = Map("softwarecenter",translate("软件中心"),translate("软件中心负责Entware，ONMP的部署和软件的自动化统一配置！<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
 --各个软件的状态
@@ -47,13 +35,20 @@ p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translat
 p:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
-swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当插入的盘没有分区这工具可简单的分区挂载"))
+swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
 p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("默许只分一个区，默认不显示sda盘符"))
-for i, d in ipairs(devices) do
-	p:value(d, size[d] and "%s ( %s GB )" % {d, size[d]})
+local o = util.consume((fs.glob("/dev/sd[b-f]")), o)
+local size = {}
+for i, dev in ipairs(o) do
+	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
+	size[dev] = s and math.floor(s / 2048 / 1024)
+	t="%s"%{nixio.fs.readfile("/sys/class/block/%s/device/model"%nixio.fs.basename(dev))}
+end
+for i, a in ipairs(o) do
+	p:value(a, size[a] and "%s ( %s GB ) %s" % {a,size[a],t})
 end
 p:depends("Partition_enabled",1)
-p = s:taboption("Partition", Button,"_add",translate("开始分区"))
+p = s:taboption("Partition", Button,"_add",translate("开始分区"),translate("如使用要先开启磁盘分区，再保存应用后点击开始分区"))
 p.inputstyle = "apply"
 function p.write(self, section)
 luci.sys.call("cbi.apply")
@@ -63,8 +58,15 @@ p:depends("Partition_enabled",1)
 
 s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
-p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点，默认可选是opt安装的所在盘"))
-for i, d in ipairs(devices) do
+p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点"))
+p:value("", translate("-- 不选择是安装在opt所在盘 --"))
+local f = util.consume((fs.glob("/mnt/sd[b-g]*")), f)
+local size = {}
+for i, dev in ipairs(f) do
+	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
+	size[dev] = s and math.floor(s / 2048 / 1024)
+end
+for i, d in ipairs(f) do
 	p:value(d, size[d] and "%s ( %s GB )" % {d, size[d]})
 end
 p:depends("swap_enabled",1)
