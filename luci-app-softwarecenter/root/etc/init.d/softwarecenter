@@ -55,6 +55,37 @@ clean_vhost_config(){
 	done
 }
 
+onmp_restart()
+{
+	/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm stop > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx stop > /dev/null 2>&1
+	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
+	sleep 3
+	/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm start > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx start > /dev/null 2>&1
+	sleep 3
+	num=0
+	for PROC in 'nginx' 'php-fpm' 'mysqld'; do
+		if [ -n "`pidof $PROC`" ]; then
+			echo $PROC "启动成功";
+		else
+			echo $PROC "启动失败";
+			num=`expr $num + 1`
+		fi
+	done
+
+	if [[ $num -gt 0 ]]; then
+		echo "onmp启动失败"
+		logger -t "【ONMP】" "启动失败"
+	else
+		echo "onmp已启动"
+		logger -t "【ONMP】" "已启动"
+		vhost_list
+	fi
+}
+
 ####### 网站迭代处理 ########
 ##本函数迭代的配置网站（处理逻辑也许可以更好的优化？）
 handle_website(){
@@ -131,7 +162,7 @@ handle_website(){
 
 cdg(){
 	# get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "swap_path" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_enabled" "Partition_disk"
-	
+
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
 	disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
@@ -210,13 +241,14 @@ cdg(){
 	fi
 	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
-    for PROC in mysqld nginx php-fpm; do 
-        if [ -n "`pidof $PROC`" ]; then
-            echo "$PROC 启动成功";
-        else
-            echo "$PROC 启动失败";
-        fi 
-    done
+	for PROC in mysqld nginx php-fpm; do
+		if [ -n "`pidof $PROC`" ]; then
+			echo "$PROC 启动成功";
+		else
+			echo "$PROC 启动失败";
+		fi
+	done
+	# onmp_restart
 }
 
 start(){

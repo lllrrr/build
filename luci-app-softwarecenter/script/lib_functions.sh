@@ -34,9 +34,9 @@ entware_set(){
 	entware_unset
 	[ "$1" ] && USB_PATH="$1"
 	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
+	system_check $USB_PATH
 	echo -e "\n开始安装entware环境\n"
 	echo "安装基本软件" && install_soft "$pkglist_base"
-	system_check $USB_PATH
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	_make_dir "$USB_PATH/opt" "/opt"
@@ -126,7 +126,7 @@ install_soft(){
 		opkg install $ipk > /dev/null 2>&1
 		status
 		if [ $? != 0 ]; then
-			echo -e "正在强制安装 $ipk\c" 
+			echo -e "正在强制安装 $ipk\c"
 			opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
 			status
 		fi
@@ -148,36 +148,28 @@ remove_soft(){
 ##### 文件系统检查 #####
 ##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
 function system_check(){
-	local Partition_disk=`uci get softwarecenter.main.Partition_disk`
-	echo $1
-	[ $1 ] && Partition_disk=$1
-	Hot_disk(){
-		echo "热插拔磁盘"
-		op=`lsblk -S | grep ${Partition_disk##*/} | awk '{print $2}'`
-		ax=${op:0:1}; ay=${op:2:1}; az=${op:4:1}; au=${op:6:1}
-		echo "scsi remove-single-device $ax $ay $az $au" > /proc/scsi/scsi
-		echo "scsi add-single-device $ax $ay $az $au" > /proc/scsi/scsi
-	}
+	[ $1 ] && Partition_disk=$1 || Partition_disk=`uci get softwarecenter.main.Partition_disk`
 
-	if [ `fdisk -l $Partition_disk | grep "^${Partition_disk}" | wc -l` -gt 0 ]; then
+	if [ -n "`fdisk -l $Partition_disk | grep "^${Partition_disk}"`" ]; then
+		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk已经分区"
 		filesystem="`blkid -s TYPE | grep $Partition_disk | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
-			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk重新格式化ext4。"
+			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk/dev/mnt}1
 			mkfs.ext4 ${Partition_disk}1
 			mount ${Partition_disk}1 ${Partition_disk/dev/mnt}1
 		fi
 	else
-		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行格式化并分区。"
-		parted -s ${Partition_disk} mklabel msdos
+		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
+		# parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
 		sync; sleep 2
 		mkfs.ext4 ${Partition_disk}1
-		[ -d /${Partition_disk##*/} ] || mkdir /${Partition_disk##*/}
+		_make_dir /${Partition_disk##*/}
 		mount ${Partition_disk}1 ${Partition_disk/dev/mnt}1
 	fi
-	
+
 }
 
 ##### 配置交换分区文件 #####
@@ -185,7 +177,7 @@ function system_check(){
 config_swap_init(){
 status=$(cat /proc/swaps | awk 'NR==2')
     if [[ -n "$status" ]]; then
-        echo "Swap已启用"
+        echo "Swap 已经启用"
     else
         if [[ ! -e "/opt/.swap" ]]; then
             echo "正在生成swap文件，请耐心等待..."
@@ -196,7 +188,7 @@ status=$(cat /proc/swaps | awk 'NR==2')
         fi
         # 启用交换分区
         swapon $2/opt/.swap
-        echo "现在你可以使用free命令查看swap是否启用"
+        echo "现在你可以使用 free 命令查看swap是否启用"
     fi
 }
 

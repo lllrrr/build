@@ -20,12 +20,13 @@ s.anonymous = true
 s:tab("entware",translate("Entware设置"))
 p = s:taboption("entware",Flag,"deploy_entware",translate("启用"),translate("开始部署Entware环境"))
 local model = luci.sys.exec("uname -m 2>/dev/null")
-local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' ')
+local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '.." (如有错误自定义)")
+cpu_model:value("", translate("-- 可选是系统检测到CPU架构 --"))
 cpu_model:value(model)
 cpu_model:depends("deploy_entware",1)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到磁盘先用磁盘分区)<br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
+p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：<code>(如没检测到加入的磁盘先用磁盘分区)</code><br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
 for list_disk_mount in luci.util.execi("lsblk -s | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
@@ -35,9 +36,9 @@ p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translat
 p:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
-swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
-p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("默许只分一个区，默认不显示sda盘符"))
-local o = util.consume((fs.glob("/dev/sd[b-f]")), o)
+-- swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
+p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载，默认不显示sda盘符"))
+local o = util.consume((fs.glob("/dev/sd[b-g]")), o)
 local size = {}
 for i, dev in ipairs(o) do
 	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
@@ -47,14 +48,14 @@ end
 for i, a in ipairs(o) do
 	p:value(a, size[a] and "%s ( %s GB ) %s" % {a,size[a],t})
 end
-p:depends("Partition_enabled",1)
-p = s:taboption("Partition", Button,"_add",translate("开始分区"),translate("如使用要先开启磁盘分区，再保存应用后点击开始分区"))
+-- p:depends("Partition_enabled",1)
+p = s:taboption("Partition", Button,"_add",translate("开始分区"),translate("默认只分一个区并格式化EXT4文件系统\n<br><b style=\"color:red\">警告：分区前确认选择的磁盘是否正确</b>"))
 p.inputstyle = "apply"
 function p.write(self, section)
 luci.sys.call("cbi.apply")
 	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
 end
-p:depends("Partition_enabled",1)
+-- p:depends("Partition_enabled",1)
 
 s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
@@ -62,9 +63,9 @@ p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("�
 p:value("", translate("-- 不选择是安装在opt所在盘 --"))
 local f = util.consume((fs.glob("/mnt/sd[b-g]*")), f)
 local size = {}
-for i, dev in ipairs(f) do
-	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
-	size[dev] = s and math.floor(s / 2048 / 1024)
+for i, q in ipairs(f) do
+	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % q:sub(6))))
+	size[q] = s and math.floor(s / 2048 / 1024)
 end
 for i, d in ipairs(f) do
 	p:value(d, size[d] and "%s ( %s GB )" % {d, size[d]})
