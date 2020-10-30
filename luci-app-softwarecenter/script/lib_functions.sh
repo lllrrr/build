@@ -144,13 +144,11 @@ remove_soft(){
 
 }
 
-##### 文件系统检查 #####
-##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
+##### 分区挂载 #####
 function system_check(){
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
 if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
-		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk是ext4"
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
 			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
@@ -158,8 +156,10 @@ if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
 			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
+		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk已ext4"
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
+
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
 		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
