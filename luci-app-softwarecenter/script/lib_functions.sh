@@ -113,7 +113,6 @@ entware_unset(){
 	rm -rf /opt/*
 	umount -lf /opt
 	rm -r /opt
-	rm -rf $disk_mount/opt
 }
 
 ##### 软件包安装 #####
@@ -148,25 +147,26 @@ remove_soft(){
 ##### 文件系统检查 #####
 ##说明：检查文件系统是否为ext4格式，不通过则转换为ext4格式
 function system_check(){
-	[ $1 ] && Partition_disk=$1 || Partition_disk=`uci get softwarecenter.main.Partition_disk`
+	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
-	if [ -n "`fdisk -l $Partition_disk | grep "^${Partition_disk}"`" ]; then
-		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk已经分区"
-		filesystem="`blkid -s TYPE | grep $Partition_disk | cut -d'"' -f2`"
+if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
+		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk是ext4"
+		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
 			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
-			umount -l ${Partition_disk/dev/mnt}1
-			mkfs.ext4 ${Partition_disk}1
-			mount ${Partition_disk}1 ${Partition_disk/dev/mnt}1
+			umount -l ${Partition_disk}
+			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
+			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
 	else
+		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
-		# parted -s ${Partition_disk} mklabel msdos
+		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
 		sync; sleep 2
-		mkfs.ext4 ${Partition_disk}1
-		_make_dir /${Partition_disk##*/}
+		echo y | mkfs.ext4 ${Partition_disk}1
+		_make_dir ${Partition_disk/dev/mnt}1
 		mount ${Partition_disk}1 ${Partition_disk/dev/mnt}1
 	fi
 
@@ -179,7 +179,7 @@ status=$(cat /proc/swaps | awk 'NR==2')
     if [[ -n "$status" ]]; then
         echo "Swap 已经启用"
     else
-        if [[ ! -e "/opt/.swap" ]]; then
+        if [ ! -e "$1/opt/.swap" ]; then
             echo "正在生成swap文件，请耐心等待..."
             dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
             # 设置交换文件
@@ -195,7 +195,7 @@ status=$(cat /proc/swaps | awk 'NR==2')
 ##### 删除交换分区文件 #####
 ##参数: $disk_mount:交换分区挂载点
 config_swap_del(){
-	[ -e /opt/.swap ] && {
+	[ -e $1/opt/.swap ] && {
 	swapoff $1/opt/.swap
 	rm -f $1/opt/.swap
 	echo -e "\n$1/opt/.swap文件已删除！\n"
