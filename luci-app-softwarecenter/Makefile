@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-softwarecenter
-LUCI_DEPENDS:=+sfdisk +cfdisk
+LUCI_DEPENDS:=
 PKG_VERSION=1.0
 PKG_RELEASE:=2
 
@@ -18,6 +18,7 @@ define Package/$(PKG_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
+  DEPENDS:=+sfdisk +cfdisk +parted +blkid +e2fsprogs
   TITLE:=LuCI Support for Software Center
   PKGARCH:=all
 endef
