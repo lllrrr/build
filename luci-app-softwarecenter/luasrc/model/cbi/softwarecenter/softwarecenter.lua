@@ -26,8 +26,8 @@ cpu_model:value(model)
 cpu_model:depends("deploy_entware",1)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：<code>(如没检测到加入的磁盘先用磁盘分区)</code><br><b style=\"color:green\">")..disk_size..("</b><br>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
-for list_disk_mount in luci.util.execi("lsblk -s | grep mnt | awk '{print $7}'") do
+p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到加入的磁盘先用<code>磁盘分区</code>)<br><b style=\"color:green\">")..disk_size..("</b>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
+for list_disk_mount in luci.util.execi("lsblk | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
 p:depends("deploy_entware",1)
@@ -36,20 +36,29 @@ p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translat
 p:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
--- swap_enable = s:taboption("Partition",Flag,"Partition_enabled",translate("Enabled"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
-p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载，默认不显示sda盘符"))
-local o = util.consume((fs.glob("/dev/sd[b-g]")), o)
+p = s:taboption("Partition", Button,"_rescan",translate("扫描磁盘"),translate("重新扫描加入后没有显示的磁盘"))
+p.inputtitle = translate("开始扫描")
+p.inputstyle = "reload"
+p.forcewrite = true
+function p.write(self, section, value)
+  luci.util.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
+  luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter"))
+end
+
+p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
+local o = util.consume((fs.glob("/dev/sd[a-g]")), o)
 local size = {}
-for i, dev in ipairs(o) do
-	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % dev:sub(6))))
-	size[dev] = s and math.floor(s / 2048 / 1024)
-	t="%s"%{nixio.fs.readfile("/sys/class/block/%s/device/model"%nixio.fs.basename(dev))}
+for i, l in ipairs(o) do
+	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % l:sub(6))))
+	size[l] = s and math.floor(s / 2048 / 1024)
+	t="%s"%{nixio.fs.readfile("/sys/class/block/%s/device/model"%nixio.fs.basename(l))}
 end
 for i, a in ipairs(o) do
 	p:value(a, size[a] and "%s ( %s GB ) %s" % {a,size[a],t})
 end
--- p:depends("Partition_enabled",1)
-p = s:taboption("Partition", Button,"_add",translate("开始分区"),translate("默认只分一个区并格式化EXT4文件系统\n<br><b style=\"color:red\">警告：分区前确认选择的磁盘是否正确</b>"))
+
+p = s:taboption("Partition", Button,"_add",translate(" "),translate("默认只分一个区，并格式化EXT4文件系统。如已挂载要先缷载\n<br><b style=\"color:red\">注意：分区前确认选择的磁盘没有重要数据，分区后数据不可恢复！</b>"))
+p.inputtitle = translate("开始分区")
 p.inputstyle = "apply"
 function p.write(self, section)
 luci.sys.call("cbi.apply")
@@ -61,7 +70,7 @@ s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
 p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点"))
 p:value("", translate("-- 不选择是安装在opt所在盘 --"))
-local f = util.consume((fs.glob("/mnt/sd[b-g]*")), f)
+local f = util.consume((fs.glob("/mnt/sd[a-g]*")), f)
 local size = {}
 for i, q in ipairs(f) do
 	local s = tonumber((fs.readfile("/sys/class/block/%s/size" % q:sub(6))))
@@ -96,7 +105,6 @@ deploy_mysql:depends("entware_enable",1)
 
 website_section = m:section(TypedSection,"website",translate("网站管理"),translate("这里先添加名称确认后再选择要安装的应用软件"))
 website_section.addremove = true
-
 s:tab("website",translate("网站管理"))
 website_enabled = website_section:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器正常安装并且已运行！<br>某些还网站需要MySQL数据库服务器的支持"))
 p = website_section:option(Flag,"autodeploy_enable",translate("启用自动部署"))
