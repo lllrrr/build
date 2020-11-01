@@ -8,15 +8,13 @@ module("luci.controller.softwarecenter",package.seeall)
 
 function index()
 	if not nixio.fs.access("/etc/config/softwarecenter")then return end
-	page = entry({"admin", "services", "softwarecenter"},firstchild(), _("Software Center"), 30)
-	page.i18n="softwarecenter"
-	page.dependent = true
-	entry({"admin","services","softwarecenter", "general"},cbi("softwarecenter/softwarecenter"),_("Configuration"), 40).leaf = true
-	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("Log"), 99).leaf = true
+	entry({"admin", "services", "softwarecenter"},alias("admin", "services", "softwarecenter","softwarecenter"), _("软件中心"), 30).dependent = true
+	entry({"admin","services","softwarecenter", "softwarecenter"},cbi("softwarecenter/softwarecenter"),_("常用配置"), 40).leaf = true
+	entry({"admin","services","softwarecenter", "website"},cbi("softwarecenter/website"),_("网站管理"), 50).leaf = true
+	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("安装日志"), 99).leaf = true
 	entry({"admin", "services", "softwarecenter", "get_log"}, call("get_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "clear_log"}, call("clear_log")).leaf = true
 	entry({"admin","services","softwarecenter","status"}, call("connection_status")).leaf = true
-
 end
 
 function get_log()
