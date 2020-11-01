@@ -1,8 +1,5 @@
---[[
-Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-
-This is free software, licensed under the GNU General Public License v3.
-]]--
+-- Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
+-- This is free software, licensed under the GNU General Public License v3.
 
 local fs   = require "nixio.fs"
 local util = require "nixio.util"
@@ -64,7 +61,6 @@ function p.write(self, section)
 luci.sys.call("cbi.apply")
 	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
 end
--- p:depends("Partition_enabled",1)
 
 s:tab("swap", translate("swap交换分区设置"))
 swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
@@ -103,33 +99,4 @@ p.password=true
 p:depends("mysql_enabled",1)
 deploy_mysql:depends("entware_enable",1)
 
--- website_section = m:section(TypedSection,"website",translate("网站管理"),translate("这里先添加名称确认后再选择要安装的应用软件"))
--- website_section.addremove = true
--- s:tab("website",translate("网站管理"))
--- website_enabled = website_section:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器正常安装并且已运行！<br>某些还网站需要MySQL数据库服务器的支持"))
--- p = website_section:option(Flag,"autodeploy_enable",translate("启用自动部署"))
--- p:depends("customdeploy_enabled",0)
--- website_select = website_section:option(ListValue,"website_select",translate("website"),translate("请选择你需要部署的网站"))
--- website_select:value("0","tz（雅黑PHP探针）")
--- website_select:value("1","phpMyAdmin（数据库管理工具）")
--- website_select:value("2","WordPress（使用最广泛的CMS）")
--- website_select:value("3","Owncloud（经典的私有云）")
--- website_select:value("4","Nextcloud（Owncloud团队的新作，美观强大的个人云盘）")
--- website_select:value("5","h5ai（优秀的文件目录）")
--- website_select:value("6","Lychee（一个很好看，易于使用的Web相册）")
--- website_select:value("7","Kodexplorer（可道云aka芒果云在线文档管理器）")
--- website_select:value("8","Typecho (流畅的轻量级开源博客程序)")
--- website_select:value("9","Z-Blog (体积小，速度快的PHP博客程序)")
--- website_select:value("10","DzzOffice (开源办公平台)")
--- website_select:depends("autodeploy_enable",1)
--- redis_enabled = website_section:option(Flag,"redis_enabled",translate("启用Redis"),translate("只有Owncloud和Nextcloud才可以使用。<br>需要先在web界面配置完成后，才能使用开启Redis"))
--- redis_enabled:depends("website_select","3")
--- redis_enabled:depends("website_select","4")
--- customdeploy_enabled = website_section:option(Flag,"customdeploy_enabled",translate("启用自定义部署"))
--- customdeploy_enabled:depends("autodeploy_enable",0)
--- website_dir = website_section:option(Value,"website_dir",translate("网站目录"),translate("该目录自动创建在/opt/wwwroot/下，只需输入目录名"))
--- website_dir:depends("customdeploy_enabled",1)
--- port = website_section:option(Value,"port",translate("设定访问端口"),translate("自定义端口不能重复前面已使用过的端口<br>(自动获取)只能在自动部署脚本已定义的端口"))
--- port:value("",translate("自动获取"))
--- luci.http.redirect(luci.dispatcher.build_url("admin", "services", "softwarecenter" , "log"))
 return m
