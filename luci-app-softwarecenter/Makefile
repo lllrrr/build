@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
-  DEPENDS:=+sfdisk +cfdisk +parted +blkid +e2fsprogs
+  DEPENDS:=+parted +blkid +e2fsprogs
   TITLE:=LuCI Support for Software Center
   PKGARCH:=all
 endef
