@@ -19,7 +19,7 @@ if [ "1" == "$1" ]; then
 		for conf in /opt/etc/nginx/vhost/*; do
 			name=`echo $conf | awk -F"[/ .]" '{print $(NF-1)}'`
 			port=`grep listen $conf | awk '{print $2}' | sed 's/;//'`
-			echo -n "$localhost:$port $name "
+			echo -n "$name $localhost:$port "
 		done
 	fi
 else 

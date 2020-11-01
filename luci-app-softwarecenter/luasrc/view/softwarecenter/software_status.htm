@@ -1,9 +1,9 @@
 <fieldset class="cbi-section">
-	<legend><%:Running Status%></legend>
+	<legend><%:运行状态%></legend>
 	<table width="100%" cellspacing="10" id="_xlnetacc_status_table">
-		<tr><td id="nginx_run_state_head" width="33%"><%:Nginx Running Status%></td><td id="nginx_run_state"><em><%:Collecting data...%></em></td></tr>
-		<tr><td id="mysql_run_state_head" width="33%"><%:MySQL Running Status%></td><td id="mysql_run_state"><em><%:Collecting data...%></em></td></tr>
-		<tr><td id="php_run_state_head" width="33%"><%:PHP7 Running Status%></td><td id="php_run_state"><em><%:Collecting data...%></em></td></tr>
+		<tr><td id="nginx_run_state_head" width="33%"><%:Nginx服务器运行状态%></td><td id="nginx_run_state"><em><%:获取数据中...%></em></td></tr>
+		<tr><td id="mysql_run_state_head" width="33%"><%:MySQL服务器运行状态%></td><td id="mysql_run_state"><em><%:获取数据中...%></em></td></tr>
+		<tr><td id="php_run_state_head" width="33%"><%:PHP7解析器运行状态%></td><td id="php_run_state"><em><%:获取数据中...%></em></td></tr>
 	</table>
 </fieldset>
 
@@ -18,7 +18,7 @@
 	XHR.poll(5, '<%=luci.dispatcher.build_url("admin", "services", "softwarecenter", "status")%>', null, function(x, status) {
 		if ( x && x.status == 200 ) {
 			if(status.nginx_installed){
-				nginx_state.innerHTML = status.nginx_state ? '<em><b><font color=green><%:RUNNING%></font></b></em>' : '<em><b><font color=red><%:NOT RUNNING%></font></b></em>';
+				nginx_state.innerHTML = status.nginx_state ? '<em><b><font color=green><%:运行中%></font></b></em>' : '<em><b><font color=red><%:没有运行%></font></b></em>';
 				nginx_state_head.style.display = 'table-cell';
 				nginx_state.style.display = 'table-cell';
 				}
@@ -27,7 +27,7 @@
 				nginx_state.style.display = 'none';
 			}
 			if(status.mysql_installed){
-				mysql_state.innerHTML = status.mysql_state ? '<em><b><font color=green><%:RUNNING%></font></b></em>' : '<em><b><font color=red><%:NOT RUNNING%></font></b></em>';
+				mysql_state.innerHTML = status.mysql_state ? '<em><b><font color=green><%:运行中%></font></b></em>' : '<em><b><font color=red><%:没有运行%></font></b></em>';
 				mysql_state_head.style.display = 'table-cell';
 				mysql_state.style.display = 'table-cell';
 				}
@@ -36,7 +36,7 @@
 				mysql_state.style.display = 'none';
 			}
 			if(status.php_installed){
-				php_state.innerHTML = status.php_state ? '<em><b><font color=green><%:RUNNING%></font></b></em>' : '<em><b><font color=red><%:NOT RUNNING%></font></b></em>';
+				php_state.innerHTML = status.php_state ? '<em><b><font color=green><%:运行中%></font></b></em>' : '<em><b><font color=red><%:没有运行%></font></b></em>';
 				php_state_head.style.display = 'table-cell';
 				php_state.style.display = 'table-cell';
 				}

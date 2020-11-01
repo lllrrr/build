@@ -1,8 +1,5 @@
---[[
-Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-
-This is free software, licensed under the GNU General Public License v3.
-]]--
+-- Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
+-- This is free software, licensed under the GNU General Public License v3.
 
 module("luci.controller.softwarecenter",package.seeall)
 
@@ -50,7 +47,7 @@ local function php_install_report()
 end 
 
 local function get_website_list()
-	return luci.sys.exec("sh /usr/bin/softwarecenter/website_list_for_luci.sh 1 2")
+	return luci.sys.exec("sh /usr/bin/softwarecenter/website_list_for_luci.sh 1")
 end
 
 local function get_website_list_size()
