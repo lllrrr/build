@@ -2,7 +2,7 @@ m=Map("softwarecenter",translate("网站管理"),translate("正常运行ONMP后�
 m:section(SimpleSection).template = "softwarecenter/website_status"
 s = m:section(TypedSection,"website")
 s.addremove = true
-a = s:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器正常安装并且已运行！<br>某些还网站需要MySQL数据库服务器的支持"))
+a = s:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器已正常运行！<br>某些网站还需要MySQL服务器的支持"))
 a = s:option(Flag,"autodeploy_enable",translate("启用自动部署"))
 a:depends("website_enabled",1)
 a = s:option(ListValue,"website_select",translate("website"),translate("请选择你需要部署的网站"))
@@ -25,7 +25,7 @@ a = s:option(Flag,"customdeploy_enabled",translate("启用自定义部署"))
 a:depends("autodeploy_enable",0)
 a = s:option(Value,"website_dir",translate("网站目录"),translate("该目录自动创建在/opt/wwwroot/下，只需输入目录名"))
 a:depends("customdeploy_enabled",1)
-a = s:option(Value,"port",translate("设定访问端口"),translate("自定义不能重复已使用过的端口<br><code>自动获取</code>是脚本已定义的端口"))
+a = s:option(Value,"port",translate("访问端口设定"),translate("如设定的端口已在用，系统自动找查80-99中可用的端口"))
 a:value("",translate("自动获取"))
 a:depends("website_enabled",1)
 return m
