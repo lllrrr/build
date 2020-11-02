@@ -99,7 +99,16 @@ ENTWARE
 
 	chmod a+x /etc/init.d/entware
 	/etc/init.d/entware enable
-	echo "export PATH=/opt/bin:/opt/sbin:\$PATH" >> /etc/profile
+	echo "export PATH=/opt/bin:/opt/sbin:/sbin:/bin:/usr/sbin:/usr/bin:$PATH" >> /etc/profile
+
+	i18n_URL=http://pkg.entware.net/sources/i18n_glib223.tar.gz
+	if check_url $i18n_URL; then
+		wget -qcNO- -t 5 $i18n_URL | tar xvz -C /opt/usr/share/ > /dev/null
+		echo "Adding zh_CN.UTF-8"
+		/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
+		sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
+	fi
+
 }
 
 ##### entware环境解除 #####
@@ -204,19 +213,18 @@ config_swap_del(){
 
 ##### 获取通用环境变量 #####
 get_env(){
-	# 获取用户名
-	if [[ $USER ]]; then
-		username=$USER
-	elif [[ -n $(whoami 2>/dev/null) ]]; then
-		username=$(whoami 2>/dev/null)
-	else
-		username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1' | awk '{print $1}')
-	fi
-	# 获取路由器IP
-	localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
-	if [[ ! -n "$localhost" ]]; then
-		localhost="你的路由器IP"
-	fi
+    # 获取用户名
+    if [ $USER ]; then
+        username=$USER
+    else
+        username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{printf $1}')
+    fi
+
+    # 获取路由器IP
+    localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
+    if [[ ! -n "$localhost" ]]; then
+        localhost="你的路由器IP"
+    fi
 }
 
 ###### 容量验证 ########

@@ -100,7 +100,7 @@ web_installer(){
 	echo -e "=============================\n"
 
 	# 获取用户自定义设置
-	[ $nport ] && port=$nport
+	[ $nport ] && port_settings $nport
 	webdir=$name
 
 	# 检查目录是否存在
@@ -204,6 +204,20 @@ onmp_restart(){
     fi
 }
 
+port_settings(){
+if [ -n "`netstat -lntp | grep $1`" ];then
+	echo "$1端口已经在用，查寻可用的端口"
+	for f in `seq 80 99`;do
+		if [ -z "`netstat -lntp | grep $f`" ]; then
+			port=$f
+			break
+		fi
+	done
+else
+	port=$1
+fi
+}
+
 ############### 网站程序卸载（by自动化接口安装） ##############
 ##参数；$1:删除的目标
 delete_website_byauto(){
@@ -302,9 +316,9 @@ install_custom(){
 }
 
 install_tz(){
-	port=81
+	port_settings 81
 	if [[ $nport ]]; then
-		port=$nport
+		port_settings $nport
 	fi
 
 	_make_dir "/opt/wwwroot/tz"
@@ -327,7 +341,7 @@ install_phpmyadmin(){
 	filelink=$url_phpMyAdmin
 	name="phpMyAdmin"
 	dirname="phpMyAdmin-*-languages"
-	port=82
+	port_settings 82
 
 	# 运行安装程序
 	web_installer
@@ -354,7 +368,7 @@ install_wordpress(){
 	filelink=$url_WordPress
 	name="WordPress"
 	dirname="wordpress"
-	port=83
+	port_settings 83
 
 	# 运行安装程序
 	web_installer
@@ -377,7 +391,7 @@ install_h5ai(){
 	filelink=$url_h5ai
 	name="h5ai"
 	dirname="_h5ai"
-	port=85
+	port_settings 84
 	hookdir=$dirname
 
 	# 运行安装程序
@@ -403,7 +417,7 @@ install_lychee(){
 	filelink=$url_Lychee
 	name="Lychee"
 	dirname="Lychee-master"
-	port=86
+	port_settings 85
 
 	# 运行安装程序
 	web_installer
@@ -427,7 +441,7 @@ install_kodexplorer(){
 	filelink=$url_Kodexplorer
 	name="Kodexplorer"
 	dirname="kodexplorer"
-	port=88
+	port_settings 86
 	hookdir=$dirname
 
 	# 运行安装程序
@@ -449,7 +463,7 @@ install_typecho(){
 	filelink=$url_Typecho
 	name="Typecho"
 	dirname="build"
-	port=90
+	port_settings 87
 	istar=true
 
 	# 运行安装程序
@@ -474,7 +488,7 @@ install_zblog(){
 	name="Zblog"
 	dirname="Z-BlogPHP_1_5_1_1740_Zero"
 	hookdir=$dirname
-	port=91
+	port_settings 88
 
 	# 运行安装程序
 	web_installer
@@ -495,7 +509,7 @@ install_dzzoffice(){
 	filelink=$url_DzzOffice
 	name="DzzOffice"
 	dirname="dzzoffice-master"
-	port=92
+	port_settings 89
 
 	# 运行安装程序
 	web_installer
@@ -517,7 +531,7 @@ install_owncloud(){
 	filelink=$url_Owncloud
 	name="Owncloud"
 	dirname="owncloud"
-	port=98
+	port_settings 90
 
 	# 运行安装程序
 	web_installer
@@ -543,7 +557,7 @@ install_nextcloud(){
 	filelink=$url_Nextcloud
 	name="Nextcloud"
 	dirname="nextcloud"
-	port=99
+	port_settings 91
 
 	# 运行安装程序
 	web_installer
