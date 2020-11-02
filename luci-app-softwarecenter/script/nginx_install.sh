@@ -19,7 +19,7 @@ pkglist_php7="php7 php7-cgi php7-cli php7-fastcgi php7-fpm"
 
 phpmod="php7-mod-mysqli php7-mod-pdo php7-mod-pdo-mysql php7-mod-calendar php7-mod-ctype php7-mod-curl php7-mod-dom php7-mod-exif php7-mod-fileinfo php7-mod-ftp php7-mod-gd php7-mod-gettext php7-mod-gmp php7-mod-iconv php7-mod-intl php7-mod-json php7-mod-ldap php7-mod-session php7-mod-mbstring php7-mod-opcache php7-mod-openssl php7-mod-pcntl php7-mod-phar php7-pecl-redis php7-mod-session php7-mod-shmop php7-mod-simplexml php7-mod-snmp php7-mod-soap php7-mod-sockets php7-mod-sqlite3 php7-mod-sysvmsg php7-mod-sysvsem php7-mod-sysvshm php7-mod-tokenizer php7-mod-xml php7-mod-xmlreader php7-mod-xmlwriter php7-mod-zip php7-pecl-dio php7-pecl-http php7-pecl-libevent php7-pecl-propro php7-pecl-raphf redis-utils snmpd snmp-mibs snmp-utils zoneinfo-core zoneinfo-asia"
 
-########## 安装nginx #########
+# 安装nginx
 init_nginx(){
 	get_env
 
@@ -73,7 +73,7 @@ EOF
 	echo 'unixsocketperm 777' >> /opt/etc/redis.conf
 }
 
-########## 卸载nginx #########
+# 卸载nginx
 del_nginx(){
 	del_php
 	remove_soft "$pkglist_nginx"
@@ -83,7 +83,7 @@ del_nginx(){
 
 }
 
-##### 特定程序的nginx配置 #####
+# 特定程序的nginx配置
 nginx_special_conf(){
 # php-fpm
 cat > "/opt/etc/nginx/conf/php-fpm.conf" <<-\OOO
@@ -278,7 +278,7 @@ OOO
 
 }
 
-############## PHP初始化 #############
+# PHP初始化
 init_php(){
 	# 安装php
 	install_soft "$pkglist_php7"
@@ -319,7 +319,7 @@ env[TEMP] = /opt/tmp
 PHPFPM
 }
 
-############## 卸载PHP #############
+# 卸载PHP
 del_php(){
 	remove_soft "$phpmod"
 	remove_soft "$pkglist_php7"
@@ -327,8 +327,7 @@ del_php(){
 	/usr/bin/find /opt -name "php*" -exec rm -rf {} \;
 }
 
-############## Nginx Server管理 #############
-##参数：$1:动作
+# Nginx Server管理 参数：$1:动作
 nginx_manage(){
 	/opt/etc/init.d/S47snmpd $1
 	/opt/etc/init.d/S70redis $1

@@ -1,10 +1,9 @@
 #!/bin/sh
 
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
 
-pkglist_base="wget unzip e2fsprogs ca-certificates coreutils-whoami"
+pkglist_base="wget unzip e2fsprogs ca-certificates"
 
 status(){
 	local p=$?
@@ -27,8 +26,7 @@ _make_dir(){
 	return 0
 }
 
-##### entware环境设定 #####
-##参数：$1:设备底层架构 $2:安装位置
+# entware环境设定 参数：$1:设备底层架构 $2:安装位置
 ##说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
@@ -69,8 +67,7 @@ entware_set(){
 #!/bin/sh /etc/rc.common
 START=51
 
-##### 获取entware安装路径 #####
-##该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
+# 获取entware安装路径 该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
 get_entware_path(){
 	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
 		if [ -d "$mount_point/opt/etc/nginx" ]; then
@@ -108,11 +105,9 @@ ENTWARE
 		/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
 		sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
 	fi
-
 }
 
-##### entware环境解除 #####
-##说明：此函数用于删除OPKG配置设定
+# entware环境解除 说明：此函数用于删除OPKG配置设定
 entware_unset(){
 	/etc/init.d/entware stop
 	/etc/init.d/entware disable
@@ -124,8 +119,7 @@ entware_unset(){
 	rm -r /opt
 }
 
-##### 软件包安装 #####
-##参数: $@:安装列表
+# 软件包安装 参数: $@:安装列表
 ##说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
 	echo "正在更新软件源" && opkg update > /dev/null 2>&1
@@ -141,8 +135,7 @@ install_soft(){
 	done
 }
 
-##### 软件包卸载 #####
-##参数: $1:卸载列表
+# 软件包卸载 参数: $1:卸载列表
 ##说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
 	for ipk in $@ ; do
@@ -153,7 +146,7 @@ remove_soft(){
 
 }
 
-##### 分区挂载 #####
+# 磁盘分区挂载
 function system_check(){
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
@@ -181,8 +174,7 @@ if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 
 }
 
-##### 配置交换分区文件 #####
-##参数: $1:交换空间大小(M) $2:交换分区挂载点
+# 配置交换分区文件 参数: $1:交换空间大小(M) $2:交换分区挂载点
 config_swap_init(){
 status=$(cat /proc/swaps | awk 'NR==2')
     if [[ -n "$status" ]]; then
@@ -201,8 +193,7 @@ status=$(cat /proc/swaps | awk 'NR==2')
     fi
 }
 
-##### 删除交换分区文件 #####
-##参数: $disk_mount:交换分区挂载点
+# 删除交换分区文件 参数: $disk_mount:交换分区挂载点
 config_swap_del(){
 	[ -e $1/opt/.swap ] && {
 	swapoff $1/opt/.swap
@@ -211,7 +202,7 @@ config_swap_del(){
 	}
 }
 
-##### 获取通用环境变量 #####
+# 获取通用环境变量
 get_env(){
     # 获取用户名
     if [ $USER ]; then
@@ -227,8 +218,7 @@ get_env(){
     fi
 }
 
-###### 容量验证 ########
-##参数：$1：目标位置
+# 容量验证 参数：$1：目标位置
 ##说明：本函数判断对于GB级别，并不会很精确
 check_available_size(){
 	available_size=`lsblk -s | grep $1 | awk '{print $4}'`

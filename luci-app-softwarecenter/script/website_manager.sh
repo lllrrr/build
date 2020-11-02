@@ -1,14 +1,9 @@
 #!/bin/sh
-##网站管理脚本
-##version 1.5
+##网站管理脚本 version 1.5
 ##本脚本实现基本移植于github开源项目ONMP
 
-#
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
-#
-
 
 # 导入通用库函数
 . /usr/bin/softwarecenter/lib_functions.sh
@@ -35,10 +30,8 @@ url_Zblog="https://update.zblogcn.com/zip/Z-BlogPHP_1_6_5_2140_Valyria.zip"
 # (10) DzzOffice (开源办公平台)
 url_DzzOffice="https://codeload.github.com/zyx0814/dzzoffice/zip/master"
 
-############### 网站程序安装 ##############
-##参数： $1:安装目标 $2:端口号
+# 网站程序安装 参数： $1:安装目标 $2:端口号
 ##实践的时候发现Nginx可热部署网站
-##说明：本函数仅负责网站安装，并不负责重载Nginx服务器配置，请调用层负责处理
 install_website(){
 	# 通用环境变量获取
 	get_env
@@ -73,8 +66,7 @@ install_website(){
 	fi
 }
 
-############### 网站名称映射 ##############
-##参数；$1:网站选项
+# 网站名称映射 参数；$1:网站选项
 website_name_mapping(){
 	case $1 in
 		0) echo "tz";;
@@ -92,8 +84,7 @@ website_name_mapping(){
 	esac
 }
 
-############### WEB程序安装器 ##############
-##已修正适配(简易处理)
+# WEB程序安装器 已修正适配(简易处理)
 web_installer(){
 	echo -e "\n============================="
 	echo -e "***********  WEB程序安装器  ***********"
@@ -218,16 +209,14 @@ else
 fi
 }
 
-############### 网站程序卸载（by自动化接口安装） ##############
-##参数；$1:删除的目标
+# 网站程序卸载（by自动化接口安装）参数；$1:删除的目标
 delete_website_byauto(){
 	local name
 	name=`website_name_mapping $1`
 	delete_website /opt/etc/nginx/vhost/$name.conf /opt/wwwroot/$name
 }
 
-############# 添加到虚拟主机 #############
-##参数：$1：端口 $2：虚拟主机配置名
+# 添加到虚拟主机 参数：$1：端口 $2：虚拟主机配置名
 add_vhost(){
 # 写入文件
 cat > "/opt/etc/nginx/vhost/$2.conf" <<-\EOF
@@ -245,8 +234,7 @@ sed -e "s/.*listen.*/    listen $1\;/g" -i /opt/etc/nginx/vhost/$2.conf
 sed -e "s/.*\/opt\/wwwroot\/www\/.*/    root \/opt\/wwwroot\/$2\/\;/g" -i /opt/etc/nginx/vhost/$2.conf
 }
 
-############## 开启 Redis ###############
-##参数: $1: 安装目录
+# 开启 Redis 参数: $1: 安装目录
 redis(){
 sed -e "/);/d" -i $1/config/config.php
 cat >> "$1/config/config.php" <<-\EOF
@@ -261,8 +249,7 @@ EOF
 echo "$webdir已开启Redis"
 }
 
-############## 网站删除 ##############
-##参数：$1:conf文件位置 $2:website_dir
+# 网站删除 参数：$1:conf文件位置 $2:website_dir
 ##说明：本函数仅删除配置文件和目录，并不负责重载Nginx服务器配置，请调用层负责处理
 delete_website(){
 	rm -rf $1
@@ -272,8 +259,7 @@ delete_website(){
 	echo "网站$2已删除"
 }
 
-############## 网站配置文件基本属性列表 ##############
-##参数：$1:配置文件位置
+# 网站配置文件基本属性列表 参数：$1:配置文件位置
 ##说明：本函是将负责解析nginx的配置文件，输出网站文件目录和访问地址,仅接受一个参数
 vhost_config_list(){
 	if [ "$#" -eq "1" ]; then
@@ -283,8 +269,7 @@ vhost_config_list(){
 	fi
 }
 
-############## 网站一览 ##############
-##说明：显示已经配置注册的网站
+## 网站一览 说明：显示已经配置注册的网站
 vhost_list(){
 	get_env
 	echo "网站列表："
@@ -293,8 +278,7 @@ vhost_list(){
 	done
 }
 
-############## 自定义部署通用函数 ##########
-##参数：$1:文件目录 $2:端口号
+# 自定义部署通用函数 参数：$1:文件目录 $2:端口号
 install_custom(){
 	webdir=$1
 	port=$2
@@ -302,7 +286,6 @@ install_custom(){
 	echo "正在配置$webdir..."
 
 	# 目录检查
-	# _make_dir /opt/wwwroot/$webdir
 	if [ ! -d /opt/wwwroot/$webdir ]; then
 		echo "目录不存在，部署中断"
 		exit 1
@@ -317,9 +300,7 @@ install_custom(){
 
 install_tz(){
 	port_settings 81
-	if [[ $nport ]]; then
-		port_settings $nport
-	fi
+	[ $nport ] && port_settings $nport
 
 	_make_dir "/opt/wwwroot/tz"
 	echo "开始下载雅黑PHP探针"
@@ -335,7 +316,7 @@ install_tz(){
 	chmod -R 777 /opt/wwwroot/tz
 }
 
-############# 安装phpMyAdmin ############
+# 安装phpMyAdmin
 install_phpmyadmin(){
 	# 默认配置
 	filelink=$url_phpMyAdmin
@@ -362,7 +343,7 @@ install_phpmyadmin(){
 	echo "phpMyaAdmin的用户、密码就是数据库用户、密码"
 }
 
-############# 安装WordPress ############
+# 安装WordPress
 install_wordpress(){
 	# 默认配置
 	filelink=$url_WordPress
@@ -385,7 +366,7 @@ install_wordpress(){
 	echo "可以用phpMyaAdmin建立数据库，然后在这个站点上一步步配置网站信息"
 }
 
-############### 安装h5ai ##############
+# 安装h5ai
 install_h5ai(){
 	# 默认配置
 	filelink=$url_h5ai
@@ -411,7 +392,7 @@ install_h5ai(){
 	echo "你可以通过修改它来获取更多功能"
 	}
 
-################ 安装Lychee ##############
+# 安装Lychee
 install_lychee(){
 	# 默认配置
 	filelink=$url_Lychee
@@ -435,7 +416,7 @@ install_lychee(){
 	echo "下面的可以不配置，然后下一步创建个用户就可以用了"
 }
 
-############## 安装kodexplorer芒果云 ##########
+# 安装kodexplorer芒果云
 install_kodexplorer(){
 	# 默认配置
 	filelink=$url_Kodexplorer
@@ -457,7 +438,7 @@ install_kodexplorer(){
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
 }
 
-############# 安装Typecho ############
+# 安装Typecho
 install_typecho(){
 	# 默认配置
 	filelink=$url_Typecho
@@ -481,7 +462,7 @@ install_typecho(){
 	echo "可以用phpMyaAdmin建立数据库，然后在这个站点上一步步配置网站信息"
 }
 
-######## 安装Z-Blog ########
+# 安装Z-Blog
 install_zblog(){
 	# 默认配置
 	filelink=$url_Zblog
@@ -503,7 +484,7 @@ install_zblog(){
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"
 }
 
-######### 安装DzzOffice #########
+# 安装DzzOffice
 install_dzzoffice(){
 	# 默认配置
 	filelink=$url_DzzOffice
@@ -525,7 +506,7 @@ install_dzzoffice(){
 	echo "DzzOffice应用市场中，某些应用无法自动安装的，请自行参看官网给的手动安装教程"
 }
 
-################# 安装Owncloud ###############
+# 安装Owncloud
 install_owncloud(){
 	# 默认配置
 	filelink=$url_Owncloud
@@ -551,7 +532,7 @@ install_owncloud(){
 	echo "需要先在web界面配置完成后，才能使用开启Redis"
 }
 
-################# 安装Nextcloud ##############
+# 安装Nextcloud
 install_nextcloud(){
 	# 默认配置
 	filelink=$url_Nextcloud
