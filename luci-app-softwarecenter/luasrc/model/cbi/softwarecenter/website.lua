@@ -2,7 +2,7 @@ m=Map("softwarecenter",translate("网站管理"),translate("正常运行ONMP后�
 m:section(SimpleSection).template = "softwarecenter/website_status"
 s = m:section(TypedSection,"website")
 s.addremove = true
-a = s:option(Flag,"website_enabled",translate("Enabled"),translate("请确保Nginx服务器已正常运行！<br>某些网站还需要MySQL服务器的支持"))
+a = s:option(Flag,"website_enabled",translate("Enabled"),translate("请确保服务器已正常运行"))
 a = s:option(Flag,"autodeploy_enable",translate("启用自动部署"))
 a:depends("website_enabled",1)
 a = s:option(ListValue,"website_select",translate("website"),translate("请选择你需要部署的网站"))
