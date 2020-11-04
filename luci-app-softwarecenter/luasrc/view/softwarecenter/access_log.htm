@@ -25,6 +25,17 @@ local dsp = require "luci.dispatcher"
 <%+header%>
 <script type="text/javascript">
 	//<![CDATA[
+	function clear_access_log(btn) {
+		XHR.get('<%=dsp.build_url("admin/services/softwarecenter/clear_access_log")%>', null,
+			function(x, data) {
+				if(x && x.status == 200) {
+					var access_log_textarea = document.getElementById('access_log_textarea');
+					access_log_textarea.innerHTML = "";
+					access_log_textarea.scrollTop = access_log_textarea.scrollHeight;
+				}
+			}
+		);
+	}
 	XHR.poll(2, '<%=dsp.build_url("admin/services/softwarecenter/access_log")%>', null,
 		function(x, data) {
 			if(x && x.status == 200) {
@@ -37,5 +48,6 @@ local dsp = require "luci.dispatcher"
 	//]]>
 </script>
 <fieldset class="cbi-section" id="_log_fieldset">
+	<input class="cbi-button cbi-input-remove" type="button" onclick="clear_access_log()" value="<%:Clear logs%>" />
 	<textarea id="access_log_textarea" class="cbi-input-textarea" style="width: 100%;margin-top: 10px;" data-update="change" rows="35" wrap="off" readonly="readonly"></textarea>
 </fieldset>

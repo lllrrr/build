@@ -13,7 +13,9 @@ function index()
 	entry({"admin", "services", "softwarecenter", "get_log"}, call("get_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "clear_log"}, call("clear_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "error_log"}, call("error_log")).leaf = true
+	entry({"admin", "services", "softwarecenter", "clear_error_log"}, call("clear_error_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "access_log"}, call("access_log")).leaf = true
+	entry({"admin", "services", "softwarecenter", "clear_access_log"}, call("clear_access_log")).leaf = true
 	entry({"admin","services","softwarecenter","status"}, call("connection_status")).leaf = true
 end
 
@@ -29,8 +31,16 @@ function error_log()
 	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/error.log' ] && cat /opt/var/log/nginx/error.log"))
 end
 
+function clear_error_log()
+	luci.sys.call("cat > /opt/var/log/nginx/error.log")
+end
+
 function access_log()
 	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/access.log' ] && cat /opt/var/log/nginx/access.log"))
+end
+
+function clear_access_log()
+	luci.sys.call("cat > /opt/var/log/nginx/access.log")
 end
 
 local function nginx_status_report()
