@@ -5,9 +5,9 @@ module("luci.controller.softwarecenter",package.seeall)
 
 function index()
 	if not nixio.fs.access("/etc/config/softwarecenter")then return end
-	entry({"admin", "services", "softwarecenter"},alias("admin", "services", "softwarecenter","softwarecenter"), _("软件中心"), 30).dependent = true
-	entry({"admin","services","softwarecenter", "softwarecenter"},cbi("softwarecenter/softwarecenter"),_("常用配置"), 40).leaf = true
-	entry({"admin","services","softwarecenter", "website"},cbi("softwarecenter/website"),_("网站管理"), 50).leaf = true
+	entry({"admin", "services", "softwarecenter"}, alias("admin", "services", "softwarecenter","softwarecenter"), _("软件中心"), 30).dependent = true
+	entry({"admin", "services", "softwarecenter", "softwarecenter"},cbi("softwarecenter/softwarecenter"),_("常用配置"), 40).leaf = true
+	entry({"admin", "services", "softwarecenter", "website"},cbi("softwarecenter/website"),_("网站管理"), 50).leaf = true
 	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("安装日志"), 60).leaf = true
 	entry({"admin", "services", "softwarecenter", "errorlog"},form("softwarecenter/errorlog"), _("nginx日志"), 70).leaf = true
 	entry({"admin", "services", "softwarecenter", "get_log"}, call("get_log")).leaf = true
@@ -16,7 +16,7 @@ function index()
 	entry({"admin", "services", "softwarecenter", "clear_error_log"}, call("clear_error_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "access_log"}, call("access_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "clear_access_log"}, call("clear_access_log")).leaf = true
-	entry({"admin","services","softwarecenter","status"}, call("connection_status")).leaf = true
+	entry({"admin", "services", "softwarecenter", "status"}, call("connection_status")).leaf = true
 end
 
 function get_log()
