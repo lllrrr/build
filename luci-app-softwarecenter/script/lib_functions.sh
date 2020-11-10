@@ -228,3 +228,6 @@ check_available_size(){
 if [ "$1" ] ;then
 	[ $1 == "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
 fi
+
+pp=`grep -c "" /opt/var/log/nginx/access.log`
+[ "$pp" -gt 400 ] && sed -i '1,'$(($pp -400))'d' /opt/var/log/nginx/access.log

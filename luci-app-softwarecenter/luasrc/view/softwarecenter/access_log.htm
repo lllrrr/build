@@ -50,5 +50,6 @@ local dsp = require "luci.dispatcher"
 <fieldset class="cbi-section" id="_log_fieldset">
 <legend><%:Nginx的运行日志%></legend>
 	<input class="cbi-button cbi-input-remove" type="button" onclick="clear_access_log()" value="<%:Clear logs%>" />
-	<textarea id="access_log_textarea" class="cbi-input-textarea" style="width: 100%;margin-top: 10px;" data-update="change" rows="35" wrap="off" readonly="readonly"></textarea>
+	<div style="text-align:right"><small><%:显示最后50行%></small></div>
+	<textarea id="access_log_textarea" class="cbi-input-textarea" style="width: 100%;margin-top: 10px;" data-update="change" rows="30" wrap="off" readonly="readonly"></textarea>
 </fieldset>

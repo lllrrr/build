@@ -8,7 +8,7 @@ function index()
 	entry({"admin", "services", "softwarecenter"}, alias("admin", "services", "softwarecenter","softwarecenter"), _("软件中心"), 30).dependent = true
 	entry({"admin", "services", "softwarecenter", "softwarecenter"},cbi("softwarecenter/softwarecenter"),_("常用配置"), 40).leaf = true
 	entry({"admin", "services", "softwarecenter", "website"},cbi("softwarecenter/website"),_("网站管理"), 50).leaf = true
-	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("安装日志"), 60).leaf = true
+	entry({"admin", "services", "softwarecenter", "log"},form("softwarecenter/log"), _("运行日志"), 60).leaf = true
 	entry({"admin", "services", "softwarecenter", "errorlog"},form("softwarecenter/errorlog"), _("nginx日志"), 70).leaf = true
 	entry({"admin", "services", "softwarecenter", "get_log"}, call("get_log")).leaf = true
 	entry({"admin", "services", "softwarecenter", "clear_log"}, call("clear_log")).leaf = true
@@ -28,7 +28,7 @@ function clear_log()
 end
 
 function error_log()
-	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/error.log' ] && cat /opt/var/log/nginx/error.log"))
+	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/error.log' ] && cat /opt/var/log/nginx/error.log | tail -n 50"))
 end
 
 function clear_error_log()
@@ -36,7 +36,7 @@ function clear_error_log()
 end
 
 function access_log()
-	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/access.log' ] && cat /opt/var/log/nginx/access.log"))
+	luci.http.write(luci.sys.exec("[ -f '/opt/var/log/nginx/access.log' ] && cat /opt/var/log/nginx/access.log | tail -n 50"))
 end
 
 function clear_access_log()

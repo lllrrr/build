@@ -23,7 +23,7 @@ cpu_model:value(model)
 cpu_model:depends("deploy_entware",1)
 
 local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
-p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到加入的磁盘先用<code>磁盘分区</code>)<br><b style=\"color:green\">")..disk_size..("</b>选中的磁盘可能被重新格式化为EXT4文件系统<br><b style=\"color:red\">警告：请确保选中的磁盘上没有重要数据</b>"))
+p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到加入的磁盘先用<code>磁盘分区</code>)<br><b style=\"color:green\">")..disk_size..("</b><b style=\"color:red\">磁盘如不是EXT4文件系统将重新格式化，里面的数据也同时清空！</b>"))
 for list_disk_mount in luci.util.execi("lsblk | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
