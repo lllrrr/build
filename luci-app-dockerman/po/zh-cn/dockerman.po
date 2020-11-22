@@ -182,7 +182,7 @@ msgid "Run command"
 msgstr "运行命令"
 
 msgid "Advance"
-msgstr "其他选项"
+msgstr "高级设置"
 
 msgid "Mount tmpfs directory"
 msgstr "挂载tmpfs到容器内部目录"
