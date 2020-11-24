@@ -152,17 +152,9 @@ handle_website(){
 	website_config_list="$website_config_list $website_name"
 }
 
-# 读取设置文件
-# get_config(){
-	# while [[ "$*" != "" ]]; do
-		# eval ${1}='`uci get softwarecenter.main.$1`' 2>/dev/null
-		# shift
-	# done
-# }
+start(){
 
 cdg(){
-	# get_config "deploy_entware" "cpu_model" "disk_mount" "entware_enable" "swap_enabled" "swap_size" "swap_path" "deploy_nginx" "nginx_enabled" "deploy_mysql" "mysql_enabled" "user" "pass" "Partition_enabled" "Partition_disk"
-
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
 	disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
@@ -251,8 +243,7 @@ cdg(){
 	# onmp_restart
 }
 
-start(){
-	cdg | tee -a /tmp/log/softwarecenter.log
+cdg | tee -a /tmp/log/softwarecenter.log
 }
 
 stop(){
