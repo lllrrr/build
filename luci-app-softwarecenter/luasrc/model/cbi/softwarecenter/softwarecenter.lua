@@ -58,8 +58,9 @@ p = s:taboption("Partition", Button,"_add",translate(" "),translate("默认只�
 p.inputtitle = translate("开始分区")
 p.inputstyle = "apply"
 function p.write(self, section)
-luci.sys.call("cbi.apply")
+	luci.sys.call("cbi.apply")
 	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
+	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
 
 s:tab("swap", translate("swap交换分区设置"))

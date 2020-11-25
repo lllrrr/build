@@ -195,9 +195,9 @@ status=$(cat /proc/swaps | awk 'NR==2')
 
 # 删除交换分区文件 参数: $disk_mount:交换分区挂载点
 config_swap_del(){
-	[ -e $1/opt/.swap ] && {
-	swapoff $1/opt/.swap
-	rm -f $1/opt/.swap
+	[ -e /opt/.swap ] && {
+	swapoff /opt/.swap
+	rm -f /opt/.swap
 	echo -e "\n$1/opt/.swap文件已删除！\n"
 	}
 }
@@ -230,5 +230,3 @@ if [ "$1" ] ;then
 	[ $1 == "install_soft" ] && install_soft $2
 fi
 
-# pp=`grep -c "" /opt/var/log/nginx/access.log  1>/dev/null 2>&1`
-# [ "$pp" -gt 400 ] && sed -i '1,'$(($pp -400))'d' /opt/var/log/nginx/access.log
