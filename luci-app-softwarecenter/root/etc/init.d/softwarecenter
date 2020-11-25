@@ -160,7 +160,7 @@ cdg(){
 
 	config_load softwarecenter
 
-	config_get_bool deploy_entware 	main deploy_entware
+	config_get_bool deploy_entware	main deploy_entware
 	config_get_bool entware_enable	main entware_enable
 	config_get_bool deploy_nginx	main deploy_nginx
 	config_get_bool deploy_mysql	main deploy_mysql
