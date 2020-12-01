@@ -27,7 +27,7 @@ _make_dir(){
 }
 
 # entware环境设定 参数：$1:设备底层架构 $2:安装位置
-##说明：此函数用于写入新配置
+#说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
 	[ "$1" ] && USB_PATH="$1"
@@ -120,7 +120,7 @@ entware_unset(){
 }
 
 # 软件包安装 参数: $@:安装列表
-##说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
+#说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
 	echo "正在更新软件源" && opkg update > /dev/null 2>&1
 	for ipk in $@ ; do
@@ -136,7 +136,7 @@ install_soft(){
 }
 
 # 软件包卸载 参数: $1:卸载列表
-##说明：本函数将负责强制卸载指定的软件包
+#说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
 	for ipk in $@ ; do
 		echo -e "正在卸载 $ipk\c"
@@ -150,7 +150,7 @@ remove_soft(){
 function system_check(){
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
-if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
+	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
 			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
@@ -161,7 +161,6 @@ if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk已ext4"
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
-
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
 		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
@@ -219,7 +218,7 @@ get_env(){
 }
 
 # 容量验证 参数：$1：目标位置
-##说明：本函数判断对于GB级别，并不会很精确
+#说明：本函数判断对于GB级别，并不会很精确
 check_available_size(){
 	available_size=`lsblk -s | grep $1 | awk '{print $4}'`
 	[ $available_size ] && echo "$available_size"

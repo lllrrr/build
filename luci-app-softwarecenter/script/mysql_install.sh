@@ -1,28 +1,22 @@
 #!/bin/sh
-##数据库安装脚本
-##version 1.5
-##本脚本实现参考于github开源项目ONMP
-##本脚本提供以下函数接口：
+#数据库安装脚本
+#version 1.5
+#本脚本实现参考于github开源项目ONMP
+#本脚本提供以下函数接口：
 #	init_mysql
 #	del_mysql
 
-#
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
-#
-
-
 
 # 加载常用函数库
 . /usr/bin/softwarecenter/lib_functions.sh
 dblist="mariadb-server mariadb-server-extra mariadb-client mariadb-client-extra"
 
-############## 重置、初始化MySQL #############
+# 重置、初始化MySQL #
 init_mysql(){
 	get_env
 	install_soft "$dblist"
-	# MySQL设置
 	_make_dir "/opt/etc/mysql"
 	cat > "/opt/etc/mysql/my.cnf" <<-\MMM
 [client-server]

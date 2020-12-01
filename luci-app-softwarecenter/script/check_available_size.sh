@@ -2,11 +2,8 @@
 #check usb disk size
 #version: 1.0
 
-#
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
-#
 
 # 加载通用函数库
 . /usr/bin/softwarecenter/lib_functions.sh
@@ -22,7 +19,7 @@
 				eval value$m=`df -h | grep $mounted | awk '{print $(eval echo '$n')}'`
 				eval pp$m=`/bin/mount | grep $mounted | awk '{print $5}'`
 			done
-			echo "[$i] $value5 [ 文件系统:$pp5 容量:$value1 已用比例:$value4(可用:$value3) 已用:$value2 ]<br>"
+			echo "[$i] $value5 [ 总容量:$value1 ($pp5) 已用:$value2(比例$value4 ) 可用:$value3]<br>"
 			i=$((i + 1))
 		done
 	;;

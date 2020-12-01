@@ -42,7 +42,7 @@ function p.write(self, section, value)
   luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter"))
 end
 
-p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，这工具可简单的分区挂载"))
+p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，此工具可简单的分区挂载"))
 local o = util.consume((fs.glob("/dev/sd[a-g]")), o)
 local size = {}
 for i, l in ipairs(o) do

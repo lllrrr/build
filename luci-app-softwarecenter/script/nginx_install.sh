@@ -1,14 +1,11 @@
 #!/bin/sh
-##Ningx安装脚本
-##version 1.2
-##本脚本实现基本移植于github开源项目ONMP
-##本脚本提供以下函数接口： init_nginx del_nginx init_php del_php
+#Ningx安装脚本
+#version 1.2
+#本脚本实现基本移植于github开源项目ONMP
+#本脚本提供以下函数接口： init_nginx del_nginx init_php del_php
 
-#
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
-#
 
 # 加载库函数
 . /usr/bin/softwarecenter/lib_functions.sh

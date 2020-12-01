@@ -1,9 +1,6 @@
 #!/bin/sh
-##网站管理脚本 version 1.5
-##本脚本实现基本移植于github开源项目ONMP
-
-# Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-# This is free software, licensed under the GNU General Public License v3.
+#网站管理脚本 version 1.5
+#本脚本实现基本移植于github开源项目ONMP
 
 # 导入通用库函数
 . /usr/bin/softwarecenter/lib_functions.sh
@@ -31,7 +28,7 @@ url_Zblog="https://update.zblogcn.com/zip/Z-BlogPHP_1_6_5_2140_Valyria.zip"
 url_DzzOffice="https://codeload.github.com/zyx0814/dzzoffice/zip/master"
 
 # 网站程序安装 参数： $1:安装目标 $2:端口号
-##实践的时候发现Nginx可热部署网站
+#实践的时候发现Nginx可热部署网站
 install_website(){
 	# 通用环境变量获取
 	get_env
@@ -132,7 +129,7 @@ web_installer(){
 			fi
 
 			mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir
-			echo "解压完成..." && rm /opt/wwwroot/$name.$suffix
+			echo "解压完成..." #&& rm /opt/wwwroot/$name.$suffix
 		fi
 	fi
 
@@ -179,13 +176,13 @@ onmp_restart(){
     /opt/etc/init.d/S80nginx start > /dev/null 2>&1
     sleep 3
     num=0
-    for PROC in 'nginx' 'php-fpm' 'mysqld'; do 
+    for PROC in 'nginx' 'php-fpm' 'mysqld'; do
         if [ -n "`pidof $PROC`" ]; then
             echo $PROC "启动成功";
         else
             echo $PROC "启动失败";
             num=`expr $num + 1`
-        fi 
+        fi
     done
 
     if [[ $num -gt 0 ]]; then
@@ -250,17 +247,17 @@ echo "$webdir已开启Redis"
 }
 
 # 网站删除 参数：$1:conf文件位置 $2:website_dir
-##说明：本函数仅删除配置文件和目录，并不负责重载Nginx服务器配置，请调用层负责处理
+#说明：本函数仅删除配置文件和目录，并不负责重载Nginx服务器配置，请调用层负责处理
 delete_website(){
 	rm -rf $1
 	rm -rf $2
-	prefix="`echo $2 |  sed 's/.$//'`"
+	prefix="`echo $2 | sed 's/.$//'`"
 	rm -rf $prefix.*
 	echo "网站$2已删除"
 }
 
 # 网站配置文件基本属性列表 参数：$1:配置文件位置
-##说明：本函是将负责解析nginx的配置文件，输出网站文件目录和访问地址,仅接受一个参数
+#说明：本函是将负责解析nginx的配置文件，输出网站文件目录和访问地址,仅接受一个参数
 vhost_config_list(){
 	if [ "$#" -eq "1" ]; then
 		path=$(cat $1 | awk 'NR==4' | awk '{print $2}' | sed 's/;//')
@@ -269,7 +266,7 @@ vhost_config_list(){
 	fi
 }
 
-## 网站一览 说明：显示已经配置注册的网站
+# 网站一览 说明：显示已经配置注册的网站
 vhost_list(){
 	get_env
 	echo "网站列表："
