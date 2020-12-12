@@ -226,6 +226,6 @@ check_available_size(){
 
 if [ "$1" ] ;then
 	[ $1 == "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
-	[ $1 == "install_soft" ] && install_soft $2
+	[ $1 == "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
 fi
 
