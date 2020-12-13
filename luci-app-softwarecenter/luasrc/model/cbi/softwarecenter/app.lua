@@ -15,9 +15,9 @@ p.forcewrite = true
 function p.write(e, e)
 	luci.sys.call("cbi.apply")
 --	luci.sys.call("echo 98 >> /tmp/log/softwarecenter.log")
-	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh install_soft deluge deluge-ui-web")
-	luci.sys.call("/opt/etc/init.d/S80deluged start")
-	luci.sys.call("/opt/etc/init.d/S81deluge-web start")
+	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh install_soft deluge deluge-ui-web &")
+	luci.sys.call("/opt/etc/init.d/S80deluged start &")
+	luci.sys.call("/opt/etc/init.d/S81deluge-web start &")
 	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
 local running=(luci.sys.call("ps | grep 'deluge' | grep -v grep > /dev/null") == 0)
