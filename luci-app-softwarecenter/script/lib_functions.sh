@@ -1,8 +1,5 @@
 #!/bin/sh
 
-# Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-# This is free software, licensed under the GNU General Public License v3.
-
 pkglist_base="wget unzip e2fsprogs ca-certificates"
 
 status(){
@@ -224,8 +221,20 @@ check_available_size(){
 	[ $available_size ] && echo "$available_size"
 }
 
-if [ "$1" ] ;then
+ipk_install(){
+	source /etc/profile
+	opkg update
+for i in $@; do
+	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
+		opkg install $i
+	else
+		echo -e $i 不在 Entware 软件源，跳过安装！
+	fi
+done
+}
+
+if [ $1 ]; then
 	[ $1 == "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
 	[ $1 == "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
+	[ $1 == "ipk_install" ] && ipk_install $2 $3 | tee -a /tmp/log/softwarecenter.log
 fi
-

@@ -19,7 +19,7 @@ url_h5ai="https://release.larsjung.de/h5ai/h5ai-0.29.0.zip"
 # (6) Lychee（一个很好看，易于使用的Web相册）
 url_Lychee="https://github.com/electerious/Lychee/archive/master.zip"
 # (7) Kodexplorer（可道云aka芒果云在线文档管理器）
-url_Kodexplorer="http://static.kodcloud.com/update/download/kodbox.1.13.zip"
+url_Kodexplorer="http://static.kodcloud.com/update/download/kodbox.1.14.zip"
 # (8) Typecho (流畅的轻量级开源博客程序)
 url_Typecho="http://typecho.org/downloads/1.1-17.10.30-release.tar.gz"
 # (9) Z-Blog (体积小，速度快的PHP博客程序)
@@ -430,6 +430,8 @@ install_kodexplorer(){
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i 's/config.php/configg.php/g' /opt/wwwroot/Kodexplorer/index.php
+	cp /opt/wwwroot/Kodexplorer/config/config.php /opt/wwwroot/Kodexplorer/config/configg.php
 
 	echo "$name安装完成"
 	echo "浏览器地址栏输入：$localhost:$port 即可访问"

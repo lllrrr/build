@@ -2,21 +2,15 @@
 START=52
 STOP=10
 
-#
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
-#
 # This is free software, licensed under the GNU General Public License v3.
-#
-
 
 # 导入函数库
 . /usr/bin/softwarecenter/website_manager.sh
 . /usr/bin/softwarecenter/mysql_install.sh
 . /usr/bin/softwarecenter/nginx_install.sh
-
 website_config_list=""
 
-####### 网站清理 ########
 ##本函数负责清理未写入配置的网站
 clean_vhost_config(){
 	local_config_list="`ls /opt/etc/nginx/vhost | sed "s/.conf//g"`"
