@@ -39,7 +39,6 @@ p.inputstyle = "reload"
 p.forcewrite = true
 function p.write(self, section, value)
   luci.util.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
-  luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter"))
 end
 
 p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，此工具可简单的分区挂载"))
