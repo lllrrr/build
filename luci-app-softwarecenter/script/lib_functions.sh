@@ -258,10 +258,10 @@ ipk_install transmission-daemon transmission-web-control
 }
 
 if [ $1 ]; then
+	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "transmission" ] && transmission | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "ipk_install" ] && ipk_install $2 $3 $4 $5 | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "transmission" ] && transmission | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
 fi
