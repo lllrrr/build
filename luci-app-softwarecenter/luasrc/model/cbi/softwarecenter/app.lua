@@ -60,18 +60,27 @@ function p.write(self, section)
 	SYS.call("/usr/bin/softwarecenter/lib_functions.sh rtorrent &")
 	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
--- p:depends("rtorrent_install", 1)
+local state=(SYS.call("pidof rtorrent > /dev/null") == 0)
+if state then
+	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "1099" .. "/rutorrent" .. "')\"/>"
+	state_msg = "<b><font color=\"green\">" .. translate("rutorrent 已经运行") .. "</font></b>"
+	p.description = translate("rutorrent默认WebUI端口：1099" .. "<br/>".. state_msg .. "&nbsp;&nbsp;&nbsp;".. o)
+else
+	state_msg = "<b><font color=\"red\">" .. translate("rutorrent 没有运行") .. "</font></b>"
+	p.description = translate("rutorrent默认WebUI端口：1099" .. "<br/>".. state_msg)
+end
+p:depends("rtorrent_install", 1)
 -- p = s:option(Value, "web_port", translate("WebUI端口"),translate("自定义WebUI端口"))
 -- p.default = "81"
 -- p.rmempty = true
-local state=(SYS.call("pidof rtorrent > /dev/null") == 0)
-if state then
-	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "81" .. "/rutorrent" .. "')\"/>"
-	state_msg = "<b><font color=\"green\">" .. translate("rutorrent 已经运行") .. "</font></b>"
-	p.description = translate("rutorrent默认WebUI端口：81" .. "<br/>".. state_msg .. "&nbsp;&nbsp;&nbsp;".. o)
-else
-	state_msg = "<b><font color=\"red\">" .. translate("rutorrent 没有运行") .. "</font></b>"
-	p.description = translate("rutorrent默认WebUI端口：81" .. "<br/>".. state_msg)
+-- p:depends("rtorrent_install", 1)
+p = s:option(Button, "_adp", translate("重启rtorrent"))
+p.inputtitle = translate("重启rtorrent")
+p.inputstyle = "apply"
+p.forcewrite = true
+function p.write(self, section)
+	SYS.call("/opt/etc/init.d/S80lighttpd restart && /opt/etc/init.d/S85rtorrent restart &")
+	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
 p:depends("rtorrent_install", 1)
 

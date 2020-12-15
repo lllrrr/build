@@ -226,6 +226,7 @@ ipk_install(){
 	opkg update
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
+		echo "请耐心等待$i安装中。"
 		opkg install $i
 	else
 		echo -e $i 不在 Entware 软件源，跳过安装！
@@ -235,26 +236,26 @@ done
 
 rtorrent(){
 ipk_install rtorrent-easy-install
-# www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
-# web_port=$(uci get softwarecenter.ipk.web_port)
-# if [ -z "`grep 'server.port' $www_cfg`" ]; then
-# echo "server.port = $web_port" >> $www_cfg
-# else
-# sed -i "s/server.port = .*/server.port = $web_port/g" $www_cfg
-# fi
-/opt/etc/init.d/S80lighttpd start 
-/opt/etc/init.d/S85rtorrent start
+web_port=1099
+www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
+if [ -z "`grep 'server.port' $www_cfg`" ]; then
+echo "server.port = $web_port" >> $www_cfg
+else
+sed -i "s/server.port = .*/server.port = $web_port/g" $www_cfg
+fi
+/opt/etc/init.d/S80lighttpd start && [ $? = 0 ] && echo lighttpd已经运行 || echo lighttpd没有运行
+/opt/etc/init.d/S85rtorrent start && [ $? = 0 ] && echo rtorrent已经运行 || echo rtorrent没有运行
 }
 
 deluge(){
 ipk_install deluge deluge-ui-web
-/opt/etc/init.d/S80deluged start
-/opt/etc/init.d/S81deluge-web start
+/opt/etc/init.d/S80deluged start && [ $? = 0 ] && echo deluged已经运行 || echo deluged没有运行
+/opt/etc/init.d/S81deluge-web start && [ $? = 0 ] && echo deluge-web已经运行 || echo deluge-web没有运行
 }
 
 transmission(){
 ipk_install transmission-daemon transmission-web-control
-/opt/etc/init.d/S88transmission start
+/opt/etc/init.d/S88transmission start && [ $? = 0 ] && echo transmission已经运行 || echo transmission没有运行
 }
 
 if [ $1 ]; then
