@@ -32,6 +32,22 @@ p:depends("deploy_entware",1)
 p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>此安装过程可能需要大量时间，可以在日志中查看到安装的过程"))
 p:depends("deploy_entware",1)
 
+deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
+p = s:taboption("entware",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx"))
+p:depends("deploy_nginx",1)
+deploy_nginx:depends("entware_enable",1)
+
+deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("自动部署MySQL数据库服务器(依赖Entware软件仓库)"))
+p = s:taboption("entware",Flag,"mysql_enabled",translate("Enabled"),translate("留空是默认登录用户  root  密码  123456"))
+p:depends("deploy_mysql",1)
+p = s:taboption("entware",Value,"user",translate("用户"),translate("MySQL数据库服务器登录用户"))
+p.placeholder="root"
+p:depends("mysql_enabled",1)
+p = s:taboption("entware",Value,"pass",translate("密码"),translate("MySQL数据库服务器登录密码"))
+p.password=true
+p:depends("mysql_enabled",1)
+deploy_mysql:depends("entware_enable",1)
+
 s:tab("Partition", translate("磁盘分区"))
 p = s:taboption("Partition", Button,"_rescan",translate("扫描磁盘"),translate("重新扫描加入后没有显示的磁盘"))
 p.inputtitle = translate("开始扫描")
@@ -80,23 +96,5 @@ p = s:taboption("swap",Value,"swap_size",translate("空间大小"),translate("�
 p.default='512'
 p:depends("swap_enabled",1)
 swap_enable:depends("entware_enable",1)
-
-s:tab("nginx",translate("Nginx服务器设置"))
-deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
-p = s:taboption("nginx",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx"))
-p:depends("deploy_nginx",1)
-deploy_nginx:depends("entware_enable",1)
-
-s:tab("mysql",translate("MySQL服务器设置"))
-deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("自动部署MySQL数据库服务器(依赖Entware软件仓库)"))
-p = s:taboption("mysql",Flag,"mysql_enabled",translate("Enabled"),translate("留空是默认登录用户  root  密码  123456"))
-p:depends("deploy_mysql",1)
-p = s:taboption("mysql",Value,"user",translate("用户"),translate("MySQL数据库服务器登录用户"))
-p.placeholder="root"
-p:depends("mysql_enabled",1)
-p = s:taboption("mysql",Value,"pass",translate("密码"),translate("MySQL数据库服务器登录密码"))
-p.password=true
-p:depends("mysql_enabled",1)
-deploy_mysql:depends("entware_enable",1)
 
 return m
