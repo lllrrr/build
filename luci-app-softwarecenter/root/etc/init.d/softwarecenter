@@ -50,7 +50,6 @@ clean_vhost_config(){
 }
 
 ipk_start(){
-ipk="deluge-web transmission-daemon rtorrent"
 _deluge(){
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluged 启动成功" || echo deluged 启动不成功
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluge-web 启动成功" || echo deluge-web 启动不成功
@@ -64,12 +63,12 @@ _rtorrent(){
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 启动成功 || echo lighttpd 启动不成功
 /opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 启动成功 || echo rtorrent 启动不成功
 }
-
+ipk="deluge-web transmission-daemon rtorrent"
 for PROC in $ipk; do
 	if [ -z "`pidof $PROC`" ]; then
-		[ "`which rtorrent`" = "/opt/bin/rtorrent"  ] && [ $PROC = rtorrent ] && _rtorrent
-		[ "`which deluge-web`" = "/opt/bin/deluge-web"  ] && [ $PROC = deluge-web ] && _deluge
-		[ "`which transmission-daemon`" = "/opt/bin/transmission-daemon" ] && [ $PROC = transmission-daemon ] && _transmission
+		[ "`which $PROC`" = "/opt/bin/rtorrent" ] && _rtorrent
+		[ "`which $PROC`" = "/opt/bin/deluge-web" ] && _deluge
+		[ "`which $PROC`" = "/opt/bin/transmission-daemon" ] && _transmission
 	fi
 done
 }
