@@ -80,7 +80,7 @@ p.inputstyle = "apply"
 p.forcewrite = true
 function p.write(self, section)
 	SYS.call("/opt/etc/init.d/S80lighttpd restart && /opt/etc/init.d/S85rtorrent restart &")
-	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
+	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/app"))
 end
 p:depends("rtorrent_install", 1)
 

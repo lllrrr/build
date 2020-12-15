@@ -49,35 +49,30 @@ clean_vhost_config(){
 	done
 }
 
-onmp_restart()
-{
-	/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
-	/opt/etc/init.d/S79php7-fpm stop > /dev/null 2>&1
-	/opt/etc/init.d/S80nginx stop > /dev/null 2>&1
-	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
-	sleep 3
-	/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
-	/opt/etc/init.d/S79php7-fpm start > /dev/null 2>&1
-	/opt/etc/init.d/S80nginx start > /dev/null 2>&1
-	sleep 3
-	num=0
-	for PROC in 'nginx' 'php-fpm' 'mysqld'; do
-		if [ -n "`pidof $PROC`" ]; then
-			echo $PROC "启动成功";
-		else
-			echo $PROC "启动失败";
-			num=`expr $num + 1`
-		fi
-	done
+ipk_start(){
 
-	if [[ $num -gt 0 ]]; then
-		echo "onmp启动失败"
-		logger -t "【ONMP】" "启动失败"
-	else
-		echo "onmp已启动"
-		logger -t "【ONMP】" "已启动"
-		vhost_list
+ipk="deluge-web transmission-daemon rtorrent"
+_deluge(){
+/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluged 启动成功" || echo deluged 启动不成功
+/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluge-web 启动成功" || echo deluge-web 启动不成功
+}
+
+_transmission(){
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 启动成功 || echo transmission 启动不成功
+}
+
+_rtorrent(){
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 启动成功 || echo lighttpd 启动不成功
+/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 启动成功 || echo rtorrent 启动不成功
+}
+
+for PROC in $ipk; do
+	if [ -z "`pidof $PROC`" ]; then
+		[ "`which rtorrent`" ] && [ $PROC = rtorrent ] && _rtorrent
+		[ "`which deluge-web`" ] && [ $PROC = deluge-web ] && _deluge
+		[ "`which transmission-daemon`" ] && [ $PROC = transmission-daemon ] && _transmission
 	fi
+done
 }
 
 ####### 网站迭代处理 ########
@@ -169,6 +164,7 @@ cdg(){
 	config_get user			main user
 	config_get pass			main pass
 	### entware ###
+	source /etc/profile
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
 			echo "entware环境初始化" && entware_unset
@@ -194,7 +190,7 @@ cdg(){
 			nginx_manage stop && echo "关闭Nginx服务器"
 		else
 			if [ -z "`pgrep nginx`" ]; then
-				nginx_manage start && echo "Nginx服务器已运行"
+				nginx_manage start > /dev/null 2>&1
 			fi
 			# 迭代配置website
 			config_foreach handle_website website test
@@ -217,7 +213,7 @@ cdg(){
 			/opt/etc/init.d/S70mysqld stop && echo "关闭MySQL服务器"
 		else
 			if [ -z "`pgrep mysqld`" ]; then
-				/opt/etc/init.d/S70mysqld start && echo "MySQL数据库已运行"
+				/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
 			fi
 		fi
 	else
@@ -229,12 +225,12 @@ cdg(){
 
 	for PROC in mysqld nginx php-fpm; do
 		if [ -n "`pidof $PROC`" ]; then
-			echo "$PROC 启动成功";
+			echo "$PROC 启动成功"
 		else
-			echo "$PROC 启动失败";
+			echo "$PROC 启动失败"
 		fi
 	done
-	# onmp_restart
+	sleep 15 && ipk_start
 }
 
 cdg | tee -a /tmp/log/softwarecenter.log
