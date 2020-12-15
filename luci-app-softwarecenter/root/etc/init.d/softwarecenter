@@ -50,7 +50,6 @@ clean_vhost_config(){
 }
 
 ipk_start(){
-
 ipk="deluge-web transmission-daemon rtorrent"
 _deluge(){
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluged 启动成功" || echo deluged 启动不成功
@@ -68,9 +67,9 @@ _rtorrent(){
 
 for PROC in $ipk; do
 	if [ -z "`pidof $PROC`" ]; then
-		[ "`which rtorrent`" ] && [ $PROC = rtorrent ] && _rtorrent
-		[ "`which deluge-web`" ] && [ $PROC = deluge-web ] && _deluge
-		[ "`which transmission-daemon`" ] && [ $PROC = transmission-daemon ] && _transmission
+		[ "`which rtorrent`" = "/opt/bin/rtorrent"  ] && [ $PROC = rtorrent ] && _rtorrent
+		[ "`which deluge-web`" = "/opt/bin/deluge-web"  ] && [ $PROC = deluge-web ] && _deluge
+		[ "`which transmission-daemon`" = "/opt/bin/transmission-daemon" ] && [ $PROC = transmission-daemon ] && _transmission
 	fi
 done
 }
@@ -163,8 +162,8 @@ cdg(){
 	config_get swap_path	main swap_path
 	config_get user			main user
 	config_get pass			main pass
-	### entware ###
 	source /etc/profile
+	### entware ###
 	if [ -z "$deploy_entware" ]; then
 		if [ -x /etc/init.d/entware ]; then
 			echo "entware环境初始化" && entware_unset
