@@ -155,7 +155,6 @@ function system_check(){
 			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
 			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
-		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk已ext4"
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
 		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
@@ -243,26 +242,117 @@ echo "server.port = $web_port" >> $www_cfg
 else
 sed -i "s/server.port = .*/server.port = $web_port/g" $www_cfg
 fi
-/opt/etc/init.d/S80lighttpd start && [ $? = 0 ] && echo lighttpd已经运行 || echo lighttpd没有运行
-/opt/etc/init.d/S85rtorrent start && [ $? = 0 ] && echo rtorrent已经运行 || echo rtorrent没有运行
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd已经运行 || echo lighttpd没有运行
+/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent已经运行 || echo rtorrent没有运行
 }
 
 deluge(){
 ipk_install deluge deluge-ui-web
-/opt/etc/init.d/S80deluged start && [ $? = 0 ] && echo deluged已经运行 || echo deluged没有运行
-/opt/etc/init.d/S81deluge-web start && [ $? = 0 ] && echo deluge-web已经运行 || echo deluge-web没有运行
+/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged已经运行 || echo deluged没有运行
+/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web已经运行 || echo deluge-web没有运行
 }
 
 transmission(){
 ipk_install transmission-daemon transmission-web-control
-/opt/etc/init.d/S88transmission start && [ $? = 0 ] && echo transmission已经运行 || echo transmission没有运行
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission已经运行 || echo transmission没有运行
+}
+
+qbittorrent(){
+if ipk_install qbittorrent; then
+QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
+cat > "$QBT_INI_FILE" << EOF
+[AutoRun]
+enabled=false
+program=
+[Preferences]
+WebUI\Address=*
+WebUI\AlternativeUIEnabled=false
+WebUI\AuthSubnetWhitelist=@Invalid()
+WebUI\AuthSubnetWhitelistEnabled=false
+WebUI\CSRFProtection=false
+WebUI\CustomHTTPHeadersEnabled=false
+WebUI\LocalHostAuth=true
+WebUI\MaxAuthenticationFailCount=5
+WebUI\Port=9080
+WebUI\SecureCookie=true
+WebUI\ServerDomains=*
+WebUI\SessionTimeout=3600
+WebUI\UseUPnP=true
+WebUI\Username=admin
+General\Locale=zh
+Downloads\UseIncompleteExtension=true
+EOF
+/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent已经运行 || echo qbittorrent没有运行
+fi
+}
+
+Paria2(){
+if ipk_install aria2; then
+sed -i '/secret/d' /opt/etc/aria2.conf
+/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
+	if [ ! -d /opt/share/www/ariang ]; then
+	wget -cN -t 5 --no-check-certificate https://github.com/mayswind/AriaNg-DailyBuild/archive/1.1.7.tar.gz -P /opt/share/www
+		if [ -f /opt/share/www/1.1.7.tar.gz ]; then
+			tar -xzf /opt/share/www/1.1.7.tar.gz -C /opt/share/www
+			mv /opt/share/www/AriaNg-DailyBuild-1.1.7 /opt/share/www/ariang
+			rm /opt/share/www/1.1.7.tar.gz
+		fi
+	fi
+fi
+}
+
+amule(){
+if ipk_install amule; then
+	# /opt/etc/init.d/S57amuled start > /dev/null 2>&1
+	# /opt/etc/init.d/S57amuled stop > /dev/null 2>&1
+	# cd /opt/share/amule/webserver
+	# wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
+	# unzip master && mv AmuleWebUI-Reloaded-master AmuleWebUI-Reloaded && rm -rf master
+	# cd /opt/share/amule/webserver/AmuleWebUI-Reloaded
+	# sed -i 's/Template=.*/Template=AmuleWebUI-Reloaded/g' /opt/var/amule/amule.conf
+	# sed -i 's/UPnPEnabled=.*/UPnPEnabled=1/g' /opt/var/amule/amule.conf
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
+fi
+}
+
+onmp_restart(){
+	/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm stop > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx stop > /dev/null 2>&1
+	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
+	sleep 3
+	/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm start > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx start > /dev/null 2>&1
+	sleep 3
+	num=0
+	for PROC in 'nginx' 'php-fpm' 'mysqld'; do
+		if [ -n "`pidof $PROC`" ]; then
+			echo $PROC "启动成功";
+		else
+			echo $PROC "启动失败";
+			num=`expr $num + 1`
+		fi
+	done
+	if [[ $num -gt 0 ]]; then
+		echo "onmp启动失败"
+		logger -t "【ONMP】" "启动失败"
+	else
+		echo "onmp已启动"
+		logger -t "【ONMP】" "已启动"
+		vhost_list
+	fi
 }
 
 if [ $1 ]; then
+	[ $1 = "amule" ] && amule | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "aria2" ] && Paria2 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "qbittorrent" ] && qbittorrent | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "transmission" ] && transmission | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "onmp_restart" ] && onmp_restart | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "ipk_install" ] && ipk_install $2 $3 $4 $5 | tee -a /tmp/log/softwarecenter.log
 fi
