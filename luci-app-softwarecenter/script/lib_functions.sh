@@ -286,9 +286,10 @@ EOF
 fi
 }
 
-aria2(){
+Paria2(){
 if ipk_install aria2; then
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
+fi
 }
 
 amule(){
@@ -336,7 +337,7 @@ onmp_restart(){
 
 if [ $1 ]; then
 	[ $1 = "amule" ] && amule | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "aria2" ] && aria2 | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "aria2" ] && Paria2 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "qbittorrent" ] && qbittorrent | tee -a /tmp/log/softwarecenter.log
