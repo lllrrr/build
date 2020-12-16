@@ -107,7 +107,7 @@ local state=(SYS.call("pidof qbittorrent-nox > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "9080" .. "')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("qbittorrent 已经运行") .. "</font></b>"
-	p.description = translate("qbittorrent默认WebUI端口：9080，首次要输入网址打开WebUI<br/>网页地址http(s)://\[ Your device IP \]:9080" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
+	p.description = translate("qbittorrent默认WebUI端口：9080" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("qbittorrent 没有运行") .. "</font></b>"
 	p.description = translate("qbittorrent默认WebUI端口：9080" .. "<br/>".. state_msg)
