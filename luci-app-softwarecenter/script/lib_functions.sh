@@ -286,19 +286,9 @@ EOF
 fi
 }
 
-Paria2(){
+aria2(){
 if ipk_install aria2; then
-sed -i '/secret/d' /opt/etc/aria2.conf
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
-	if [ ! -d /opt/share/www/ariang ]; then
-	wget -cN -t 5 --no-check-certificate https://github.com/mayswind/AriaNg-DailyBuild/archive/1.1.7.tar.gz -P /opt/share/www
-		if [ -f /opt/share/www/1.1.7.tar.gz ]; then
-			tar -xzf /opt/share/www/1.1.7.tar.gz -C /opt/share/www
-			mv /opt/share/www/AriaNg-DailyBuild-1.1.7 /opt/share/www/ariang
-			rm /opt/share/www/1.1.7.tar.gz
-		fi
-	fi
-fi
 }
 
 amule(){
@@ -346,7 +336,7 @@ onmp_restart(){
 
 if [ $1 ]; then
 	[ $1 = "amule" ] && amule | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "aria2" ] && Paria2 | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "aria2" ] && aria2 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "qbittorrent" ] && qbittorrent | tee -a /tmp/log/softwarecenter.log

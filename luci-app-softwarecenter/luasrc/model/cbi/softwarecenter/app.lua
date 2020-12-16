@@ -17,9 +17,9 @@ p.write = function()
 end
 local state=(SYS.call("pidof aria2c > /dev/null") == 0)
 if state then
-	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开AriNG管理") .." \" onclick=\"window.open('http://'+window.location.hostname+'" .. "/ariang/" .. "')\"/>"
+	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开AriNG管理") .." \" onclick=\"window.open('http://ariang.ghostry.cn')\"/>&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开YAAW管理") .." \" onclick=\"window.open('http://yaaw.ghostry.cn')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("aria2 已经运行") .. "</font></b>"
-	p.description = translate("Aria2 RPC密码为空" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
+	p.description = translate("Aria2 RPC监听端口默认为：6800; RPC密码默认为：Passw0rd<br/>如修改相关配置可在  /opt/etc/aria2.conf  文件修改相关内容" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("aria2 没有运行") .. "</font></b>"
 	p.description = translate("Aria2 RPC密码为空" .. "<br/>".. state_msg)
@@ -107,7 +107,7 @@ local state=(SYS.call("pidof qbittorrent-nox > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "9080" .. "')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("qbittorrent 已经运行") .. "</font></b>"
-	p.description = translate("qbittorrent默认WebUI端口：9080" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
+	p.description = translate("qbittorrent默认WebUI端口：9080，首次要输入网址打开WebUI<br/>网页地址http(s)://\[ Your device IP \]:9080" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("qbittorrent 没有运行") .. "</font></b>"
 	p.description = translate("qbittorrent默认WebUI端口：9080" .. "<br/>".. state_msg)
