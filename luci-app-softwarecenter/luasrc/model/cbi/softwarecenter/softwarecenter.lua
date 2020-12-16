@@ -1,9 +1,10 @@
 -- Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 -- This is free software, licensed under the GNU General Public License v3.
-
+local SYS = require "luci.sys"
+local UTIL = require "luci.util"
 local fs   = require "nixio.fs"
 local util = require "nixio.util"
-local p = require("luci.model.uci").cursor()
+-- local p = require("luci.model.uci").cursor()
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m = Map("softwarecenter",translate("软件中心"),translate("软件中心负责自动化Entware，ONMP的部署和软件配置！<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
@@ -16,15 +17,15 @@ s.anonymous = true
 
 s:tab("entware",translate("Entware设置"))
 p = s:taboption("entware",Flag,"deploy_entware",translate("启用"),translate("开始部署Entware环境"))
-local model = luci.sys.exec("uname -m 2>/dev/null")
+local model = SYS.exec("opkg status libc 2>/dev/null | grep 'Architecture' | awk -F ': ' '{print $2}' 2>/dev/null")
 local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '.." (如有错误自定义)")
 cpu_model:value("", translate("-- 可选是系统检测到CPU架构 --"))
 cpu_model:value(model)
 cpu_model:depends("deploy_entware",1)
 
-local disk_size = luci.sys.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
+local disk_size = SYS.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
 p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到加入的磁盘先用<code>磁盘分区</code>)<br><b style=\"color:green\">")..disk_size..("</b><b style=\"color:red\">磁盘如不是EXT4文件系统将重新格式化，里面的数据也同时清空！</b>"))
-for list_disk_mount in luci.util.execi("lsblk | grep mnt | awk '{print $7}'") do
+for list_disk_mount in UTIL.execi("lsblk | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
 p:depends("deploy_entware",1)
@@ -54,7 +55,7 @@ p.inputtitle = translate("开始扫描")
 p.inputstyle = "reload"
 p.forcewrite = true
 function p.write(self, section, value)
-  luci.util.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
+  UTIL.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
 end
 
 p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，此工具可简单的分区挂载"))
@@ -73,8 +74,8 @@ p = s:taboption("Partition", Button,"_add",translate(" "),translate("默认只�
 p.inputtitle = translate("开始分区")
 p.inputstyle = "apply"
 function p.write(self, section)
-	luci.sys.call("cbi.apply")
-	luci.sys.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
+	SYS.call("cbi.apply")
+	SYS.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
 	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
 
