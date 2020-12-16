@@ -51,7 +51,7 @@ clean_vhost_config(){
 
 ipk_start(){
 
-local ipk="aria2c deluge-web transmission-daemon rtorrent qbittorrent amule"
+local ipk="amule aria2c deluge-web transmission-daemon rtorrent qbittorrent-nox "
 
 _aria2c (){
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo "$PROC 启动成功" || echo $PROC 启动不成功
@@ -85,7 +85,7 @@ for PROC in $ipk; do
 		[ "`which $PROC`" = "/opt/bin/aria2c" ] && _aria2c
 		[ "`which $PROC`" = "/opt/bin/rtorrent" ] && _rtorrent
 		[ "`which $PROC`" = "/opt/bin/deluge-web" ] && _deluge
-		[ "`which $PROC`" = "/opt/bin/qbittorrent" ] && _qbittorrent
+		[ "`which $PROC`" = "/opt/bin/qbittorrent-nox" ] && _qbittorrent
 		[ "`which $PROC`" = "/opt/bin/transmission-daemon" ] && _transmission
 	fi
 done
