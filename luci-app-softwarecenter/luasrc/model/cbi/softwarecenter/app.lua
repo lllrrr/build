@@ -19,14 +19,14 @@ local state=(SYS.call("pidof aria2c > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开AriNG管理") .." \" onclick=\"window.open('http://ariang.ghostry.cn')\"/>&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开webui-aria2管理") .." \" onclick=\"window.open('http://webui-aria2.ghostry.cn')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("aria2 已经运行") .. "</font></b>"
-	p.description = translate("Aria2 RPC监听端口默认为：6800; RPC密码默认为：Passw0rd<br/>如修改相关配置可在  /opt/etc/aria2.conf  文件修改相关内容" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
+	p.description = translate("Aria2 RPC监听端口默认为：6800; RPC密码默认为：Passw0rd<br/>配置文件在   /opt/etc/aria2.conf " .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("aria2 没有运行") .. "</font></b>"
 	p.description = translate("Aria2 RPC密码为空" .. "<br/>".. state_msg)
 end
 p:depends("aria2_install", 1)
 -- deluge
-p = s:option(Flag, "deluge_install",translate("启用deluge"), translate("Deluge是一个免费好用的BT下载软件，通过PyGTK建立图形界面<br/>使用libtorrent作为其后端，有包括GTK+、网络远程客户端、命令行模式等<br/>多种用户界面，占用系统资源少，有丰富的插件来实现核心以外的众多功能。"))
+p = s:option(Flag, "deluge_install",translate("启用deluge"), translate("Deluge是一个免费好用的BT下载软件，使用libtorrent作为其后端<br/>多种用户界面，占用系统资源少，有丰富的插件来实现核心以外的众多功能。"))
 p.default = 0
 p.rmempty = false
 p = s:option(Button, "_adb", translate("安装deluge"))
@@ -107,7 +107,7 @@ local state=(SYS.call("pidof qbittorrent-nox > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "9080" .. "')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("qbittorrent 已经运行") .. "</font></b>"
-	p.description = translate("qbittorrent默认WebUI端口：9080，首次要输入网址打开WebUI<br/>网页地址http://\[ Your device IP \]:9080设置保存后下次可从按纽打开" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
+	p.description = translate("qbittorrent默认WebUI端口：9080 用启名：admin 密码：adminadmin<br/>配置文件在 /opt/etc/qBittorrent_entware/config/qBittorrent.conf " .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("qbittorrent 没有运行") .. "</font></b>"
 	p.description = translate("qbittorrent默认WebUI端口：9080" .. "<br/>".. state_msg)

@@ -23,8 +23,7 @@ _make_dir(){
 	return 0
 }
 
-# entware环境设定 参数：$1:设备底层架构 $2:安装位置
-#说明：此函数用于写入新配置
+# entware环境设定 参数：$1:设备底层架构 $2:安装位置 说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
 	[ "$1" ] && USB_PATH="$1"
@@ -104,6 +103,10 @@ ENTWARE
 	fi
 }
 
+check_url() {
+  if [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ]; then return 0; else return 1; fi
+}
+
 # entware环境解除 说明：此函数用于删除OPKG配置设定
 entware_unset(){
 	/etc/init.d/entware stop
@@ -116,8 +119,7 @@ entware_unset(){
 	rm -r /opt
 }
 
-# 软件包安装 参数: $@:安装列表
-#说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
+# 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
 	echo "正在更新软件源" && opkg update > /dev/null 2>&1
 	for ipk in $@ ; do
@@ -132,8 +134,7 @@ install_soft(){
 	done
 }
 
-# 软件包卸载 参数: $1:卸载列表
-#说明：本函数将负责强制卸载指定的软件包
+# 软件包卸载 参数: $1:卸载列表 说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
 	for ipk in $@ ; do
 		echo -e "正在卸载 $ipk\c"
@@ -172,7 +173,7 @@ function system_check(){
 # 配置交换分区文件 参数: $1:交换空间大小(M) $2:交换分区挂载点
 config_swap_init(){
 status=$(cat /proc/swaps | awk 'NR==2')
-    if [[ -n "$status" ]]; then
+    if [ -n "$status" ]; then
         echo "Swap 已经启用"
     else
         if [ ! -e "$1/opt/.swap" ]; then
@@ -208,7 +209,7 @@ get_env(){
 
     # 获取路由器IP
     localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
-    if [[ ! -n "$localhost" ]]; then
+    if [ ! -n "$localhost" ]; then
         localhost="你的路由器IP"
     fi
 }
@@ -242,51 +243,40 @@ echo "server.port = $web_port" >> $www_cfg
 else
 sed -i "s/server.port = .*/server.port = $web_port/g" $www_cfg
 fi
-/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd已经运行 || echo lighttpd没有运行
-/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent已经运行 || echo rtorrent没有运行
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
+/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 deluge(){
 ipk_install deluge deluge-ui-web
-/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged已经运行 || echo deluged没有运行
-/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web已经运行 || echo deluge-web没有运行
+/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
+/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
 
 transmission(){
 ipk_install transmission-daemon transmission-web-control
-/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission已经运行 || echo transmission没有运行
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
 qbittorrent(){
 if ipk_install qbittorrent; then
+/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 10
 QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
 cat > "$QBT_INI_FILE" << EOF
-[AutoRun]
-enabled=false
-program=
 [Preferences]
-WebUI\Address=*
-WebUI\AlternativeUIEnabled=false
-WebUI\AuthSubnetWhitelist=@Invalid()
-WebUI\AuthSubnetWhitelistEnabled=false
+Connection\PortRangeMin=44667
+Queueing\QueueingEnabled=false
 WebUI\CSRFProtection=false
-WebUI\CustomHTTPHeadersEnabled=false
-WebUI\LocalHostAuth=true
-WebUI\MaxAuthenticationFailCount=5
 WebUI\Port=9080
-WebUI\SecureCookie=true
-WebUI\ServerDomains=*
-WebUI\SessionTimeout=3600
-WebUI\UseUPnP=true
 WebUI\Username=admin
 General\Locale=zh
 Downloads\UseIncompleteExtension=true
 EOF
-/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent已经运行 || echo qbittorrent没有运行
 fi
+/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
-Paria2(){
+aria2(){
 if ipk_install aria2; then
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
 fi
@@ -337,13 +327,13 @@ onmp_restart(){
 
 if [ $1 ]; then
 	[ $1 = "amule" ] && amule | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "aria2" ] && Paria2 | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "aria2" ] && aria2 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "qbittorrent" ] && qbittorrent | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "transmission" ] && transmission | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "onmp_restart" ] && onmp_restart | tee -a /tmp/log/softwarecenter.log
+	[ $1 = "ipk_install" ] && ipk_install $2 $3 | tee -a /tmp/log/softwarecenter.log
 	[ $1 = "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "ipk_install" ] && ipk_install $2 $3 $4 $5 | tee -a /tmp/log/softwarecenter.log
 fi
