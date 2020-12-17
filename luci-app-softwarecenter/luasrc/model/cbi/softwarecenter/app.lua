@@ -129,16 +129,12 @@ local state=(SYS.call("pidof amuled > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "4711" .. "')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("amule 已经运行") .. "</font></b>"
-	p.description = translate("amule默认WebUI端口：4711" .. "<br/>".. state_msg .. "&nbsp;&nbsp;&nbsp;".. o)
+	p.description = translate("amule默认WebUI端口：4711，密码：admin" .. "<br/>".. state_msg .. "&nbsp;&nbsp;&nbsp;".. o)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("amule 没有运行") .. "</font></b>"
 	p.description = translate("amule默认WebUI端口：4711" .. "<br/>".. state_msg)
 end
 p:depends("amule_install", 1)
--- p = s:option(Value, "web_port", translate("WebUI端口"),translate("自定义WebUI端口"))
--- p.default = "81"
--- p.rmempty = true
--- p:depends("rtorrent_install", 1)
 -- p = s:option(Button, "_adp", translate("重启rtorrent"))
 -- p.inputtitle = translate("重启rtorrent")
 -- p.inputstyle = "apply"
