@@ -248,7 +248,7 @@ fi
 }
 
 deluge(){
-ipk_install deluge deluge-ui-web
+ipk_install deluge-ui-web
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
