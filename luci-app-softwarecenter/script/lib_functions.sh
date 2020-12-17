@@ -284,16 +284,23 @@ fi
 
 amule(){
 if ipk_install amule; then
-	# /opt/etc/init.d/S57amuled start > /dev/null 2>&1
-	# /opt/etc/init.d/S57amuled stop > /dev/null 2>&1
-	# cd /opt/share/amule/webserver
-	# wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	# unzip master && mv AmuleWebUI-Reloaded-master AmuleWebUI-Reloaded && rm -rf master
-	# cd /opt/share/amule/webserver/AmuleWebUI-Reloaded
-	# sed -i 's/Template=.*/Template=AmuleWebUI-Reloaded/g' /opt/var/amule/amule.conf
-	# sed -i 's/UPnPEnabled=.*/UPnPEnabled=1/g' /opt/var/amule/amule.conf
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
+	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
+	wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
+	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1
+	pp=`echo -n admin | md5sum | awk '{print $1}'`
+	sed -i "{
+	s/^Enabled=.*/Enabled=1/g
+	s/^Password=.*/Password=$pp/g
+	s/^ECPassword=.*/ECPassword=$pp/g
+	s/^UPnPEnabled=.*/UPnPEnabled=1/g
+	s/^UPnPECEnabled=.*/UPnPECEnabled=1/g
+	s/^Template=.*/Template=AmuleWebUI-Reloaded-master/g
+	s/^AcceptExternalConnections=.*/AcceptExternalConnections=1/g
+	}" /opt/var/amule/amule.conf
+	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php
 fi
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
 }
 
 onmp_restart(){
