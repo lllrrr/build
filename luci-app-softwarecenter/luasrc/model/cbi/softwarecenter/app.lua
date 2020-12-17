@@ -129,7 +129,7 @@ local state=(SYS.call("pidof amuled > /dev/null") == 0)
 if state then
 	o="<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开WebUI管理") .." \" onclick=\"window.open('http://'+window.location.hostname+':" .. "4711" .. "')\"/>"
 	state_msg = "<b><font color=\"green\">" .. translate("amule 已经运行") .. "</font></b>"
-	p.description = translate("amule默认WebUI端口：4711，密码：admin" .. "<br/>".. state_msg .. "&nbsp;&nbsp;&nbsp;".. o)
+	p.description = translate("amule默认WebUI端口：4711，密码：admin" .. "<br/>".. o .. "&nbsp;&nbsp;&nbsp;".. state_msg)
 else
 	state_msg = "<b><font color=\"red\">" .. translate("amule 没有运行") .. "</font></b>"
 	p.description = translate("amule默认WebUI端口：4711" .. "<br/>".. state_msg)
