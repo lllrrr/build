@@ -97,7 +97,7 @@ ENTWARE
 	i18n_URL=http://pkg.entware.net/sources/i18n_glib223.tar.gz
 	if check_url $i18n_URL; then
 		wget -qcNO- -t 5 $i18n_URL | tar xvz -C /opt/usr/share/ > /dev/null
-		echo "Adding zh_CN.UTF-8"
+		echo "添加 zh_CN.UTF-8"
 		/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
 		sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
 	fi
@@ -179,7 +179,6 @@ status=$(cat /proc/swaps | awk 'NR==2')
         if [ ! -e "$1/opt/.swap" ]; then
             echo "正在生成swap文件，请耐心等待..."
             dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
-            # 设置交换文件
             mkswap $2/opt/.swap
             chmod 0600 $2/opt/.swap
         fi
@@ -214,8 +213,7 @@ get_env(){
     fi
 }
 
-# 容量验证 参数：$1：目标位置
-#说明：本函数判断对于GB级别，并不会很精确
+# 容量验证 参数：$1：目标位置 说明：本函数判断对于GB级别，并不会很精确
 check_available_size(){
 	available_size=`lsblk -s | grep $1 | awk '{print $4}'`
 	[ $available_size ] && echo "$available_size"
@@ -241,7 +239,7 @@ www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
 if [ -z "`grep 'server.port' $www_cfg`" ]; then
 echo "server.port = $web_port" >> $www_cfg
 else
-sed -i "s/server.port = .*/server.port = $web_port/g" $www_cfg
+sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
 fi
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
 /opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
@@ -260,7 +258,7 @@ ipk_install transmission-daemon transmission-web-control
 
 qbittorrent(){
 if ipk_install qbittorrent; then
-/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 10
+/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 5
 QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
 cat > "$QBT_INI_FILE" << EOF
 [Preferences]
@@ -286,19 +284,19 @@ amule(){
 if ipk_install amule; then
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
 	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
-	wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1
+	if wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
+	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1; then
+	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded-master/*.php; fi
 	pp=`echo -n admin | md5sum | awk '{print $1}'`
 	sed -i "{
 	s/^Enabled=.*/Enabled=1/g
+	s/^ECPas.*/ECPassword=$pp/g
+	s/^UPnPEn.*/UPnPEnabled=1/g
 	s/^Password=.*/Password=$pp/g
-	s/^ECPassword=.*/ECPassword=$pp/g
-	s/^UPnPEnabled=.*/UPnPEnabled=1/g
-	s/^UPnPECEnabled=.*/UPnPECEnabled=1/g
+	s/^UPnPECE.*/UPnPECEnabled=1/g
 	s/^Template=.*/Template=AmuleWebUI-Reloaded-master/g
-	s/^AcceptExternalConnections=.*/AcceptExternalConnections=1/g
+	s/^AcceptExternal.*/AcceptExternalConnections=1/g
 	}" /opt/var/amule/amule.conf
-	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php
 fi
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
 }
@@ -333,14 +331,15 @@ onmp_restart(){
 }
 
 if [ $1 ]; then
-	[ $1 = "amule" ] && amule | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "aria2" ] && aria2 | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "deluge" ] && deluge | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "rtorrent" ] && rtorrent | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "qbittorrent" ] && qbittorrent | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "transmission" ] && transmission | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "system_check" ] && system_check | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "onmp_restart" ] && onmp_restart | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "ipk_install" ] && ipk_install $2 $3 | tee -a /tmp/log/softwarecenter.log
-	[ $1 = "install_soft" ] && install_soft $2 $3 | tee -a /tmp/log/softwarecenter.log
+	log="/tmp/log/softwarecenter.log"
+	[ $1 = "amule" ] && amule >> $log
+	[ $1 = "aria2" ] && aria2 >> $log
+	[ $1 = "deluge" ] && deluge >> $log
+	[ $1 = "rtorrent" ] && rtorrent >> $log
+	[ $1 = "qbittorrent" ] && qbittorrent >> $log
+	[ $1 = "transmission" ] && transmission >> $log
+	[ $1 = "system_check" ] && system_check >> $log
+	[ $1 = "onmp_restart" ] && onmp_restart >> $log
+	[ $1 = "ipk_install" ] && ipk_install $2 $3 >> $log
+	[ $1 = "install_soft" ] && install_soft $2 $3 >> $log
 fi

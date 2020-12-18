@@ -51,7 +51,7 @@ clean_vhost_config(){
 
 ipk_start(){
 
-local ipk="amule aria2c deluge-web transmission-daemon rtorrent qbittorrent-nox "
+local ipk="amuled aria2c rtorrent deluge-web qbittorrent-nox transmission-daemon"
 
 _aria2c (){
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo "$PROC 启动成功" || echo $PROC 启动不成功
@@ -81,12 +81,13 @@ _amule(){
 
 for PROC in $ipk; do
 	if [ -z "`pidof $PROC`" ]; then
-		[ "`which $PROC`" = "/opt/bin/amule" ] && _amule
-		[ "`which $PROC`" = "/opt/bin/aria2c" ] && _aria2c
-		[ "`which $PROC`" = "/opt/bin/rtorrent" ] && _rtorrent
-		[ "`which $PROC`" = "/opt/bin/deluge-web" ] && _deluge
-		[ "`which $PROC`" = "/opt/bin/qbittorrent-nox" ] && _qbittorrent
-		[ "`which $PROC`" = "/opt/bin/transmission-daemon" ] && _transmission
+		INSPECT=`which $PROC`
+		[ "$INSPECT" = "/opt/bin/amuled" ] && _amule
+		[ "$INSPECT" = "/opt/bin/aria2c" ] && _aria2c
+		[ "$INSPECT" = "/opt/bin/rtorrent" ] && _rtorrent
+		[ "$INSPECT" = "/opt/bin/deluge-web" ] && _deluge
+		[ "$INSPECT" = "/opt/bin/qbittorrent-nox" ] && _qbittorrent
+		[ "$INSPECT" = "/opt/bin/transmission-daemon" ] && _transmission
 	fi
 done
 }
@@ -202,7 +203,7 @@ cdg(){
 			echo "开始安装Nginx" && init_nginx
 		fi
 		if [ -z "$nginx_enabled" ]; then
-			nginx_manage stop && echo "关闭Nginx服务器"
+			nginx_manage stop > /dev/null 2>&1
 		else
 			if [ -z "`pgrep nginx`" ]; then
 				nginx_manage start > /dev/null 2>&1
@@ -226,7 +227,7 @@ cdg(){
 			init_mysql
 		fi
 		if [ -z $mysql_enabled ]; then
-			/opt/etc/init.d/S70mysqld stop && echo "关闭MySQL服务器"
+			/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
 		else
 			if [ -z "`pgrep mysqld`" ]; then
 				/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
@@ -241,15 +242,15 @@ cdg(){
 
 	for PROC in mysqld nginx php-fpm; do
 		if [ -n "`pidof $PROC`" ]; then
-			echo "$PROC 启动成功"
+			echo "$PROC 已经启动"
 		else
-			echo "$PROC 启动失败"
+			[ "`which $PROC`" ] && echo "$PROC 没有开启" || echo "$PROC 没有安装"
 		fi
 	done
 	sleep 15 && ipk_start
 }
 
-cdg | tee -a /tmp/log/softwarecenter.log
+cdg >> /tmp/log/softwarecenter.log
 }
 
 stop(){
