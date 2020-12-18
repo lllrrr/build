@@ -122,14 +122,16 @@ entware_unset(){
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
 	echo "正在更新软件源" && opkg update > /dev/null 2>&1
-	for ipk in $@ ; do
-		echo -e "正在安装 $ipk\c"
+	for ipk in $@; do
+		if [ -z "`which $ipk`" ]; then
+		echo -e "正在安装  $ipk\c"
 		opkg install $ipk > /dev/null 2>&1
 		status
-		if [ $? != 0 ]; then
-			echo -e "正在强制安装 $ipk\c"
-			opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
-			status
+			if [ $? != 0 ]; then
+				echo -e "正在强制安装 $ipk\c"
+				opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
+				status
+			fi
 		fi
 	done
 }
@@ -320,7 +322,7 @@ onmp_restart(){
 			num=`expr $num + 1`
 		fi
 	done
-	if [[ $num -gt 0 ]]; then
+	if [ $num -gt 0 ]; then
 		echo "onmp启动失败"
 		logger -t "【ONMP】" "启动失败"
 	else

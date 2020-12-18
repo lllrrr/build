@@ -1,4 +1,4 @@
-m=Map("softwarecenter",translate("网站管理"),translate("正常运行ONMP后先添加名称再选择要安装的应用软件"))
+m=Map("softwarecenter",translate("网站管理"),translate("在能正常运行 Nginx/MySQL/PHP 后先添加网站名称后再选择要部署的网站<br>可以自动部署PHP探针，phpMyAdmin，可道云，h5ai，Typecho等等"))
 m:section(SimpleSection).template = "softwarecenter/website_status"
 s = m:section(TypedSection,"website")
 s.addremove = true

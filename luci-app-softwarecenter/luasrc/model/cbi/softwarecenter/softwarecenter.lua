@@ -4,11 +4,9 @@ local SYS = require "luci.sys"
 local UTIL = require "luci.util"
 local fs   = require "nixio.fs"
 local util = require "nixio.util"
--- local p = require("luci.model.uci").cursor()
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m = Map("softwarecenter",translate("软件中心"),translate("软件中心负责自动化Entware，ONMP的部署和软件配置！<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
---各个软件的状态
 m:section(SimpleSection).template = "softwarecenter/software_status"
 
 s = m:section(TypedSection,"softwarecenter",translate("设置"))
@@ -30,15 +28,15 @@ for list_disk_mount in UTIL.execi("lsblk | grep mnt | awk '{print $7}'") do
 end
 p:depends("deploy_entware",1)
 
-p = s:taboption("entware",Flag,"entware_enable",translate("安装ONMP"),translate("ONMP是使用opkg包快速搭建Nginx/MySQL/PHP环境，<br>此安装过程可能需要大量时间，可以在日志中查看到安装的过程"))
+p = s:taboption("entware",Flag,"entware_enable",translate("安装Entware"),translate("安装过程可以在运行日志中查看进度<br>如只安装应用软件可不用部署 Nginx / MySQL"))
 p:depends("deploy_entware",1)
 
 deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
-p = s:taboption("entware",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx"))
+p = s:taboption("entware",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx/PHP7(依赖Entware软件仓库)"))
 p:depends("deploy_nginx",1)
 deploy_nginx:depends("entware_enable",1)
 
-deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("自动部署MySQL数据库服务器(依赖Entware软件仓库)"))
+deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("部署MySQL数据库服务器(依赖Entware软件仓库)"))
 p = s:taboption("entware",Flag,"mysql_enabled",translate("Enabled"),translate("留空是默认登录用户  root  密码  123456"))
 p:depends("deploy_mysql",1)
 p = s:taboption("entware",Value,"user",translate("用户"),translate("MySQL数据库服务器登录用户"))
