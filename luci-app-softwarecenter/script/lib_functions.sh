@@ -224,6 +224,7 @@ check_available_size(){
 ipk_install(){
 	source /etc/profile
 	opkg update
+	_make_dir /opt/etc/config
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
 		echo "请耐心等待$i安装中。"
@@ -243,18 +244,21 @@ echo "server.port = $web_port" >> $www_cfg
 else
 sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
 fi
+ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
 /opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 deluge(){
 ipk_install deluge-ui-web
+ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
 
 transmission(){
 ipk_install transmission-daemon transmission-web-control
+ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.conf
 /opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
@@ -273,11 +277,13 @@ General\Locale=zh
 Downloads\UseIncompleteExtension=true
 EOF
 fi
+ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
 /opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
 aria2(){
 if ipk_install aria2; then
+ln -sf /opt/etc/aria2.conf /opt/etc/config/aria2.conf
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
 fi
 }
@@ -300,6 +306,7 @@ if ipk_install amule; then
 	s/^AcceptExternal.*/AcceptExternalConnections=1/g
 	}" /opt/var/amule/amule.conf
 fi
+	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
 }
 
