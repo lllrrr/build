@@ -75,7 +75,7 @@ get_entware_path(){
 start(){
 mkdir -p /opt
 ENTWARE_PATH=`uci get softwarecenter.main.disk_mount`
-[ $ENTWARE_PATH ] || ENTWARE_PATH=$get_entware_path
+[ $ENTWARE_PATH ] || ENTWARE_PATH=$(get_entware_path)
 mount -o bind $ENTWARE_PATH/opt /opt
 }
 
