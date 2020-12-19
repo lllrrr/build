@@ -63,20 +63,10 @@ entware_set(){
 #!/bin/sh /etc/rc.common
 START=51
 
-# 获取entware安装路径 该函数负责将找到的entware路径返回，有多个目录则返回最先找到的
-get_entware_path(){
-	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
-		if [ -d "$mount_point/opt/etc/nginx" ]; then
-			echo "$mount_point/opt"
-			break
-		fi
-	done
-}
-
 start(){
-	mkdir -p /opt
-	ENTWARE_PATH=`get_entware_path`
-	mount -o bind $ENTWARE_PATH /opt
+mkdir -p /opt
+ENTWARE_PATH=`uci get softwarecenter.main.disk_mount`
+mount -o bind $ENTWARE_PATH/opt /opt
 }
 
 stop(){
