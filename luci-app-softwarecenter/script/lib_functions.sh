@@ -63,9 +63,19 @@ entware_set(){
 #!/bin/sh /etc/rc.common
 START=51
 
+get_entware_path(){
+	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
+		if [ -d "$mount_point/opt/etc" ]; then
+			echo "$mount_point"
+			break
+		fi
+	done
+}
+
 start(){
 mkdir -p /opt
 ENTWARE_PATH=`uci get softwarecenter.main.disk_mount`
+[ $ENTWARE_PATH ] || ENTWARE_PATH=$get_entware_path
 mount -o bind $ENTWARE_PATH/opt /opt
 }
 
