@@ -1,6 +1,5 @@
 #!/bin/sh
-#check usb disk size
-#version: 1.0
+#check usb disk size version: 1.0
 
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 # This is free software, licensed under the GNU General Public License v3.
@@ -13,7 +12,7 @@
 	;;
 	2)
 		PART_TYPES="ext2|ext3|ext4|.*fat|.*ntfs|fuseblk|btrfs|ufsd"; i=1
-		for mounted in $(/bin/mount | grep -E "$PART_TYPES" | grep -v -E "/opt|/boot|/root" | grep -v -E -w "/" | cut -d' ' -f3) ; do
+		for mounted in $(/bin/mount | grep -E "$PART_TYPES" | grep -v -E "/opt|/boot|/root" | grep -v -E -w "/" | cut -d' ' -f3); do
 			for m in `seq 5`; do
 				n=$((m + 1))
 				eval value$m=`df -h | grep $mounted | awk '{print $(eval echo '$n')}'`
@@ -22,14 +21,5 @@
 			echo "[$i] $value5 [ 总容量:$value1 ($pp5) 已用:$value2(比例$value4 ) 可用:$value3]<br>"
 			i=$((i + 1))
 		done
-	;;
-	3)
-	if [[ -n `which lsscsi` ]]; then
-		lsscsi | grep disk | awk '{print $NF}'
-	elif [ -n `which mount` ]; then
-		mount | grep mnt | awk '{print $3}'
-	else
-		blkid -s PARTLABEL | cut -d: -f1
-	fi
 	;;
 	esac
