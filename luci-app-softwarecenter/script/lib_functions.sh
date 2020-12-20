@@ -220,6 +220,7 @@ check_available_size(){
 }
 
 ipk_install(){
+	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
 	source /etc/profile
 	opkg update
 	_make_dir /opt/etc/config
