@@ -14,27 +14,27 @@ s.addremove = false
 s.anonymous = true
 
 s:tab("entware",translate("Entware设置"))
-p = s:taboption("entware",Flag,"deploy_entware",translate("启用"),translate("开始部署Entware环境"))
-local model = SYS.exec("opkg status libc 2>/dev/null | grep 'Architecture' | awk -F ': ' '{print $2}' 2>/dev/null")
+p = s:taboption("entware",Flag,"entware_enable",translate("启用"),translate("开始部署Entware环境"))
+local model = SYS.exec("cat /etc/openwrt_release | grep ARCH | cut -f2 -d\"'\" ")
 local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '.." (如有错误自定义)")
 cpu_model:value("", translate("-- 可选是系统检测到CPU架构 --"))
 cpu_model:value(model)
-cpu_model:depends("deploy_entware",1)
+cpu_model:depends("entware_enable",1)
 
 local disk_size = SYS.exec("/usr/bin/softwarecenter/check_available_size.sh 2")
 p = s:taboption("entware",ListValue,"disk_mount",translate("安装路径"),translatef("已挂载磁盘：(如没检测到加入的磁盘先用<code>磁盘分区</code>)<br><b style=\"color:green\">")..disk_size..("</b><b style=\"color:red\">磁盘如不是EXT4文件系统将重新格式化，里面的数据也同时清空！</b>"))
 for list_disk_mount in UTIL.execi("lsblk | grep mnt | awk '{print $7}'") do
 	p:value(list_disk_mount)
 end
-p:depends("deploy_entware",1)
+p:depends("entware_enable",1)
 
-p = s:taboption("entware",Flag,"entware_enable",translate("安装Entware"),translate("安装过程可以在运行日志中查看进度<br>如只安装应用软件可不用部署 Nginx / MySQL"))
-p:depends("deploy_entware",1)
+p = s:taboption("entware",Flag,"deploy_entware",translate("安装Entware"),translate("安装过程可以在运行日志中查看进度<br>如只安装应用软件可不用部署 Nginx / MySQL"))
+p:depends("entware_enable",1)
 
 deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
 p = s:taboption("entware",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx/PHP7(依赖Entware软件仓库)"))
 p:depends("deploy_nginx",1)
-deploy_nginx:depends("entware_enable",1)
+deploy_nginx:depends("deploy_entware",1)
 
 deploy_mysql = s:taboption("entware",Flag,"deploy_mysql",translate("部署MySQL"),translate("部署MySQL数据库服务器(依赖Entware软件仓库)"))
 p = s:taboption("entware",Flag,"mysql_enabled",translate("Enabled"),translate("留空是默认登录用户  root  密码  123456"))
@@ -45,7 +45,7 @@ p:depends("mysql_enabled",1)
 p = s:taboption("entware",Value,"pass",translate("密码"),translate("MySQL数据库服务器登录密码"))
 p.password=true
 p:depends("mysql_enabled",1)
-deploy_mysql:depends("entware_enable",1)
+deploy_mysql:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
 p = s:taboption("Partition", Button,"_rescan",translate("扫描磁盘"),translate("重新扫描加入后没有显示的磁盘"))
@@ -94,6 +94,6 @@ p:depends("swap_enabled",1)
 p = s:taboption("swap",Value,"swap_size",translate("空间大小"),translate("交换空间大小(M)，默认512M"))
 p.default='512'
 p:depends("swap_enabled",1)
-swap_enable:depends("entware_enable",1)
+swap_enable:depends("deploy_entware",1)
 
 return m

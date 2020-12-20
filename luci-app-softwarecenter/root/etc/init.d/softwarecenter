@@ -179,69 +179,51 @@ cdg(){
 	config_get swap_path	main swap_path
 	config_get user			main user
 	config_get pass			main pass
-	# entware
+	# entware环境
 	source /etc/profile
-	if [ -z "$deploy_entware" ]; then
-		if [ -x /etc/init.d/entware ]; then
-			echo "entware环境初始化" && entware_unset
+	if [ $entware_enable ]; then
+		if [ ! -e /etc/init.d/entware ]; then
+			echo -e "\n开始安装entware环境\n" && entware_set $disk_mount $cpu_model
+			source /etc/profile
 		fi
-		return
-	fi
-
-	if [ ! -x /etc/init.d/entware ]; then
-		entware_set $disk_mount $cpu_model
-		source /etc/profile
-	fi
-
-	if [ -z "$entware_enable" ]; then
+	else
+		if [ -x /etc/init.d/entware ]; then
+			echo -e "\n开始删除entware环境\n" && entware_unset
+		fi
 		return
 	fi
 
 	# Nginx
-	if [ -n "$deploy_nginx" ];then
-		if [ ! -x /opt/etc/init.d/S80nginx ]; then
-			echo "开始安装Nginx" && init_nginx
-		fi
-		if [ -z "$nginx_enabled" ]; then
-			nginx_manage stop > /dev/null 2>&1
-		else
-			if [ -z "`pgrep nginx`" ]; then
-				nginx_manage start > /dev/null 2>&1
-			fi
+	if [ $deploy_nginx ];then
+		[ ! -x /opt/etc/init.d/S80nginx ] && echo "开始安装Nginx" && init_nginx
+		if [ $nginx_enabled ]; then
+			[ "`pgrep nginx`" ] || nginx_manage start > /dev/null 2>&1
 			# 迭代配置website
 			config_foreach handle_website website test
 			clean_vhost_config
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
+		else
+			nginx_manage stop > /dev/null 2>&1
 		fi
 	else
-		if [ -x /opt/etc/init.d/S80nginx ]; then
-			del_nginx && echo "已卸载Nginx相关的软件包"
-		fi
+		[ -x /opt/etc/init.d/S80nginx ] && del_nginx && echo "已卸载Nginx相关的软件包"
 	fi
 
 	# MySQL
-	if [ -n "$deploy_mysql" ]; then
-		# echo "检查MySQL部署情况"
-		if [ ! -x /opt/etc/init.d/S70mysqld ]; then
-			echo "开始安装MySQL"
-			init_mysql
-		fi
-		if [ -z $mysql_enabled ]; then
-			/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
+	if [ $deploy_mysql ]; then
+		[ ! -x /opt/etc/init.d/S70mysqld ] && echo "开始安装MySQL" && init_mysql
+		if [ $mysql_enabled ]; then
+			[ "`pgrep mysqld`" ] || /opt/etc/init.d/S70mysqld start > /dev/null 2>&1
 		else
-			if [ -z "`pgrep mysqld`" ]; then
-				/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
-			fi
+			/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
 		fi
 	else
-		if [ -x /opt/etc/init.d/S70mysqld ]; then
-			del_mysql && echo "已卸载MySQL相关的软件包"
-		fi
+		[ -x /opt/etc/init.d/S70mysqld ] && del_mysql && echo "已卸载MySQL相关的软件包"
 	fi
-	[ $swap_enabled = 1 ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
+	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
 	for PROC in mysqld nginx php-fpm; do
-		if [ -n "`pidof $PROC`" ]; then
+		if [ "`pidof $PROC`" ]; then
 			echo "$PROC 已经启动"
 		else
 			[ "`which $PROC`" ] && echo "$PROC 没有开启" || echo "$PROC 没有安装"

@@ -29,30 +29,29 @@ entware_set(){
 	[ "$1" ] && USB_PATH="$1"
 	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
 	system_check $USB_PATH
-	echo -e "\n开始安装entware环境\n"
 	echo "安装基本软件" && install_soft "$pkglist_base"
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 
-	if [ "$2" == "mipsel" ]; then
+	if [ "$2" = "mipsel_24kc" ]; then
 		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
-	elif [ "$2" == "mips" ]; then
-	if [ $Kernel_V == "2.6" ]; then
+	elif [ "$2" = "mips" ]; then
+	if [ $Kernel_V = "2.6" ]; then
 		wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
 	else
 		wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
 	fi
-	elif [ "$2" == "armv7" ]; then
+	elif [ "$2" = "armv7" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$2" == "x86_64" ]; then
+	elif [ "$2" = "x86_64" ]; then
 		wget -O - http://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$2" == "x86" ]; then
+	elif [ "$2" = "x86" ]; then
 		wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
-	elif [ "$2" == "aarch64" ]; then
+	elif [ "$2" = "aarch64" ]; then
 		wget -O - http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
-	elif [ "$2" == "armv7l" ]; then
+	elif [ "$2" = "armv7l" ]; then
 		wget -O - http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh | /bin/sh
 	else
 		echo "没有找到你选择的CPU架构！"
@@ -103,20 +102,19 @@ ENTWARE
 	fi
 }
 
-check_url() {
-  if [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ]; then return 0; else return 1; fi
-}
-
 # entware环境解除 说明：此函数用于删除OPKG配置设定
 entware_unset(){
-	/etc/init.d/entware stop
-	/etc/init.d/entware disable
+	/etc/init.d/entware stop > /dev/null 2>&1
+	/etc/init.d/entware disable > /dev/null 2>&1
 	rm /etc/init.d/entware
-	sed -i "export PATH=\/opt\/bin:\/opt\/sbin:\$PATH/d" /etc/profile
+	sed -i "/export PATH=\/opt\/bin/d" /etc/profile
 	source /etc/profile
-	rm -rf /opt/*
 	umount -lf /opt
 	rm -r /opt
+}
+
+check_url() {
+  [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ] && return 0|| return 1
 }
 
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
@@ -235,18 +233,33 @@ for i in $@; do
 done
 }
 
-rtorrent(){
-ipk_install rtorrent-easy-install
-web_port=1099
-www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
-if [ -z "`grep 'server.port' $www_cfg`" ]; then
-echo "server.port = $web_port" >> $www_cfg
-else
-sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
+amule(){
+if ipk_install amule; then
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
+	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
+	if wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
+	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1; then
+	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded-master/*.php; fi
+	pp=`echo -n admin | md5sum | awk '{print $1}'`
+	sed -i "{
+	s/^Enabled=.*/Enabled=1/g
+	s/^ECPas.*/ECPassword=$pp/g
+	s/^UPnPEn.*/UPnPEnabled=1/g
+	s/^Password=.*/Password=$pp/g
+	s/^UPnPECE.*/UPnPECEnabled=1/g
+	s/^Template=.*/Template=AmuleWebUI-Reloaded-master/g
+	s/^AcceptExternal.*/AcceptExternalConnections=1/g
+	}" /opt/var/amule/amule.conf
 fi
-ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
-/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
-/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
+	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
+}
+
+aria2(){
+if ipk_install aria2; then
+ln -sf /opt/etc/aria2.conf /opt/etc/config/aria2.conf
+/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
+fi
 }
 
 deluge(){
@@ -254,12 +267,6 @@ ipk_install deluge-ui-web
 ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
-}
-
-transmission(){
-ipk_install transmission-daemon transmission-web-control
-ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.conf
-/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
 qbittorrent(){
@@ -281,33 +288,24 @@ ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBit
 /opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
-aria2(){
-if ipk_install aria2; then
-ln -sf /opt/etc/aria2.conf /opt/etc/config/aria2.conf
-/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
+rtorrent(){
+ipk_install rtorrent-easy-install
+web_port=1099
+www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
+if [ -z "`grep 'server.port' $www_cfg`" ]; then
+echo "server.port = $web_port" >> $www_cfg
+else
+sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
 fi
+ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
+/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
-amule(){
-if ipk_install amule; then
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
-	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
-	if wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1; then
-	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded-master/*.php; fi
-	pp=`echo -n admin | md5sum | awk '{print $1}'`
-	sed -i "{
-	s/^Enabled=.*/Enabled=1/g
-	s/^ECPas.*/ECPassword=$pp/g
-	s/^UPnPEn.*/UPnPEnabled=1/g
-	s/^Password=.*/Password=$pp/g
-	s/^UPnPECE.*/UPnPECEnabled=1/g
-	s/^Template=.*/Template=AmuleWebUI-Reloaded-master/g
-	s/^AcceptExternal.*/AcceptExternalConnections=1/g
-	}" /opt/var/amule/amule.conf
-fi
-	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
+transmission(){
+ipk_install transmission-daemon transmission-web-control
+ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
 onmp_restart(){
