@@ -80,7 +80,9 @@ _amule(){
 }
 
 for PROC in $ipk; do
-	if [ -z "`pidof $PROC`" ]; then
+	if [ "`pidof $PROC`" ]; then
+		echo $PROC 已经在运行
+	else
 		INSPECT=`which $PROC`
 		[ "$INSPECT" = "/opt/bin/amuled" ] && _amule
 		[ "$INSPECT" = "/opt/bin/aria2c" ] && _aria2c
