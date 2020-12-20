@@ -22,4 +22,13 @@
 			i=$((i + 1))
 		done
 	;;
+	3)
+	if [ `which lsscsi` ]; then
+		echo "'lsscsi | grep disk | awk '{print $NF}''"
+	elif [ `which mount` ]; then
+		echo "'mount | grep mnt | awk '{print $3}''"
+	else
+		echo "'blkid -s PARTLABEL | cut -d: -f1'"
+	fi
+	;;
 	esac
