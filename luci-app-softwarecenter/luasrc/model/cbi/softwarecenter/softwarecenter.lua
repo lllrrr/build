@@ -6,15 +6,15 @@ local fs   = require "nixio.fs"
 local util = require "nixio.util"
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
-m = Map("softwarecenter",translate("软件中心"),translate("软件中心负责自动化Entware，ONMP的部署和软件配置！<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
+m = Map("softwarecenter",translate("软件中心"),translate("负责自动 Opkg/Nginx/MySQ/PHP(ONMP的)的部署和应用安装<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
 m:section(SimpleSection).template = "softwarecenter/software_status"
 
 s = m:section(TypedSection,"softwarecenter",translate("设置"))
 s.addremove = false
 s.anonymous = true
 
-s:tab("entware",translate("Entware设置"))
-p = s:taboption("entware",Flag,"entware_enable",translate("启用"),translate("开始部署Entware环境"))
+s:tab("entware",translate("ONMP部署"))
+p = s:taboption("entware",Flag,"entware_enable",translate("启用"),translate("部署ONMP环境"))
 local model = SYS.exec("cat /etc/openwrt_release | grep ARCH | cut -f2 -d\"'\" ")
 local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '.." (如有错误自定义)")
 cpu_model:value("", translate("-- 可选是系统检测到CPU架构 --"))
@@ -28,10 +28,10 @@ for list_disk_mount in UTIL.execi("lsblk | grep mnt | awk '{print $7}'") do
 end
 p:depends("entware_enable",1)
 
-p = s:taboption("entware",Flag,"deploy_entware",translate("安装Entware"),translate("安装过程可以在运行日志中查看进度<br>如只安装应用软件可不用部署 Nginx / MySQL"))
+p = s:taboption("entware",Flag,"deploy_entware",translate("部署ONMP"),translate("安装过程可以在运行日志中查看进度<br>如只安装应用软件可不用部署 Nginx / MySQL"))
 p:depends("entware_enable",1)
 
-deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
+deploy_nginx = s:taboption("entware",Flag,"deploy_nginx",translate("部署Nginx/PHP"),translate("自动部署Nginx服务器和其所需的PHP7运行环境"))
 p = s:taboption("entware",Flag,"nginx_enabled",translate("Enabled"),translate("部署完成后启动Nginx/PHP7(依赖Entware软件仓库)"))
 p:depends("deploy_nginx",1)
 deploy_nginx:depends("deploy_entware",1)
@@ -78,7 +78,7 @@ function p.write(self, section)
 end
 
 s:tab("swap", translate("swap交换分区设置"))
-swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足，闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
+swap_enable = s:taboption("swap",Flag,"swap_enabled",translate("Enabled"),translate("如果物理内存不足或php-fpm和mysqld 启动失败的可以开启<br>闲置数据可自动移到 swap 区暂存，以增加可用的 RAM"))
 p = s:taboption("swap",Value,"swap_path",translate("安装路径"),translate("交换分区挂载点"))
 p:value("", translate("-- 不选择是安装在opt所在盘 --"))
 local f = util.consume((fs.glob("/mnt/sd[a-g]*")), f)

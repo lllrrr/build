@@ -119,7 +119,7 @@ check_url() {
 
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	echo "正在更新软件源" && opkg update > /dev/null 2>&1
+	[ ! -d /tmp/opkg-lists ] && echo "正在更新软件源" && opkg update
 	for ipk in $@; do
 		if [ -z "`which $ipk`" ]; then
 		echo -e "正在安装  $ipk\c"
@@ -146,6 +146,7 @@ remove_soft(){
 
 # 磁盘分区挂载
 function system_check(){
+	install_soft parted
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
