@@ -6,7 +6,7 @@ local fs   = require "nixio.fs"
 local util = require "nixio.util"
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
-m = Map("softwarecenter",translate("软件中心"),translate("负责自动 Opkg/Nginx/MySQ/PHP(ONMP的)的部署和应用安装<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
+m = Map("softwarecenter",translate("软件中心"),translate("自动 部署Entware-opt/Nginx/MySQ/PHP(ONMP)和应用安装<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
 m:section(SimpleSection).template = "softwarecenter/software_status"
 
 s = m:section(TypedSection,"softwarecenter",translate("设置"))

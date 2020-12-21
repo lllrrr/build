@@ -3,7 +3,7 @@ font_green = [[<b><font color="green">]]
 font_red = [[<b><font color="red">]]
 font_op = " \" onclick=\"window.open('http://'+window.location.hostname+':"
 font_apply = "<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" "
-m = Map("softwarecenter",translate("Entware软件安装"), translate("Entware提供超过2000多个不同平台的软件包<br>配置文件都软链接在 /opt/etc/config下，以方便查看、修改"))
+m = Map("softwarecenter",translate("Entware软件安装"), translate("Entware提供超过2000多个不同平台的软件包<br>配置文件都软链接在 /opt/etc/config下，以方便查看和修改"))
 
 s = m:section(TypedSection, "ipk")
 s.anonymous = true

@@ -182,11 +182,11 @@ cdg(){
 	config_get user			main user
 	config_get pass			main pass
 	# entware环境
-	source /etc/profile
+	source /etc/profile > /dev/null 2>&1
 	if [ $entware_enable ]; then
 		if [ ! -e /etc/init.d/entware ]; then
 			echo -e "\n开始安装entware环境\n" && entware_set $disk_mount $cpu_model
-			source /etc/profile
+			source /etc/profile > /dev/null 2>&1
 		fi
 	else
 		if [ -x /etc/init.d/entware ]; then

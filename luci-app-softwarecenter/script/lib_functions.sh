@@ -108,7 +108,7 @@ entware_unset(){
 	/etc/init.d/entware disable > /dev/null 2>&1
 	rm /etc/init.d/entware
 	sed -i "/export PATH=\/opt\/bin/d" /etc/profile
-	source /etc/profile
+	source /etc/profile > /dev/null 2>&1
 	umount -lf /opt
 	rm -r /opt
 }
@@ -119,7 +119,7 @@ check_url() {
 
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	[ ! -d /tmp/opkg-lists ] && echo "正在更新软件源" && opkg update
+	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	for ipk in $@; do
 		if [ -z "`which $ipk`" ]; then
 		echo -e "正在安装  $ipk\c"
@@ -222,13 +222,17 @@ check_available_size(){
 
 ipk_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
-	source /etc/profile
-	opkg update
+	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	_make_dir /opt/etc/config
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
-		echo "请耐心等待$i安装中。"
-		opkg install $i
+		[ "`which $i`" = "/opt/bin/transmission-daemon" ] && s=$i && k=${s:0:12}
+		[ $i = amule ] && p=amuled && [ "`which $p`" = "/opt/bin/amuled" ] && s=$p && k=${s:0:5}
+		[ $i = aria2 ] && p=aria2c && [ "`which $p`" = "/opt/bin/aria2c" ] && s=$p && k=${s:0:5}
+		[ $i = deluge-ui-web ] && p=deluged && [ "`which $p`" = "/opt/bin/deluged" ] && s=$p && k=${s:0:6}
+		[ $i = rtorrent-easy-install ] && p=rtorrent && [ "`which $p`" = "/opt/bin/rtorrent" ] && s=$p && k=${s}
+		[ $i = qbittorrent ] && p=qbittorrent-nox && [ "`which $p`" = "/opt/bin/qbittorrent-nox" ] && s=$p && k=${s:0:11}
+		[ "`which $s`" ] && { echo -e "\n$k 已经安装" && exit 0; } || { echo -e "\n请耐心等待$i安装中" && opkg install $i; }
 	else
 		echo -e $i 不在 Entware 软件源，跳过安装！
 	fi
