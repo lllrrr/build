@@ -49,7 +49,7 @@ entware_set(){
 	[ "$2" = "mipsel_24kc" ] && INST_URL="http://bin.entware.net/mipselsf-k3.4/installer/generic.sh"
 	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
 	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
-
+	[ $INST_URL ] || { echo "没有找到你选择的CPU架构！" && exit 1; }
 	if [ -z "`check_url $INST_URL`" ]; then
 		echo -e "Entware-NG 官网连接成功，开始安装 Entware-NG ……"
 		wget -t 5 -qcNO - $INST_URL | /bin/sh
