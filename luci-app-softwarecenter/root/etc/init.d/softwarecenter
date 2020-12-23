@@ -121,7 +121,6 @@ handle_website(){
 	else
 		return
 	fi
-
 	if [ -z "$website_enabled" ]; then
 		echo "$website_name 网站未启用"
 		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
@@ -185,7 +184,7 @@ cdg(){
 	source /etc/profile > /dev/null 2>&1
 	if [ $entware_enable ]; then
 		if [ ! -e /etc/init.d/entware ]; then
-			echo -e "\n开始安装entware环境\n" && entware_set $disk_mount $cpu_model
+			echo -e "\n开始部署entware环境\n" && entware_set $disk_mount $cpu_model
 			source /etc/profile > /dev/null 2>&1
 		fi
 	else
@@ -226,12 +225,12 @@ cdg(){
 
 	for PROC in mysqld nginx php-fpm; do
 		if [ "`pidof $PROC`" ]; then
-			echo "$PROC 已经启动"
+			echo -e "$PROC 已经启动\c"
 		else
 			[ "`which $PROC`" ] && echo "$PROC 没有开启" || echo "$PROC 没有安装"
 		fi
 	done
-	sleep 15 && ipk_start
+	[ -d /opt/etc/config ] && sleep 5 && ipk_start
 }
 
 cdg >> /tmp/log/softwarecenter.log

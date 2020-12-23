@@ -35,30 +35,30 @@ entware_set(){
 	_make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 
-	if [ "$2" = "mipsel_24kc" ]; then
-		wget -O - http://bin.entware.net/mipselsf-k3.4/installer/generic.sh | /bin/sh
-	elif [ "$2" = "mips" ]; then
-	if [ $Kernel_V = "2.6" ]; then
-		wget -O - http://pkg.entware.net/binaries/mipsel/installer/installer.sh | /bin/sh
-	else
-		wget -O - http://bin.entware.net/mipssf-k3.4/installer/generic.sh | /bin/sh
+	if [ "$2" = "mips" ]; then
+		if [ $Kernel_V = "2.6" ]; then
+			INST_URL="http://pkg.entware.net/binaries/mipsel/installer/installer.sh"
+		else
+			INST_URL="http://bin.entware.net/mipssf-k3.4/installer/generic.sh"
+		fi
 	fi
-	elif [ "$2" = "armv7" ]; then
-		wget -O - http://bin.entware.net/armv7sf-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$2" = "x86_64" ]; then
-		wget -O - http://bin.entware.net/x64-k3.2/installer/generic.sh | /bin/sh
-	elif [ "$2" = "x86" ]; then
-		wget -O - http://bin.entware.net/x86-k2.6/installer/generic.sh | /bin/sh
-	elif [ "$2" = "aarch64" ]; then
-		wget -O - http://bin.entware.net/aarch64-k3.10/installer/generic.sh | /bin/sh
-	elif [ "$2" = "armv7l" ]; then
-		wget -O - http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh | /bin/sh
+	[ "$2" = "x86_64" ] && INST_URL="http://bin.entware.net/x64-k3.2/installer/generic.sh"
+	[ "$2" = "armv7" ] && INST_URL="http://bin.entware.net/armv7sf-k3.2/installer/generic.sh"
+	[ "$2" = "armv5*" ] && INST_URL="http://bin.entware.net/armv5sf-k3.2/installer/generic.sh"
+	[ "$2" = "aarch64" ] && INST_URL="http://bin.entware.net/aarch64-k3.10/installer/generic.sh"
+	[ "$2" = "mipsel_24kc" ] && INST_URL="http://bin.entware.net/mipselsf-k3.4/installer/generic.sh"
+	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
+	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
+
+	if [ -z "`check_url $INST_URL`" ]; then
+		echo -e "Entware-NG 官网连接成功，开始安装 Entware-NG ……"
+		wget -t 5 -qcNO - $INST_URL | /bin/sh
 	else
-		echo "没有找到你选择的CPU架构！"
+		echo -e "Entware-NG 官网连接失败，请检查网络连接状态后重试！"
 		exit 1
 	fi
 
-	cat > "/etc/init.d/entware" <<-\ENTWARE
+cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
 START=51
 
@@ -114,12 +114,12 @@ entware_unset(){
 }
 
 check_url() {
-  [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ] && return 0|| return 1
+  [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ] && return 0 || return 1
 }
 
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
+	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1 && opkg upgrade > /dev/null 2>&1
 	for ipk in $@; do
 		if [ -z "`which $ipk`" ]; then
 		echo -e "正在安装  $ipk\c"
@@ -145,8 +145,7 @@ remove_soft(){
 }
 
 # 磁盘分区挂载
-function system_check(){
-	install_soft parted
+system_check(){
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
 
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
@@ -222,17 +221,19 @@ check_available_size(){
 
 ipk_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
-	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
-	_make_dir /opt/etc/config
+	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1 && opkg upgrade > /dev/null 2>&1
+	_make_dir /opt/etc/config > /dev/null 2>&1
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
-		[ "`which $i`" = "/opt/bin/transmission-daemon" ] && s=$i && k=${s:0:12}
-		[ $i = amule ] && p=amuled && [ "`which $p`" = "/opt/bin/amuled" ] && s=$p && k=${s:0:5}
-		[ $i = aria2 ] && p=aria2c && [ "`which $p`" = "/opt/bin/aria2c" ] && s=$p && k=${s:0:5}
-		[ $i = deluge-ui-web ] && p=deluged && [ "`which $p`" = "/opt/bin/deluged" ] && s=$p && k=${s:0:6}
-		[ $i = rtorrent-easy-install ] && p=rtorrent && [ "`which $p`" = "/opt/bin/rtorrent" ] && s=$p && k=${s}
-		[ $i = qbittorrent ] && p=qbittorrent-nox && [ "`which $p`" = "/opt/bin/qbittorrent-nox" ] && s=$p && k=${s:0:11}
-		[ "`which $s`" ] && { echo -e "\n$k 已经安装" && exit 0; } || { echo -e "\n请耐心等待$i安装中" && opkg install $i; }
+		# [ $i = amule ] && p=amuled; k=amule
+		# [ $i = aria2 ] && p=aria2c; k=aria2
+		# [ $i = deluge-ui-web ] && p=deluged; k=deluge
+		# [ $i = transmission-daemon ] && p=$i; k=transmission
+		# [ $i = rtorrent-easy-install ] && p=rtorrent; k=$p
+		# [ $i = qbittorrent ] && p=qbittorrent-nox; k=qbittorrent
+		# [ "`ls /opt/bin/$p > /dev/null 2>&1`" ] && echo -e "\n$k 已经安装" || { echo -e "\n请耐心等待$i安装中" && opkg install $i; }
+		# [ $i = transmission-web-control ] && opkg install transmission-web-control > /dev/null 2>&1
+		echo -e "\n请耐心等待$i安装中" && opkg install $i
 	else
 		echo -e $i 不在 Entware 软件源，跳过安装！
 	fi
@@ -289,8 +290,8 @@ WebUI\Username=admin
 General\Locale=zh
 Downloads\UseIncompleteExtension=true
 EOF
-fi
 ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
+fi
 /opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
