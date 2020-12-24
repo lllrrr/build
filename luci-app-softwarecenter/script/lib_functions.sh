@@ -269,7 +269,9 @@ cd $Pro
 if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
 	if [ ! -s $i ]; then
 		wget -N -t2 -T3 https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
-		wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i
+		curl -fsSLO https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
+		wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i || \
+		curl -fsSLO https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i
 		[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
 	fi
 done
