@@ -245,7 +245,7 @@ if ipk_install amule; then
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
 	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
 	if wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1; then
+	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1 && rm master; then
 	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded-master/*.php; fi
 	pp=`echo -n admin | md5sum | awk '{print $1}'`
 	sed -i "{
@@ -290,6 +290,38 @@ fi
 
 deluge(){
 ipk_install deluge-ui-web
+cat > "/opt/etc/deluge/web.conf" << EOF
+{
+    "file": 2,
+    "format": 1
+}{
+    "base": "/",
+    "cert": "ssl/daemon.cert",
+    "default_daemon": "",
+    "enabled_plugins": [],
+    "first_login": false,
+    "https": false,
+    "interface": "0.0.0.0",
+    "language": "zh_CN",
+    "pkey": "ssl/daemon.pkey",
+    "port": 8112,
+    "pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
+    "pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
+    "session_timeout": 3600,
+    "sessions": {
+        "e62e391f764e83f41ef10cd60e7ea68e88057b8a9737de1920900c936abfe0d5": {
+            "expires": 1608831495.0,
+            "level": 10,
+            "login": "admin"
+        }
+    },
+    "show_session_speed": false,
+    "show_sidebar": true,
+    "sidebar_multiple_filters": true,
+    "sidebar_show_zero": false,
+    "theme": "gray"
+}
+EOF
 ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
@@ -329,8 +361,13 @@ ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 }
 
 transmission(){
-ipk_install transmission-daemon transmission-web-control
+ipk_install transmission-daemon
 ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
+wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
+unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
+_make_dir /opt/share/transmission/web
+cp -Rf /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
+rm -rf /opt/share/transmission-w*
 /opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
