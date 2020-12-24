@@ -221,7 +221,7 @@ check_available_size(){
 
 ipk_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
-	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1 && opkg upgrade > /dev/null 2>&1
+	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
 	_make_dir /opt/etc/config > /dev/null 2>&1
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
@@ -264,6 +264,25 @@ fi
 
 aria2(){
 if ipk_install aria2; then
+Pro="/opt/var/aria2"
+cd $Pro
+if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
+	if [ ! -s $i ]; then
+		wget -N -t2 -T3 https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
+		wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i || \
+		curl -fsSLO https://p3terx.github.io/aria2.conf/$i || \
+		curl -fsSLO https://gh.p3terx.workers.dev/aria2.conf/master/$i
+		[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
+	fi
+done
+[ -e "aria2.session" ] || touch aria2.session
+sed -i -e 's|dir=.*|dir='"$Pro"'/downloads|g;s|/root/.aria2|'"$Pro"'|g;s/^rpc-se.*/rpc-secret=Passw0rd/g' ./aria2.conf
+sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d;/^WARRING/d' ./core
+sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
+sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
+echo "Aria2加强配置下载完成！"; fi
+chmod +x *.sh && sh ./tracker.sh
+mv -f ./aria2.conf /opt/etc/aria2.conf
 ln -sf /opt/etc/aria2.conf /opt/etc/config/aria2.conf
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
 fi
