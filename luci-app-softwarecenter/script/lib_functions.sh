@@ -50,9 +50,10 @@ entware_set(){
 	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
 	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
 	[ $INST_URL ] || { echo "没有找到你选择的CPU架构！" && exit 1; }
-	if [ -z "`check_url $INST_URL`" ]; then
+	if [ -n "`check_url $INST_URL`" ]; then
 		echo -e "Entware-NG 官网连接成功，开始安装 Entware-NG ……"
 		wget -t 5 -qcNO - $INST_URL | /bin/sh
+		[ -z "`ls /opt`" ] && { echo 安装Entware出错！ && exit 1; }
 	else
 		echo -e "Entware-NG 官网连接失败，请检查网络连接状态后重试！"
 		exit 1
@@ -244,9 +245,10 @@ amule(){
 if ipk_install amule; then
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
 	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
-	if wget https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	unzip -d /opt/share/amule/webserver/ master > /dev/null 2>&1 && rm master; then
-	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded-master/*.php; fi
+	if wget -O AmuleWebUI.zip https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
+	unzip -d /opt/share/amule/ AmuleWebUI.zip > /dev/null 2>&1 && rm AmuleWebUI.zip
+	mv -f /opt/share/amule/AmuleWebUI-Reloaded-master /opt/share/amule/webserver/AmuleWebUI-Reloaded; then
+	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php; fi
 	pp=`echo -n admin | md5sum | awk '{print $1}'`
 	sed -i "{
 	s/^Enabled=.*/Enabled=1/g
@@ -254,7 +256,7 @@ if ipk_install amule; then
 	s/^UPnPEn.*/UPnPEnabled=1/g
 	s/^Password=.*/Password=$pp/g
 	s/^UPnPECE.*/UPnPECEnabled=1/g
-	s/^Template=.*/Template=AmuleWebUI-Reloaded-master/g
+	s/^Template=.*/Template=AmuleWebUI-Reloaded/g
 	s/^AcceptExternal.*/AcceptExternalConnections=1/g
 	}" /opt/var/amule/amule.conf
 fi
@@ -289,7 +291,7 @@ fi
 }
 
 deluge(){
-ipk_install deluge-ui-web
+if ipk_install deluge-ui-web; then
 cat > "/opt/etc/deluge/web.conf" << EOF
 {
     "file": 2,
@@ -323,6 +325,7 @@ cat > "/opt/etc/deluge/web.conf" << EOF
 }
 EOF
 ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
+fi
 /opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
 /opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
