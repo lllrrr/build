@@ -223,9 +223,9 @@ cdg(){
 	fi
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
-	for PROC in mysqld nginx php-fpm; do
+	for PROC in nginx mysqld php-fpm; do
 		if [ "`pidof $PROC`" ]; then
-			echo -e "$PROC 已经启动\c"
+			echo -e "$PROC  已经启动"
 		else
 			[ "`which $PROC`" ] && echo "$PROC 没有开启" || echo "$PROC 没有安装"
 		fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-pkglist_base="wget unzip e2fsprogs ca-certificates"
+pkglist_base="wget unzip e2fsprogs ca-certificates wget-nossl tar"
 
 status(){
 	local p=$?
@@ -50,7 +50,7 @@ entware_set(){
 	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
 	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
 	[ $INST_URL ] || { echo "没有找到你选择的CPU架构！" && exit 1; }
-	if [ -n "`check_url $INST_URL`" ]; then
+	if check_url $INST_URL; then
 		echo -e "Entware-NG 官网连接成功，开始安装 Entware-NG ……"
 		wget -t 5 -qcNO - $INST_URL | /bin/sh
 		[ -z "`ls /opt`" ] && { echo 安装Entware出错！ && exit 1; }
@@ -120,7 +120,7 @@ check_url() {
 
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
-	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1 && opkg upgrade > /dev/null 2>&1
+	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	for ipk in $@; do
 		if [ -z "`which $ipk`" ]; then
 		echo -e "正在安装  $ipk\c"
@@ -131,6 +131,8 @@ install_soft(){
 				opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
 				status
 			fi
+		else
+			echo "$ipk	已经安装"
 		fi
 	done
 }
@@ -220,7 +222,7 @@ check_available_size(){
 	[ $available_size ] && echo "$available_size"
 }
 
-ipk_install(){
+opkg_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
 	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
 	_make_dir /opt/etc/config > /dev/null 2>&1
@@ -242,7 +244,7 @@ done
 }
 
 amule(){
-if ipk_install amule; then
+if opkg_install amule; then
 	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
 	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
 	if wget -O AmuleWebUI.zip https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
@@ -265,7 +267,7 @@ fi
 }
 
 aria2(){
-if ipk_install aria2; then
+if opkg_install aria2; then
 Pro="/opt/var/aria2"
 cd $Pro
 if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
@@ -291,7 +293,7 @@ fi
 }
 
 deluge(){
-if ipk_install deluge-ui-web; then
+if opkg_install deluge-ui-web; then
 cat > "/opt/etc/deluge/web.conf" << EOF
 {
     "file": 2,
@@ -331,7 +333,7 @@ fi
 }
 
 qbittorrent(){
-if ipk_install qbittorrent; then
+if opkg_install qbittorrent; then
 /opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 5
 QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
 cat > "$QBT_INI_FILE" << EOF
@@ -350,27 +352,29 @@ fi
 }
 
 rtorrent(){
-ipk_install rtorrent-easy-install
+if opkg_install rtorrent-easy-install; then
 web_port=1099
 www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
-if [ -z "`grep 'server.port' $www_cfg`" ]; then
-echo "server.port = $web_port" >> $www_cfg
-else
-sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
-fi
+	if [ -z "`grep 'server.port' $www_cfg`" ]; then
+	echo "server.port = $web_port" >> $www_cfg
+	else
+	sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
+	fi
 ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
+fi
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
 /opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 transmission(){
-ipk_install transmission-daemon
+if opkg_install transmission-daemon; then
 ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
 wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
 unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
 _make_dir /opt/share/transmission/web
 cp -Rf /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
 rm -rf /opt/share/transmission-w*
+fi
 /opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
@@ -408,11 +412,11 @@ if [ $1 ]; then
 	[ $1 = "amule" ] && amule >> $log
 	[ $1 = "aria2" ] && aria2 >> $log
 	[ $1 = "deluge" ] && deluge >> $log
-	[ $1 = "rtorrent" ] && rtorrent >> $log
+	[ $1 = "rtorrent" ] && rtorrent $@ >> $log
 	[ $1 = "qbittorrent" ] && qbittorrent >> $log
 	[ $1 = "transmission" ] && transmission >> $log
 	[ $1 = "system_check" ] && system_check >> $log
 	[ $1 = "onmp_restart" ] && onmp_restart >> $log
-	[ $1 = "ipk_install" ] && ipk_install $2 $3 >> $log
+	[ $1 = "opkg_install" ] && opkg_install $@ >> $log
 	[ $1 = "install_soft" ] && install_soft $2 $3 >> $log
 fi
