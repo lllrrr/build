@@ -147,6 +147,10 @@ remove_soft(){
 
 }
 
+date_time() {
+    date +"%Y-%m-%d %H:%M:%S"
+}
+
 # 磁盘分区挂载
 system_check(){
 	[ $1 ] && Partition_disk=${1} || { Partition_disk=`uci get softwarecenter.main.Partition_disk` && Partition_disk=${Partition_disk}1; }
@@ -154,14 +158,14 @@ system_check(){
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
-			echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
+			echo "$(date_time) 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk}
 			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
 			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
-		echo "`date "+%Y-%m-%d %H:%M:%S"` 磁盘$Partition_disk没有分区，进行分区并格式化。"
+		echo "$(date_time) 磁盘$Partition_disk没有分区，进行分区并格式化。"
 		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
@@ -236,7 +240,7 @@ for i in $@; do
 		# [ $i = qbittorrent ] && p=qbittorrent-nox; k=qbittorrent
 		# [ "`ls /opt/bin/$p > /dev/null 2>&1`" ] && echo -e "\n$k 已经安装" || { echo -e "\n请耐心等待$i安装中" && opkg install $i; }
 		# [ $i = transmission-web-control ] && opkg install transmission-web-control > /dev/null 2>&1
-		echo -e "\n请耐心等待$i安装中" && opkg install $i
+		echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
 	else
 		echo -e $i 不在 Entware 软件源，跳过安装！
 	fi
@@ -285,9 +289,9 @@ sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d;/^WARRING/d' ./core
 sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
 sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
 echo "Aria2加强配置下载完成！"; fi
-chmod +x *.sh && sh ./tracker.sh
-mv -f ./aria2.conf /opt/etc/aria2.conf
-ln -sf /opt/etc/aria2.conf /opt/etc/config/aria2.conf
+chmod +x *.sh && sh ./tracker.sh > /dev/null 2>&1
+ln -sf /opt/var/aria2/aria2.conf /opt/etc/aria2.conf
+ln -sf /opt/var/aria2/aria2.conf /opt/etc/config/aria2.conf
 /opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
 fi
 }
