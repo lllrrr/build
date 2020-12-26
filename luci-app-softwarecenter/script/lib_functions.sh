@@ -1,6 +1,6 @@
 #!/bin/sh
 
-pkglist_base="wget unzip e2fsprogs ca-certificates wget-nossl tar"
+pkglist_base="wget unzip e2fsprogs ca-certificates"
 
 status(){
 	local p=$?
@@ -366,8 +366,213 @@ www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
 	fi
 ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 fi
+install_soft ffmpeg mediainfo unrar php7-mod-json > /dev/null 2>&1
+wget https://github.com/Novik/ruTorrent/archive/v3.10.tar.gz
+tar -xzf v3.10.tar.gz -C /opt/share/www && rm -rf v3.*
+cp -Rf /opt/share/www/ruTorrent-3.10/* /opt/share/www/rutorrent
+rm -rf /opt/share/www/ruT*
+
+cat > /opt/etc/rtorrent/rtorrent.conf << EOF
+# 高级设置：任务信息文件路径。用来生成任务信息文件，记录种子下载的进度等信息
+session.path.set = /opt/etc/rtorrent/session
+# 监听种子文件夹
+schedule2 = watch_directory,5,5,load_start=/opt/etc/rtorrent/watchdir/*.torrent
+# 监听目录中的新的种子文件，并停止那些已经被删除部分的种子
+schedule2 = untied_directory,5,5,stop_untied=
+# 当磁盘空间不足时停止下载
+schedule2 = low_diskspace,5,60,close_low_diskspace=100M
+# 高级设置：绑定 IP
+network.bind_address.set = 0.0.0.0
+# 选项将指定选用哪一个端口去侦听。建议使用高于 49152 的端口。虽然 rTorrent 允许使用多个的端口，还是建议使用单个的端口。
+network.port_range.set = 51411-51411
+# 是否使用随机端口
+# yes 是 / no 否
+# port_random = no
+network.port_random.set = no
+# 下载完成或 rTorrent 重新启动时对文件进行 Hash 校验。这将确保你下载/做种的文件没有错误( auto 自动/ yes 启动 / no 禁用)
+pieces.hash.on_completion.set = yes
+# 高级设置：支持 UDP 伺服器
+trackers.use_udp.set = yes
+# 如下例中的值将允许将接入连接加密，开始时以非加密方式作为连接的输出方式，
+# 如行不通则以加密方式进行重试，在加密握手后，优先选择将纯文本以 RC4 加密
+protocol.encryption.set = allow_incoming,enable_retry,prefer_plaintext
+# 是否启用 DHT 支持。
+# 如果你使用了 public trackers，你可能希望使能 DHT 以获得更多的连接。
+# 如果你仅仅使用了私有的连接 privite trackers ，请不要启用 DHT，因为这将降低你的速度，并可能造成一些泄密风险，如泄露 passkey。一些 PT 站点甚至会因为检测到你使用 DHT 而向你发出警告。
+# disable 完全禁止/ off 不启用/ auto 按需启用(即PT种子不启用，BT种子启用)/ on 启用
+dht.mode.set = auto
+# 启用 DHT 监听的 UDP 端口
+dht.port.set = 51412
+# 对未标记为私有的种子启用/禁用用户交换。默认情况下禁用。
+# yes 启用 / no 禁用
+protocol.pex.set = yes
+# 本地挂载点路径
+network.scgi.open_local = /opt/var/rpc.socket
+# 编码类型(UTF-8 支持中文显示，避免乱码)
+encoding.add = utf8
+# 每个种子的最大同时上传连接数
+throttle.max_uploads.set = 8
+# 全局上传通道数
+throttle.max_uploads.global.set = 32
+# 全局下载通道数
+throttle.max_downloads.global.set = 64
+# 全局的下载速度限制，“0”表示无限制
+# 默认单位为 B/s (设置为 4(B) 表示 4B/s；4K表示 4KB/s；4M 表示4MB/s；4G 表示 4GB/s)
+throttle.global_down.max_rate.set_kb = 0
+# 全局的上传速度限制，“0”表示无限制
+# 默认单位为 B/s (设置为 4(B) 表示 4B/s；4K表示 4KB/s；4M 表示4MB/s；4G 表示 4GB/s)
+throttle.global_up.max_rate.set_kb = 0
+# 默认下载路径(不支持绝对路径，如~/torrents)
+directory.default.set = /opt/torrents
+# 免登陆 Web 服务初始化 rutorrent 的插件
+execute = {sh,-c,/opt/bin/php-cgi /opt/share/www/rutorrent/php/initplugins.php $user &}
+EOF
+
+cat > /opt/share/www/rutorrent/conf/plugins.ini << EOF
+;; Plugins' permissions.
+;; If flag is not found in plugin section, corresponding flag from "default" section is used.
+;; If flag is not found in "default" section, it is assumed to be "yes".
+;;
+;; For setting individual plugin permissions you must write something like that:
+;;
+;; [ratio]
+;; enabled = yes ;; also may be "user-defined", in this case user can control plugin's state from UI
+;; canChangeToolbar = yes
+;; canChangeMenu = yes
+;; canChangeOptions = no
+;; canChangeTabs = yes
+;; canChangeColumns = yes
+;; canChangeStatusBar = yes
+;; canChangeCategory = yes
+;; canBeShutdowned = yes
+
+[default]
+enabled = user-defined
+canChangeToolbar = yes
+canChangeMenu = yes
+canChangeOptions = yes
+canChangeTabs = yes
+canChangeColumns = yes
+canChangeStatusBar = yes
+canChangeCategory = yes
+canBeShutdowned = yes
+
+;; Default
+
+[autodl-irssi]
+enabled = user-defined
+[cookies]
+enabled = user-defined
+[cpuload]
+enabled = user-defined
+[create]
+enabled = user-defined
+[data]
+enabled = user-defined
+[diskspace]
+enabled = user-defined
+[edit]
+enabled = user-defined
+[extratio]
+enabled = user-defined
+[extsearch]
+enabled = user-defined
+[filedrop]
+enabled = user-defined
+[geoip]
+enabled = user-defined
+[lookat]
+enabled = user-defined
+[mediainfo]
+enabled = user-defined
+[ratio]
+enabled = user-defined
+[rss]
+enabled = user-defined
+[rssurlrewrite]
+enabled = user-defined
+[screenshots]
+enabled = user-defined
+[show_peers_like_wtorrent]
+enabled = user-defined
+[throttle]
+enabled = user-defined
+[trafic]
+enabled = user-defined
+[unpack]
+enabled = user-defined
+
+;; Enabled
+[_getdir]
+enabled = yes
+canBeShutdowned =no
+[_noty]
+enabled = yes
+canBeShutdowned =no
+[_task]
+enabled = yes
+canBeShutdowned =no
+[autotools]
+enabled = yes
+[datadir]
+enabled = yes
+[erasedata]
+enabled = yes
+[httprpc]
+enabled = yes
+canBeShutdowned = no
+[seedingtime]
+enabled = yes
+[source]
+enabled = yes
+[theme]
+enabled = yes
+[tracklabels]
+enabled = yes
+
+;; Disabled
+[check_port]
+enabled = yes
+[chunks]
+enabled = yes
+[feeds]
+enabled = no
+[history]
+enabled = yes
+[ipad]
+enabled = no
+[loginmgr]
+enabled = yes
+[retrackers]
+enabled = yes
+[rpc]
+enabled = yes
+[rutracker_check]
+enabled = yes
+[scheduler]
+enabled = yes
+[spectrogram]
+enabled = no
+[xmpp]
+enabled = no
+EOF
+
+rut_cfg=/opt/share/www/rutorrent/conf/config.php
+sed -i 's|/tmp/errors.log|/opt/var/log/rutorrent_errors.log|g' $rut_cfg
+sed -i 's|$scgi_port = 5|// $scgi_port = 5|g' $rut_cfg
+sed -i 's|$scgi_host = "1|// $scgi_host = "1|g' $rut_cfg
+sed -i 's|// $scgi_port = 0|$scgi_port = 0|g' $rut_cfg
+sed -i 's|// $scgi_host = "unix:///tmp|$scgi_host = "unix:///opt/var|g' $rut_cfg
+sed -i "s:\"php\".*=> '':\"php\"   => '/opt/bin/php-cgi':" $rut_cfg
+sed -i "s:\"curl\".*=> '':\"curl\"  => '/opt/bin/curl':" $rut_cfg
+sed -i "s:\"gzip\".*=> '':\"gzip\"  => '/opt/bin/gzip':" $rut_cfg
+sed -i "s:\"id\".*=> '':\"id\"    => '/opt/bin/id':" $rut_cfg
+sed -i "s:\"stat\".*=> '':\"stat\"  => '/opt/bin/stat':" $rut_cfg
+sed -i 's/this.request("?action=getplugins/this.requestWithoutTimeout("?action=getplugins/g' /opt/share/www/rutorrent/js/webui.js
+sed -i 's/this.request("?action=getuisettings/this.requestWithoutTimeout("?action=getuisettings/g' /opt/share/www/rutorrent/js/webui.js
+
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
-/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
+/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 transmission(){

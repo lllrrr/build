@@ -97,7 +97,7 @@ if state then
 	p.description = translate("rTorrent默认WebUI端口: 1099" .. "<br>" .. state_msg .. "<br>" .. o )
 else
 	state_msg = font_red .. translate("rTorrent 没有运行") .. font_off
-	p.description = translate("rTorrent是一个Linux下控制台的BT 客户端程序。" .. "<br>" .. state_msg )
+	p.description = translate("rTorrent是一个Linux下控制台的BT客户端程序，使用Novik的插件Rutorrent。" .. "<br>" .. state_msg )
 end
 
 p = s:option(Button, "_adc", translate("安装Transmission"))
