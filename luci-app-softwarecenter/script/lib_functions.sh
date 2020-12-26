@@ -123,7 +123,7 @@ install_soft(){
 	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	for ipk in $@; do
 		if [ -z "`which $ipk`" ]; then
-		echo -e "正在安装  $ipk\c"
+		echo -e "`date_time`  正在安装  $ipk\c"
 		opkg install $ipk > /dev/null 2>&1
 		status
 			if [ $? != 0 ]; then
@@ -357,14 +357,14 @@ fi
 
 rtorrent(){
 if opkg_install rtorrent-easy-install; then
-web_port=1099
-www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
+	web_port=1099
+	www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
 	if [ -z "`grep 'server.port' $www_cfg`" ]; then
-	echo "server.port = $web_port" >> $www_cfg
+		echo "server.port = $web_port" >> $www_cfg
 	else
-	sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
+		sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
 	fi
-ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
+	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 fi
 install_soft ffmpeg mediainfo unrar php7-mod-json > /dev/null 2>&1
 wget https://github.com/Novik/ruTorrent/archive/v3.10.tar.gz
@@ -372,6 +372,7 @@ tar -xzf v3.10.tar.gz -C /opt/share/www && rm -rf v3.*
 cp -Rf /opt/share/www/ruTorrent-3.10/* /opt/share/www/rutorrent
 rm -rf /opt/share/www/ruT*
 
+if [ -z "`grep execute /opt/etc/rtorrent/rtorrent.conf`" ]; then
 cat > /opt/etc/rtorrent/rtorrent.conf << EOF
 # 高级设置：任务信息文件路径。用来生成任务信息文件，记录种子下载的进度等信息
 session.path.set = /opt/etc/rtorrent/session
@@ -427,6 +428,7 @@ directory.default.set = /opt/torrents
 # 免登陆 Web 服务初始化 rutorrent 的插件
 execute = {sh,-c,/opt/bin/php-cgi /opt/share/www/rutorrent/php/initplugins.php $user &}
 EOF
+fi
 
 cat > /opt/share/www/rutorrent/conf/plugins.ini << EOF
 ;; Plugins' permissions.
@@ -563,13 +565,13 @@ sed -i 's|$scgi_port = 5|// $scgi_port = 5|g' $rut_cfg
 sed -i 's|$scgi_host = "1|// $scgi_host = "1|g' $rut_cfg
 sed -i 's|// $scgi_port = 0|$scgi_port = 0|g' $rut_cfg
 sed -i 's|// $scgi_host = "unix:///tmp|$scgi_host = "unix:///opt/var|g' $rut_cfg
-sed -i "s:\"php\".*=> '':\"php\"   => '/opt/bin/php-cgi':" $rut_cfg
-sed -i "s:\"curl\".*=> '':\"curl\"  => '/opt/bin/curl':" $rut_cfg
-sed -i "s:\"gzip\".*=> '':\"gzip\"  => '/opt/bin/gzip':" $rut_cfg
-sed -i "s:\"id\".*=> '':\"id\"    => '/opt/bin/id':" $rut_cfg
-sed -i "s:\"stat\".*=> '':\"stat\"  => '/opt/bin/stat':" $rut_cfg
-sed -i 's/this.request("?action=getplugins/this.requestWithoutTimeout("?action=getplugins/g' /opt/share/www/rutorrent/js/webui.js
-sed -i 's/this.request("?action=getuisettings/this.requestWithoutTimeout("?action=getuisettings/g' /opt/share/www/rutorrent/js/webui.js
+sed -i "s|\"php\" 	=> ''|\"php\" 	=> '/opt/bin/php-cgi'|" $rut_cfg
+sed -i "s|\"curl\"	=> ''|\"curl\"	=> '/opt/bin/curl'|" $rut_cfg
+sed -i "s|\"gzip\"	=> ''|\"gzip\"	=> '/opt/bin/gzip'|" $rut_cfg
+sed -i "s|\"id\"	=> ''|\"id\"	=> '/opt/bin/id'|" $rut_cfg
+sed -i "s|\"stat\"	=> ''|\"stat\"	=> '/opt/bin/stat'|" $rut_cfg
+sed -i 's|this.request("?action=getplugins|this.requestWithoutTimeout("?action=getplugins|g' /opt/share/www/rutorrent/js/webui.js
+sed -i 's|this.request("?action=getuisettings|this.requestWithoutTimeout("?action=getuisettings|g' /opt/share/www/rutorrent/js/webui.js
 
 /opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
 /opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行

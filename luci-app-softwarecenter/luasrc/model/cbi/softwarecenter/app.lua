@@ -40,7 +40,7 @@ local state=(SYS.call("pidof aria2c > /dev/null") == 0)
 if state then
 	o=font_apply .. translate("打开AriNG管理") .." \" onclick=\"window.open('http://ariang.ghostry.cn')\"/>&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\" " .. translate("打开webui-aria2管理") .." \" onclick=\"window.open('http://webui-aria2.ghostry.cn')\"/>"
 	state_msg = font_green .. translate("Aria2 运行中") .. font_off
-	p.description = translate(("Aria2 添加了") .. [[<a href="https://github.com/P3TERX/aria2.conf"target="_blank">]] .. translate(" P3TERX ") .. [[</a>]] .. translate("的增强和扩展功能。RPC的默认密钥为: Passw0rd") .. "<br>" .. state_msg .. "<br>" .. o )
+	p.description = translate(("Aria2 RPC 监听端口为默认: 6800，密钥为默认: Passw0rd<br>添加了") .. [[<a href="https://github.com/P3TERX/aria2.conf"target="_blank">]] .. translate(" P3TERX ") .. [[</a>]] .. translate("的增强和扩展功能") .. "<br>" .. state_msg .. "<br>" .. o )
 else
 	state_msg = font_red .. translate("Aria2 没有运行") .. font_off
 	p.description = translate("Aria2 是一款开源、轻量级的多协议命令行下载工具<br>支持 HTTP/HTTPS、FTP、SFTP、BitTorrent 和 Metalink 协议" .. "<br>" .. state_msg )
@@ -94,10 +94,10 @@ local state=(SYS.call("pidof rtorrent > /dev/null") == 0)
 if state then
 	o=font_apply .. translate("打开WebUI管理") .. font_op .. "1099" .. "/rutorrent" .. "')\"/>"
 	state_msg = font_green .. translate("rTorrent 运行中") .. font_off
-	p.description = translate("rTorrent默认WebUI端口: 1099" .. "<br>" .. state_msg .. "<br>" .. o )
+	p.description = translate(("rTorrent默认WebUI端口: 1099。Rutorrent替换为") .. [[<a href="https://github.com/Novik/ruTorrent"target="_blank">]] .. translate(" Novik ") .. [[</a>]] .. translate("的稳定插件版") .. "<br>" .. state_msg .. "<br>" .. o )
 else
 	state_msg = font_red .. translate("rTorrent 没有运行") .. font_off
-	p.description = translate("rTorrent是一个Linux下控制台的BT客户端程序，使用Novik的插件Rutorrent。" .. "<br>" .. state_msg )
+	p.description = translate("rTorrent是一个Linux下控制台的BT客户端程序，。" .. "<br>" .. state_msg )
 end
 
 p = s:option(Button, "_adc", translate("安装Transmission"))
