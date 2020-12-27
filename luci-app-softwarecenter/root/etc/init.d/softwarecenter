@@ -51,36 +51,36 @@ clean_vhost_config(){
 
 ipk_start(){
 
-local ipk="amuled aria2c rtorrent deluge-web qbittorrent-nox transmission-daemon"
-
 _aria2c (){
-/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo "$PROC 启动成功" || echo $PROC 启动不成功
+/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ "$a" ] && echo "$PROC 启动成功" || echo $PROC 启动失败
 }
 
 _deluge(){
-/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo "deluged 启动成功" || echo deluged 启动不成功
-/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo "$PROC 启动成功" || echo $PROC 启动不成功
+/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ "$a" ] && echo "deluged 启动成功" || echo deluged 启动失败
+/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ "$a" ] && echo "$PROC 启动成功" || echo $PROC 启动失败
 }
 
 _transmission(){
-/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo $PROC 启动成功 || echo $PROC 启动不成功
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ "$a" ] && echo $PROC 启动成功 || echo $PROC 启动失败
 }
 
 _rtorrent(){
-/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 启动成功 || echo lighttpd 启动不成功
-/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo $PROC 启动成功 || echo $PROC 启动不成功
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ "$a" ] && echo lighttpd 启动成功 || echo lighttpd 启动失败
+/opt/etc/init.d/S85rtorrent start > /dev/null 2>&1 && [ "$a" ] && echo $PROC 启动成功 || echo $PROC 启动失败
 }
 
 _qbittorrent(){
-/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && [ $? = 0 ] && echo $PROC 启动成功 || echo $PROC 启动不成功
+/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && [ "$a"] && echo $PROC 启动成功 || echo $PROC 启动失败
 }
 
 _amule(){
-/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo $PROC 启动成功 || echo $PROC 启动不成功
+/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ "$a" ] && echo $PROC 启动成功 || echo $PROC 启动失败
 }
 
+local ipk="amuled aria2c rtorrent deluge-web qbittorrent-nox transmission-daemon"
+a=`pidof $PROC`
 for PROC in $ipk; do
-	if [ "`pidof $PROC`" ]; then
+	if [ "$a" ]; then
 		echo $PROC 已经在运行
 	else
 		INSPECT=`which $PROC`
