@@ -230,16 +230,9 @@ opkg_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
 	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
 	_make_dir /opt/etc/config > /dev/null 2>&1
+	_make_dir /opt/downloads > /dev/null 2>&1
 for i in $@; do
 	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
-		# [ $i = amule ] && p=amuled; k=amule
-		# [ $i = aria2 ] && p=aria2c; k=aria2
-		# [ $i = deluge-ui-web ] && p=deluged; k=deluge
-		# [ $i = transmission-daemon ] && p=$i; k=transmission
-		# [ $i = rtorrent-easy-install ] && p=rtorrent; k=$p
-		# [ $i = qbittorrent ] && p=qbittorrent-nox; k=qbittorrent
-		# [ "`ls /opt/bin/$p > /dev/null 2>&1`" ] && echo -e "\n$k 已经安装" || { echo -e "\n请耐心等待$i安装中" && opkg install $i; }
-		# [ $i = transmission-web-control ] && opkg install transmission-web-control > /dev/null 2>&1
 		echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
 	else
 		echo -e $i 不在 Entware 软件源，跳过安装！
@@ -264,10 +257,11 @@ if opkg_install amule; then
 	s/^UPnPECE.*/UPnPECEnabled=1/g
 	s/^Template=.*/Template=AmuleWebUI-Reloaded/g
 	s/^AcceptExternal.*/AcceptExternalConnections=1/g
+	s/^IncomingDir=.*/IncomingDir=/opt/downloads/g
 	}" /opt/var/amule/amule.conf
 fi
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ $? = 0 ] && echo amule 已经运行 || echo amule 没有运行
+	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ -n "`pidof amuled`" ] && echo amule 已经运行 || echo amule 没有运行
 }
 
 aria2(){
@@ -283,16 +277,14 @@ if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
 		[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
 	fi
 done
-[ -e "aria2.session" ] || touch aria2.session
-sed -i -e 's|dir=.*|dir='"$Pro"'/downloads|g;s|/root/.aria2|'"$Pro"'|g;s/^rpc-se.*/rpc-secret=Passw0rd/g' ./aria2.conf
+sed -i -e "s|session.dat|aria2.session|g;s|=/opt/etc|=$Pro|" /opt/etc/init.d/S81aria2
+sed -i -e 's|dir=.*|dir=/opt/downloads|g;s|/root/.aria2|'"$Pro"'|g;s/^rpc-se.*/rpc-secret=Passw0rd/g' ./aria2.conf
 sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d;/^WARRING/d' ./core
 sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
 sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
-echo "Aria2加强配置下载完成！"; fi
 chmod +x *.sh && sh ./tracker.sh > /dev/null 2>&1
-ln -sf /opt/var/aria2/aria2.conf /opt/etc/aria2.conf
-ln -sf /opt/var/aria2/aria2.conf /opt/etc/config/aria2.conf
-/opt/etc/init.d/S81aria2 start > /dev/null 2>&1 && [ $? = 0 ] && echo aria2 已经运行 || echo aria2 没有运行
+ln -sf $Pro/aria2.conf /opt/etc/config/aria2.conf; fi
+/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && [ -n "`pidof aria2c`" ] && echo aria2 已经运行 || echo aria2 没有运行
 fi
 }
 
@@ -330,10 +322,11 @@ cat > "/opt/etc/deluge/web.conf" << EOF
     "theme": "gray"
 }
 EOF
+sed -i 's|root|opt|g' /opt/etc/deluge/core.conf
 ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 fi
-/opt/etc/init.d/S80deluged start > /dev/null 2>&1 && [ $? = 0 ] && echo deluged 已经运行 || echo deluged 没有运行
-/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 && [ $? = 0 ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
+/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && [ -n "`pidof deluged`" ] && echo deluge 已经运行 || echo deluge 没有运行
+/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && [ -n "`pidof deluge-web`" ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
 
 qbittorrent(){
@@ -349,10 +342,11 @@ WebUI\Port=9080
 WebUI\Username=admin
 General\Locale=zh
 Downloads\UseIncompleteExtension=true
+Downloads\SavePath=/opt/downloads/
 EOF
 ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
 fi
-/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
+/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ -n "`pidof qbittorrent-nox`" ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
 rtorrent(){
@@ -578,8 +572,8 @@ execute = {sh,-c,/opt/bin/php-cgi /opt/share/www/rutorrent/php/initplugins.php $
 EOF
 fi
 
-/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ $? = 0 ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
-/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && [ $? = 0 ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
+/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ -n "`pidof lighttpd`" ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
+/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && [ -n "`pidof rtorrent`" ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 transmission(){
@@ -591,7 +585,7 @@ _make_dir /opt/share/transmission/web
 cp -Rf /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
 rm -rf /opt/share/transmission-w*
 fi
-/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ $? = 0 ] && echo transmission 已经运行 || echo transmission 没有运行
+/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ -n "`pidof transmission-daemon`" ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
 onmp_restart(){
