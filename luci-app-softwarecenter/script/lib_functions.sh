@@ -367,13 +367,13 @@ if opkg_install rtorrent-easy-install; then
 	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 fi
 
-install_soft ffmpeg mediainfo unrar php7-mod-json git git-http > /dev/null
+install_soft ffmpeg mediainfo unrar php7-mod-json git-http > /dev/null
 rurelease=`git ls-remote -t https://github.com/Novik/ruTorrent v\* | awk -F/ 'NR == 1 {print $3}'`
-[ -f /opt/share/www/$rurelease.tar.gz* ] && rm /opt/share/www/$rurelease.tar.gz*
+[ -e /opt/share/www/$rurelease.tar.gz* ] && rm /opt/share/www/$rurelease.tar.gz*
 if wget -cN -t 5 --no-check-certificate https://github.com/Novik/ruTorrent/archive/$rurelease.tar.gz -P /opt/share/www; then
-[ -d "/opt/share/www/rutorrent" ] && rm -rf /opt/share/www/rutorrent
+[ -d /opt/share/www/rutorrent ] && rm -rf /opt/share/www/rutorrent
 tar -xzf /opt/share/www/$rurelease.tar.gz -C /opt/share/www
-mv /opt/share/www/$(tar -tzf /opt/share/www/$rurelease.tar.gz | awk -F/ 'NR == 1 {print $1}') /opt/share/www/rutorrent
+mv -f /opt/share/www/$(tar -tzf /opt/share/www/$rurelease.tar.gz | awk -F/ 'NR == 1 {print $1}') /opt/share/www/rutorrent
 rm /opt/share/www/$rurelease.tar.gz*
 
 cat > /opt/share/www/rutorrent/conf/plugins.ini << EOF
