@@ -371,8 +371,8 @@ install_soft ffmpeg mediainfo unrar php7-mod-json git git-http > /dev/null
 rurelease=`git ls-remote -t https://github.com/Novik/ruTorrent v\* | awk -F/ 'NR == 1 {print $3}'`
 [ -f /opt/share/www/$rurelease.tar.gz* ] && rm /opt/share/www/$rurelease.tar.gz*
 if wget -cN -t 5 --no-check-certificate https://github.com/Novik/ruTorrent/archive/$rurelease.tar.gz -P /opt/share/www; then
+[ -d "/opt/share/www/rutorrent" ] && rm -rf /opt/share/www/rutorrent
 tar -xzf /opt/share/www/$rurelease.tar.gz -C /opt/share/www
-[ -d "/opt/share/www/rutorrent" ] && rm /opt/share/www/rutorrent
 mv /opt/share/www/$(tar -tzf /opt/share/www/$rurelease.tar.gz | awk -F/ 'NR == 1 {print $1}') /opt/share/www/rutorrent
 rm /opt/share/www/$rurelease.tar.gz*
 
