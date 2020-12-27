@@ -78,7 +78,7 @@ _amule(){
 }
 
 local ipk="amuled aria2c rtorrent deluge-web qbittorrent-nox transmission-daemon"
-a=`pidof $PROC`
+local a=`pidof $PROC`
 for PROC in $ipk; do
 	if [ "$a" ]; then
 		echo $PROC 已经在运行
