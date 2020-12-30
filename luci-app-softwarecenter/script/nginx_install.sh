@@ -20,13 +20,13 @@ init_php(){
 
 	_make_dir /opt/usr/php/tmp/ > /dev/null 2>&1 && chmod -R 777 /opt/usr/php/tmp/
 
-	sed -e -i "/^doc_root/d" /opt/etc/php.ini
-	sed -e -i "s|.*memory_limit.*|memory_limit = 128M|g" /opt/etc/php.ini
-	sed -e -i "s|.*post_max_size.*|post_max_size = 8000M|g" /opt/etc/php.ini
-	sed -e -i "s|.*output_buffering.*|output_buffering = 4096|g" /opt/etc/php.ini
-	sed -e -i "s|.*upload_max_filesize.*|upload_max_filesize = 8000M|g" /opt/etc/php.ini
-	sed -e -i "s|.*max_execution_time.*|max_execution_time = 2000|g" /opt/etc/php.ini
-	sed -e -i "s|.*listen.mode.*|listen.mode = 0666|g" /opt/etc/php7-fpm.d/www.conf
+	sed -i "/^doc_root/d" /opt/etc/php.ini
+	sed -i "s|.*memory_limit.*|memory_limit = 128M|g" /opt/etc/php.ini
+	sed -i "s|.*post_max_size.*|post_max_size = 8000M|g" /opt/etc/php.ini
+	sed -i "s|.*output_buffering.*|output_buffering = 4096|g" /opt/etc/php.ini
+	sed -i "s|.*upload_max_filesize.*|upload_max_filesize = 8000M|g" /opt/etc/php.ini
+	sed -i "s|.*max_execution_time.*|max_execution_time = 2000|g" /opt/etc/php.ini
+	sed -i "s|.*listen.mode.*|listen.mode = 0666|g" /opt/etc/php7-fpm.d/www.conf
 
 	# PHP配置文件
 cat >> "/opt/etc/php.ini" <<-\PHPINI
