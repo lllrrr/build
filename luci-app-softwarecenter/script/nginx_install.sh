@@ -1,8 +1,5 @@
 #!/bin/sh
-#Ningx安装脚本
-#version 1.2
-#本脚本实现基本移植于github开源项目ONMP
-#本脚本提供以下函数接口： init_nginx del_nginx init_php del_php
+#Ningx安装脚本，本脚本提供以下函数接口： init_nginx del_nginx init_php del_php
 
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 # This is free software, licensed under the GNU General Public License v3.
@@ -10,11 +7,50 @@
 # 加载库函数
 . /usr/bin/softwarecenter/lib_functions.sh
 
-# 在Entware软件仓库中，nginx与nginx-extras冲突，后者提供一个更加完整的nginx支持
+# 在Entware软件仓库中，nginx 与 nginx-extras冲突，后者提供一个更加完整的nginx支持
 pkglist_nginx="nginx-extras"
 pkglist_php7="php7 php7-cgi php7-cli php7-fastcgi php7-fpm"
 
 phpmod="php7-mod-mysqli php7-mod-pdo php7-mod-pdo-mysql php7-mod-calendar php7-mod-ctype php7-mod-curl php7-mod-dom php7-mod-exif php7-mod-fileinfo php7-mod-ftp php7-mod-gd php7-mod-gettext php7-mod-gmp php7-mod-iconv php7-mod-intl php7-mod-json php7-mod-ldap php7-mod-session php7-mod-mbstring php7-mod-opcache php7-mod-openssl php7-mod-pcntl php7-mod-phar php7-pecl-redis php7-mod-session php7-mod-shmop php7-mod-simplexml php7-mod-snmp php7-mod-soap php7-mod-sockets php7-mod-sqlite3 php7-mod-sysvmsg php7-mod-sysvsem php7-mod-sysvshm php7-mod-tokenizer php7-mod-xml php7-mod-xmlreader php7-mod-xmlwriter php7-mod-zip php7-pecl-dio php7-pecl-http php7-pecl-libevent php7-pecl-propro php7-pecl-raphf redis-utils snmpd snmp-mibs snmp-utils zoneinfo-core zoneinfo-asia"
+
+# PHP初始化
+init_php(){
+	# 安装php
+	install_soft $pkglist_php7 $phpmod
+
+	_make_dir /opt/usr/php/tmp/ > /dev/null 2>&1 && chmod -R 777 /opt/usr/php/tmp/
+
+	sed -e -i "/^doc_root/d" /opt/etc/php.ini
+	sed -e -i "s|.*memory_limit.*|memory_limit = 128M|g" /opt/etc/php.ini
+	sed -e -i "s|.*post_max_size.*|post_max_size = 8000M|g" /opt/etc/php.ini
+	sed -e -i "s|.*output_buffering.*|output_buffering = 4096|g" /opt/etc/php.ini
+	sed -e -i "s|.*upload_max_filesize.*|upload_max_filesize = 8000M|g" /opt/etc/php.ini
+	sed -e -i "s|.*max_execution_time.*|max_execution_time = 2000|g" /opt/etc/php.ini
+	sed -e -i "s|.*listen.mode.*|listen.mode = 0666|g" /opt/etc/php7-fpm.d/www.conf
+
+	# PHP配置文件
+cat >> "/opt/etc/php.ini" <<-\PHPINI
+session.save_path = "/opt/usr/php/tmp/"
+opcache.enable=1
+opcache.enable_cli=1
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=10000
+opcache.memory_consumption=128
+opcache.save_comments=1
+opcache.revalidate_freq=60
+opcache.fast_shutdown=1
+mysqli.default_socket=/opt/var/run/mysqld.sock
+pdo_mysql.default_socket=/opt/var/run/mysqld.sock
+PHPINI
+
+cat >> "/opt/etc/php7-fpm.d/www.conf" <<-\PHPFPM
+env[HOSTNAME] = $HOSTNAME
+env[PATH] = /opt/bin:/usr/local/bin:/usr/bin:/bin
+env[TMP] = /opt/tmp
+env[TMPDIR] = /opt/tmp
+env[TEMP] = /opt/tmp
+PHPFPM
+}
 
 # 安装nginx
 init_nginx(){
@@ -23,11 +59,11 @@ init_nginx(){
 	echo "安装php环境支持" && init_php
 	# 安装nginx软件包
 	install_soft "$pkglist_nginx"
-	_make_dir "/opt/etc/nginx/vhost" "/opt/etc/nginx/no_use" "/opt/etc/nginx/conf"
+	_make_dir /opt/etc/nginx/vhost /opt/etc/nginx/no_use /opt/etc/nginx/conf > /dev/null 2>&1
 
 	# 初始化nginx配置文件
-	cat > "/opt/etc/nginx/nginx.conf" <<-\EOF
-user theOne root;
+cat > "/opt/etc/nginx/nginx.conf" << EOF
+user $username root;
 pid /opt/var/run/nginx.pid;
 worker_processes auto;
 events {
@@ -59,8 +95,6 @@ http {
 	include /opt/etc/nginx/vhost/*.conf;
 }
 EOF
-
-	sed -i "s/theOne/$username/g" /opt/etc/nginx/nginx.conf
 
 	# 特定程序的nginx配置
 	nginx_special_conf
@@ -273,47 +307,6 @@ if (!-e $request_filename) {
 	}
 OOO
 
-}
-
-# PHP初始化
-init_php(){
-	# 安装php
-	install_soft "$pkglist_php7"
-	install_soft "$phpmod"
-
-	_make_dir /opt/usr/php/tmp/
-	chmod -R 777 /opt/usr/php/tmp/
-
-	sed -e "/^doc_root/d" -i /opt/etc/php.ini
-	sed -e "s/.*memory_limit = .*/memory_limit = 128M/g" -i /opt/etc/php.ini
-	sed -e "s/.*output_buffering = .*/output_buffering = 4096/g" -i /opt/etc/php.ini
-	sed -e "s/.*post_max_size = .*/post_max_size = 8000M/g" -i /opt/etc/php.ini
-	sed -e "s/.*max_execution_time = .*/max_execution_time = 2000 /g" -i /opt/etc/php.ini
-	sed -e "s/.*upload_max_filesize.*/upload_max_filesize = 8000M/g" -i /opt/etc/php.ini
-	sed -e "s/.*listen.mode.*/listen.mode = 0666/g" -i /opt/etc/php7-fpm.d/www.conf
-
-	# PHP配置文件
-	cat >> "/opt/etc/php.ini" <<-\PHPINI
-session.save_path = "/opt/usr/php/tmp/"
-opcache.enable=1
-opcache.enable_cli=1
-opcache.interned_strings_buffer=8
-opcache.max_accelerated_files=10000
-opcache.memory_consumption=128
-opcache.save_comments=1
-opcache.revalidate_freq=60
-opcache.fast_shutdown=1
-mysqli.default_socket=/opt/var/run/mysqld.sock
-pdo_mysql.default_socket=/opt/var/run/mysqld.sock
-PHPINI
-
-	cat >> "/opt/etc/php7-fpm.d/www.conf" <<-\PHPFPM
-env[HOSTNAME] = $HOSTNAME
-env[PATH] = /opt/bin:/usr/local/bin:/usr/bin:/bin
-env[TMP] = /opt/tmp
-env[TMPDIR] = /opt/tmp
-env[TEMP] = /opt/tmp
-PHPFPM
 }
 
 # 卸载PHP

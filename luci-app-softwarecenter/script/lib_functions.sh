@@ -4,7 +4,7 @@ pkglist_base="wget unzip e2fsprogs ca-certificates"
 
 status(){
 	local p=$?
-	# echo -en "\\033[40G[ "
+		# echo -en "\\033[40G[ "
 	if [ "$p" = "0" ]; then
 		# echo -e "\\033[1;33m成功\\033[0;39m ]"
 		echo "   成功"
@@ -18,7 +18,7 @@ status(){
 
 _make_dir(){
 	for p in "$@"; do
-		[ -d "$p" ] || { mkdir -p $p && echo "成功创建$p";}
+		[ -d "$p" ] || { mkdir -p $p && echo "新建目录 $p";}
 	done
 	return 0
 }
@@ -50,26 +50,19 @@ entware_set(){
 	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
 	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
 	[ $INST_URL ] || { echo "没有找到你选择的CPU架构！" && exit 1; }
-	if check_url $INST_URL; then
-		echo -e "Entware-NG 官网连接成功，开始安装 Entware-NG ……"
-		wget -t 5 -qcNO - $INST_URL | /bin/sh
-		[ -z "`ls /opt`" ] && { echo 安装Entware出错！ && exit 1; }
-	else
-		echo -e "Entware-NG 官网连接失败，请检查网络连接状态后重试！"
-		exit 1
-	fi
-
+	wget -t 5 -qcNO - $INST_URL | /bin/sh
+	[ -e "$USB_PATH/opt/etc/init.d/rc.func" ] || { echo 安装 Entware 出错！ && exit 1; }
 cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
 START=51
 
 get_entware_path(){
-	for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
-		if [ -d "$mount_point/opt/etc" ]; then
-			echo "$mount_point"
-			break
-		fi
-	done
+for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
+if [ -d "$mount_point/opt/etc" ]; then
+echo "$mount_point"
+break
+fi
+done
 }
 
 start(){
@@ -80,13 +73,13 @@ mount -o bind $ENTWARE_PATH/opt /opt
 }
 
 stop(){
-	/opt/etc/init.d/rc.unslung stop
-	umount -lf /opt
-	rm -r /opt
+/opt/etc/init.d/rc.unslung stop
+umount -lf /opt
+rm -r /opt
 }
 
 restart(){
-	stop;start
+stop;start
 }
 ENTWARE
 
@@ -95,12 +88,11 @@ ENTWARE
 	echo "export PATH=/opt/bin:/opt/sbin:/sbin:/bin:/usr/sbin:/usr/bin:$PATH" >> /etc/profile
 
 	i18n_URL=http://pkg.entware.net/sources/i18n_glib223.tar.gz
-	if check_url $i18n_URL; then
-		wget -qcNO- -t 5 $i18n_URL | tar xvz -C /opt/usr/share/ > /dev/null
-		echo "添加 zh_CN.UTF-8"
-		/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
-		sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
-	fi
+	wget -qcNO- -t 5 $i18n_URL | tar xvz -C /opt/usr/share/ > /dev/null
+	echo "添加 zh_CN.UTF-8"
+	/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
+	sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
+	echo -e "\nEntware 安装成功！\n"
 }
 
 # entware环境解除 说明：此函数用于删除OPKG配置设定
@@ -114,25 +106,21 @@ entware_unset(){
 	rm -r /opt
 }
 
-check_url() {
-  [ "`wget -S --no-check-certificate --spider --tries=3 $1 2>&1 | grep 'HTTP/1.1 200 OK'`" ] && return 0 || return 1
-}
-
 # 软件包安装 参数: $@:安装列表 说明：本函数将负责安装指定列表的软件到外置存储区，请保证区域指向正常且空间充足
 install_soft(){
 	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	for ipk in $@; do
-		if [ -z "`which $ipk`" ]; then
-		echo -e "`date_time`  正在安装  $ipk\c"
-		opkg install $ipk > /dev/null 2>&1
-		status
+		if [ "`which $ipk`" ]; then
+			echo "$ipk	已经安装"
+		else
+			echo -e "`date_time`  正在安装  $ipk\c"
+			opkg install $ipk > /dev/null 2>&1
+			status
 			if [ $? != 0 ]; then
-				echo -e "正在强制安装 $ipk\c"
+				echo -e "`date_time`  强制安装  $ipk\c"
 				opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
 				status
 			fi
-		else
-			echo "$ipk	已经安装"
 		fi
 	done
 }
@@ -148,7 +136,7 @@ remove_soft(){
 }
 
 date_time() {
-    date +"%Y-%m-%d %H:%M:%S"
+	date +"%Y-%m-%d %H:%M:%S"
 }
 
 # 磁盘分区挂载
@@ -179,160 +167,172 @@ system_check(){
 
 # 配置交换分区文件 参数: $1:交换空间大小(M) $2:交换分区挂载点
 config_swap_init(){
-status=$(cat /proc/swaps | awk 'NR==2')
-    if [ -n "$status" ]; then
-        echo "Swap 已经启用"
-    else
-        if [ ! -e "$1/opt/.swap" ]; then
-            echo "正在生成swap文件，请耐心等待..."
-            dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
-            mkswap $2/opt/.swap
-            chmod 0600 $2/opt/.swap
-        fi
-        # 启用交换分区
-        swapon $2/opt/.swap
-        echo "现在你可以使用 free 命令查看swap是否启用"
-    fi
+	status=$(cat /proc/swaps | awk 'NR==2')
+	if [ "$status" ]; then
+		echo "Swap 已经启用"
+	else
+		[ -e "$1/opt/.swap" ] || {
+			echo "正在生成swap文件，请耐心等待..."
+			dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
+			mkswap $2/opt/.swap
+			chmod 0600 $2/opt/.swap
+		}
+		# 启用交换分区
+		swapon $2/opt/.swap
+		echo "现在你可以使用 free 命令查看swap是否启用"
+	fi
 }
 
 # 删除交换分区文件 参数: $disk_mount:交换分区挂载点
 config_swap_del(){
 	[ -e /opt/.swap ] && {
-	swapoff /opt/.swap
-	rm -f /opt/.swap
-	echo -e "\n$1/opt/.swap文件已删除！\n"
-	}
+		swapoff /opt/.swap
+		rm -f /opt/.swap
+		echo -e "\n$1/opt/.swap文件已删除！\n"
+		}
 }
 
 # 获取通用环境变量
 get_env(){
-    # 获取用户名
-    if [ $USER ]; then
-        username=$USER
-    else
-        username=$(cat /etc/passwd | sed "s/:/ /g" | awk 'NR==1'  | awk '{printf $1}')
-    fi
+# 获取用户名
+	[ "$USER" ] && username=$USER || username=$(cat /etc/passwd | awk -F: 'NR==1{print $1}')
 
-    # 获取路由器IP
-    localhost=$(ifconfig  | grep "inet addr" | awk '{ print $2}' | awk -F: '{print $2}' | awk 'NR==1')
-    if [ ! -n "$localhost" ]; then
-        localhost="你的路由器IP"
-    fi
+# 获取路由器IP
+	localhost=$(ifconfig | awk '/inet addr/{print $2}' | awk -F: 'NR==1{print $2}')
+	[ "$localhost" ] || localhost="你的路由器IP"
 }
 
-# 容量验证 参数：$1：目标位置 说明：本函数判断对于GB级别，并不会很精确
+# 容量验证 参数：$1：目标位置
 check_available_size(){
-	available_size=`lsblk -s | grep $1 | awk '{print $4}'`
+	available_size="`lsblk -s | grep $1 | awk '{print $4}'`"
 	[ $available_size ] && echo "$available_size"
 }
 
 opkg_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
 	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
-	_make_dir /opt/etc/config > /dev/null 2>&1
-	_make_dir /opt/downloads > /dev/null 2>&1
-for i in $@; do
-	if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
-		echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
-	else
-		echo -e $i 不在 Entware 软件源，跳过安装！
-	fi
-done
+	_make_dir /opt/etc/config /opt/downloads > /dev/null 2>&1
+	for i in $@; do
+		if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
+			echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
+		else
+			echo -e $i 不在 Entware 软件源，跳过安装！
+		fi
+	done
 }
 
 amule(){
-if opkg_install amule; then
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
-	/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
-	if wget -O AmuleWebUI.zip https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master
-	unzip -d /opt/share/amule/ AmuleWebUI.zip > /dev/null 2>&1 && rm AmuleWebUI.zip
-	mv -f /opt/share/amule/AmuleWebUI-Reloaded-master /opt/share/amule/webserver/AmuleWebUI-Reloaded; then
-	sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php; fi
-	pp=`echo -n admin | md5sum | awk '{print $1}'`
-	sed -i "{
-	s/^Enabled=.*/Enabled=1/g
-	s/^ECPas.*/ECPassword=$pp/g
-	s/^UPnPEn.*/UPnPEnabled=1/g
-	s/^Password=.*/Password=$pp/g
-	s/^UPnPECE.*/UPnPECEnabled=1/g
-	s/^Template=.*/Template=AmuleWebUI-Reloaded/g
-	s/^AcceptExternal.*/AcceptExternalConnections=1/g
-	s/^IncomingDir=.*/IncomingDir=/opt/downloads/g
-	}" /opt/var/amule/amule.conf
-fi
+	if opkg_install amule; then
+		/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && sleep 5
+		/opt/etc/init.d/S57amuled stop > /dev/null 2>&1
+		if wget -O AmuleWebUI.zip https://codeload.github.com/MatteoRagni/AmuleWebUI-Reloaded/zip/master; then
+			unzip -d /opt/share/amule/ AmuleWebUI.zip > /dev/null 2>&1 && rm AmuleWebUI.zip
+			mv -f /opt/share/amule/AmuleWebUI-Reloaded-master /opt/share/amule/webserver/AmuleWebUI-Reloaded
+			sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php
+		else
+			echo AmuleWebUI-Reloaded 下载失败，使用原版UI。
+		fi
+		pp=`echo -n admin | md5sum | awk '{print $1}'`
+		sed -i "{
+		s/^Enabled=.*/Enabled=1/g
+		s/^ECPas.*/ECPassword=$pp/g
+		s/^UPnPEn.*/UPnPEnabled=1/g
+		s/^Password=.*/Password=$pp/g
+		s/^UPnPECE.*/UPnPECEnabled=1/g
+		s/^Template=.*/Template=AmuleWebUI-Reloaded/g
+		s/^AcceptExternal.*/AcceptExternalConnections=1/g
+		s|^IncomingDir=.*|IncomingDir=/opt/downloads|g
+		}" /opt/var/amule/amule.conf
+	else
+		echo amule 安装失败，再重试安装！ && exit 1
+	fi
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
-	/opt/etc/init.d/S57amuled start > /dev/null 2>&1 && [ -n "`pidof amuled`" ] && echo amule 已经运行 || echo amule 没有运行
+	/opt/etc/init.d/S57amuled restart > /dev/null 2>&1 && \
+	[ -n "`pidof amuled`" ] && echo amule 已经运行 || echo amule 没有运行
 }
 
 aria2(){
-if opkg_install aria2; then
-Pro="/opt/var/aria2"
-cd $Pro
-if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
-	if [ ! -s $i ]; then
-		wget -N -t2 -T3 https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
-		curl -fsSLO https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
-		wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i || \
-		curl -fsSLO https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i
-		[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
+	if opkg_install aria2; then
+		Pro="/opt/var/aria2"
+		_make_dir $Pro > /dev/null && cd $Pro
+		if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
+				if [ ! -s $i ]; then
+					wget -N -t2 -T3 https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
+					curl -fsSLO https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
+					wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i || \
+					curl -fsSLO https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i
+					[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
+				fi
+			done
+			sed -i -e "s|session.dat|aria2.session|g;s|=/opt/etc|=$Pro|" /opt/etc/init.d/S81aria2
+			sed -i -e 's|dir=.*|dir=/opt/downloads|g;s|/root/.aria2|'"$Pro"'|g;s/^rpc-se.*/rpc-secret=Passw0rd/g' ./aria2.conf
+			sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d;/^WARRING/d' ./core
+			sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
+			sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
+				chmod +x *.sh && sh ./tracker.sh > /dev/null 2>&1 && [ $? = 0 ] && \
+				echo "BT 服务器地址下载成功！" || echo "BT 服务器地址下载失败！"
+				ln -sf $Pro/aria2.conf /opt/etc/config/aria2.conf
+				rm /opt/etc/aria2.conf
+		fi
+	else
+		echo aria2 安装失败，再重试安装！ && exit 1
 	fi
-done
-sed -i -e "s|session.dat|aria2.session|g;s|=/opt/etc|=$Pro|" /opt/etc/init.d/S81aria2
-sed -i -e 's|dir=.*|dir=/opt/downloads|g;s|/root/.aria2|'"$Pro"'|g;s/^rpc-se.*/rpc-secret=Passw0rd/g' ./aria2.conf
-sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d;/^WARRING/d' ./core
-sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
-sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
-chmod +x *.sh && sh ./tracker.sh > /dev/null 2>&1
-ln -sf $Pro/aria2.conf /opt/etc/config/aria2.conf; fi
-/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && [ -n "`pidof aria2c`" ] && echo aria2 已经运行 || echo aria2 没有运行
-fi
+	/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && \
+	[ -n "`pidof aria2c`" ] && echo aria2 已经运行 || echo aria2 没有运行
 }
 
 deluge(){
 if opkg_install deluge-ui-web; then
+	/opt/etc/init.d/S80deluged start > /dev/null 2>&1 &&  sleep 10
+	/opt/etc/init.d/S80deluged stop > /dev/null 2>&1 
 cat > "/opt/etc/deluge/web.conf" << EOF
 {
-    "file": 2,
-    "format": 1
+"file": 2,
+"format": 1
 }{
-    "base": "/",
-    "cert": "ssl/daemon.cert",
-    "default_daemon": "",
-    "enabled_plugins": [],
-    "first_login": false,
-    "https": false,
-    "interface": "0.0.0.0",
-    "language": "zh_CN",
-    "pkey": "ssl/daemon.pkey",
-    "port": 8112,
-    "pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
-    "pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
-    "session_timeout": 3600,
-    "sessions": {
-        "e62e391f764e83f41ef10cd60e7ea68e88057b8a9737de1920900c936abfe0d5": {
-            "expires": 1608831495.0,
-            "level": 10,
-            "login": "admin"
-        }
-    },
-    "show_session_speed": false,
-    "show_sidebar": true,
-    "sidebar_multiple_filters": true,
-    "sidebar_show_zero": false,
-    "theme": "gray"
+"base": "/",
+"cert": "ssl/daemon.cert",
+"default_daemon": "",
+"enabled_plugins": [],
+"first_login": false,
+"https": false,
+"interface": "0.0.0.0",
+"language": "zh_CN",
+"pkey": "ssl/daemon.pkey",
+"port": 8112,
+"pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
+"pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
+"session_timeout": 3600,
+"sessions": {
+"e62e391f764e83f41ef10cd60e7ea68e88057b8a9737de1920900c936abfe0d5": {
+"expires": 1608831495.0,
+"level": 10,
+"login": "admin"
+}
+},
+"show_session_speed": false,
+"show_sidebar": true,
+"sidebar_multiple_filters": true,
+"sidebar_show_zero": false,
+"theme": "gray"
 }
 EOF
-sed -i 's|root|opt|g' /opt/etc/deluge/core.conf
-ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
+	killall deluged && killall deluge-web
+	sed -i 's|root/Down|opt/down|g' /opt/etc/deluge/core.conf
+	ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
+else
+	echo deluge 安装失败，再重试安装！ && exit 1
 fi
-/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && [ -n "`pidof deluged`" ] && echo deluge 已经运行 || echo deluge 没有运行
-/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && [ -n "`pidof deluge-web`" ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
+	/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && \
+	[ "`pidof deluged`" ] && echo deluge 已经运行 || echo deluge 没有运行
+	/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && \
+	[ "`pidof deluge-web`" ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
 }
 
 qbittorrent(){
 if opkg_install qbittorrent; then
-/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 5
-QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
+	/opt/etc/init.d/S89qbittorrent start > /dev/null 2>&1 && sleep 5
+	QBT_INI_FILE="/opt/etc/qBittorrent_entware/config/qBittorrent.conf"
 cat > "$QBT_INI_FILE" << EOF
 [Preferences]
 Connection\PortRangeMin=44667
@@ -344,33 +344,37 @@ General\Locale=zh
 Downloads\UseIncompleteExtension=true
 Downloads\SavePath=/opt/downloads/
 EOF
-ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
+	ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
+else
+	echo qBittorrent 安装失败，再重试安装！ && exit 1
 fi
-/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && [ -n "`pidof qbittorrent-nox`" ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
+	/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && \
+	[ -n "`pidof qbittorrent-nox`" ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
 }
 
 rtorrent(){
-if opkg_install rtorrent-easy-install; then
-	web_port=1099
-	www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
-	if [ -z "`grep 'server.port' $www_cfg`" ]; then
-		echo "server.port = $web_port" >> $www_cfg
+	if opkg_install rtorrent-easy-install; then
+		web_port=1099
+		www_cfg=/opt/etc/lighttpd/conf.d/99-rtorrent-fastcgi-scgi-auth.conf
+		if [ -z "`grep 'server.port' $www_cfg`" ]; then
+			echo "server.port = $web_port" >> $www_cfg
+		else
+			sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
+		fi
 	else
-		sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
+		echo rtorrent 安装失败，再重试安装！ && exit 1
 	fi
-	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
-fi
 
-install_soft ffmpeg mediainfo unrar php7-mod-json git-http > /dev/null
-rurelease=`git ls-remote -t https://github.com/Novik/ruTorrent v\* | awk -F/ 'NR == 1 {print $3}'`
-[ -e /opt/share/www/$rurelease.tar.gz* ] && rm /opt/share/www/$rurelease.tar.gz*
-if wget -cN -t 5 --no-check-certificate https://github.com/Novik/ruTorrent/archive/$rurelease.tar.gz -P /opt/share/www; then
-[ -d /opt/share/www/rutorrent ] && rm -rf /opt/share/www/rutorrent
-tar -xzf /opt/share/www/$rurelease.tar.gz -C /opt/share/www
-mv -f /opt/share/www/$(tar -tzf /opt/share/www/$rurelease.tar.gz | awk -F/ 'NR == 1 {print $1}') /opt/share/www/rutorrent
-rm /opt/share/www/$rurelease.tar.gz*
+	install_soft ffmpeg mediainfo unrar php7-mod-json git-http > /dev/null
+	rurelease=`git ls-remote -t https://github.com/Novik/ruTorrent v\* | awk -F/ 'NR == 1 {print $3}'`
+	[ -e /opt/share/www/$rurelease.tar.gz* ] && rm /opt/share/www/$rurelease.tar.gz*
+	if wget -cN -t 5 --no-check-certificate https://github.com/Novik/ruTorrent/archive/$rurelease.tar.gz -P /opt/share/www; then
+		[ -d /opt/share/www/rutorrent ] && rm -rf /opt/share/www/rutorrent
+		tar -xzf /opt/share/www/$rurelease.tar.gz -C /opt/share/www
+		mv -f /opt/share/www/$(tar -tzf /opt/share/www/$rurelease.tar.gz | awk -F/ 'NR == 1 {print $1}') /opt/share/www/rutorrent
+		rm /opt/share/www/$rurelease.tar.gz*
 
-cat > /opt/share/www/rutorrent/conf/plugins.ini << EOF
+cat > /opt/share/www/rutorrent/conf/plugins.ini <<-\ENTWARE
 ;; Plugins' permissions.
 ;; If flag is not found in plugin section, corresponding flag from "default" section is used.
 ;; If flag is not found in "default" section, it is assumed to be "yes".
@@ -497,24 +501,24 @@ enabled = yes
 enabled = no
 [xmpp]
 enabled = no
-EOF
+ENTWARE
 
-rut_cfg=/opt/share/www/rutorrent/conf/config.php
-sed -i 's|/tmp/errors.log|/opt/var/log/rutorrent_errors.log|g' $rut_cfg
-sed -i 's|$scgi_port = 5|// $scgi_port = 5|g' $rut_cfg
-sed -i 's|$scgi_host = "1|// $scgi_host = "1|g' $rut_cfg
-sed -i 's|// $scgi_port = 0|$scgi_port = 0|g' $rut_cfg
-sed -i 's|// $scgi_host = "unix:///tmp|$scgi_host = "unix:///opt/var|g' $rut_cfg
-sed -i "s|\"php\" 	=> ''|\"php\" 	=> '/opt/bin/php-cgi'|" $rut_cfg
-sed -i "s|\"curl\"	=> ''|\"curl\"	=> '/opt/bin/curl'|" $rut_cfg
-sed -i "s|\"gzip\"	=> ''|\"gzip\"	=> '/opt/bin/gzip'|" $rut_cfg
-sed -i "s|\"id\"	=> ''|\"id\"	=> '/opt/bin/id'|" $rut_cfg
-sed -i "s|\"stat\"	=> ''|\"stat\"	=> '/opt/bin/stat'|" $rut_cfg
-sed -i 's|this.request("?action=getplugins|this.requestWithoutTimeout("?action=getplugins|g' /opt/share/www/rutorrent/js/webui.js
-sed -i 's|this.request("?action=getuisettings|this.requestWithoutTimeout("?action=getuisettings|g' /opt/share/www/rutorrent/js/webui.js
-fi
+	rut_cfg=/opt/share/www/rutorrent/conf/config.php
+	sed -i 's|/tmp/errors.log|/opt/var/log/rutorrent_errors.log|g' $rut_cfg
+	sed -i 's|$scgi_port = 5|// $scgi_port = 5|g' $rut_cfg
+	sed -i 's|$scgi_host = "1|// $scgi_host = "1|g' $rut_cfg
+	sed -i 's|// $scgi_port = 0|$scgi_port = 0|g' $rut_cfg
+	sed -i 's|// $scgi_host = "unix:///tmp|$scgi_host = "unix:///opt/var|g' $rut_cfg
+	sed -i "s|\"php\" 	=> ''|\"php\" 	=> '/opt/bin/php-cgi'|" $rut_cfg
+	sed -i "s|\"curl\"	=> ''|\"curl\"	=> '/opt/bin/curl'|" $rut_cfg
+	sed -i "s|\"gzip\"	=> ''|\"gzip\"	=> '/opt/bin/gzip'|" $rut_cfg
+	sed -i "s|\"id\"	=> ''|\"id\"	=> '/opt/bin/id'|" $rut_cfg
+	sed -i "s|\"stat\"	=> ''|\"stat\"	=> '/opt/bin/stat'|" $rut_cfg
+	sed -i 's|this.request("?action=getplugins|this.requestWithoutTimeout("?action=getplugins|g' /opt/share/www/rutorrent/js/webui.js
+	sed -i 's|this.request("?action=getuisettings|this.requestWithoutTimeout("?action=getuisettings|g' /opt/share/www/rutorrent/js/webui.js
+	fi
 
-if [ -z "`grep execute /opt/etc/rtorrent/rtorrent.conf`" ]; then
+	if [ -z "`grep execute /opt/etc/rtorrent/rtorrent.conf`" ]; then
 cat > /opt/etc/rtorrent/rtorrent.conf << EOF
 # 高级设置：任务信息文件路径。用来生成任务信息文件，记录种子下载的进度等信息
 session.path.set = /opt/etc/rtorrent/session
@@ -566,26 +570,38 @@ throttle.global_down.max_rate.set_kb = 0
 # 默认单位为 B/s (设置为 4(B) 表示 4B/s；4K表示 4KB/s；4M 表示4MB/s；4G 表示 4GB/s)
 throttle.global_up.max_rate.set_kb = 0
 # 默认下载路径(不支持绝对路径，如~/torrents)
-directory.default.set = /opt/torrents
+directory.default.set = /opt/downloads
 # 免登陆 Web 服务初始化 rutorrent 的插件
 execute = {sh,-c,/opt/bin/php-cgi /opt/share/www/rutorrent/php/initplugins.php $user &}
 EOF
-fi
+	fi
 
-/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && [ -n "`pidof lighttpd`" ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
-/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && [ -n "`pidof rtorrent`" ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
+	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
+	/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && \
+	[ -n "`pidof lighttpd`" ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
+	/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && \
+	[ -n "`pidof rtorrent`" ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
 }
 
 transmission(){
-if opkg_install transmission-daemon; then
-ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
-wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
-unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
-_make_dir /opt/share/transmission/web
-cp -Rf /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
-rm -rf /opt/share/transmission-w*
-fi
-/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && [ -n "`pidof transmission-daemon`" ] && echo transmission 已经运行 || echo transmission 没有运行
+	if opkg_install transmission-daemon; then
+		ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
+		wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
+		if [ -e "tr.zip" ]; then
+			unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
+			_make_dir /opt/share/transmission/web > /dev/null 2>&1 
+			mv -f /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
+			rm -rf /opt/share/transmission-w*
+			sed -i 's|/torrent||g' /opt/etc/transmission/settings.json
+		else
+			echo "下载 transmission-web-control 出错！" && opkg_install transmission-web-control
+			echo "使用 Entware transmission-web-control"
+		fi
+	else
+		echo transmission 安装失败，再重试安装！ && exit 1
+	fi
+	/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && \
+	[ -n "`pidof transmission-daemon`" ] && echo transmission 已经运行 || echo transmission 没有运行
 }
 
 onmp_restart(){
@@ -607,6 +623,7 @@ onmp_restart(){
 			num=`expr $num + 1`
 		fi
 	done
+
 	if [ $num -gt 0 ]; then
 		echo "onmp启动失败"
 		logger -t "【ONMP】" "启动失败"
@@ -617,16 +634,16 @@ onmp_restart(){
 	fi
 }
 
-if [ $1 ]; then
-	log="/tmp/log/softwarecenter.log"
-	[ $1 = "amule" ] && amule >> $log
-	[ $1 = "aria2" ] && aria2 >> $log
-	[ $1 = "deluge" ] && deluge >> $log
-	[ $1 = "rtorrent" ] && rtorrent $@ >> $log
-	[ $1 = "qbittorrent" ] && qbittorrent >> $log
-	[ $1 = "transmission" ] && transmission >> $log
-	[ $1 = "system_check" ] && system_check >> $log
-	[ $1 = "onmp_restart" ] && onmp_restart >> $log
-	[ $1 = "opkg_install" ] && opkg_install $@ >> $log
-	[ $1 = "install_soft" ] && install_soft $2 $3 >> $log
-fi
+	if [ $1 ]; then
+		log="/tmp/log/softwarecenter.log"
+		[ $1 = "amule" ] && amule >> $log
+		[ $1 = "aria2" ] && aria2 >> $log
+		[ $1 = "deluge" ] && deluge >> $log
+		[ $1 = "rtorrent" ] && rtorrent $@ >> $log
+		[ $1 = "qbittorrent" ] && qbittorrent >> $log
+		[ $1 = "transmission" ] && transmission >> $log
+		[ $1 = "system_check" ] && system_check >> $log
+		[ $1 = "onmp_restart" ] && onmp_restart >> $log
+		[ $1 = "opkg_install" ] && opkg_install $@ >> $log
+		[ $1 = "install_soft" ] && install_soft $2 $3 >> $log
+	fi

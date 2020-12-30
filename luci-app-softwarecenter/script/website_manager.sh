@@ -1,8 +1,6 @@
 #!/bin/sh
 #网站管理脚本 version 1.5
-#本脚本实现基本移植于github开源项目ONMP
 
-# 导入通用库函数
 . /usr/bin/softwarecenter/lib_functions.sh
 
 # Web程序
@@ -57,10 +55,6 @@ install_website(){
 		*)break;;
 	esac
 
-	if [ ! -d "/opt/wwwroot/$webdir" ]; then
-		echo "部署验证失败，回滚操作"
-		delete_website /opt/etc/nginx/vhost/$webdir.conf
-	fi
 }
 
 # 网站名称映射 参数；$1:网站选项
@@ -88,57 +82,41 @@ web_installer(){
 	echo -e "=============================\n"
 
 	# 获取用户自定义设置
-	[ $nport ] && port_settings $nport
 	webdir=$name
+	suffix="zip"
+	[ $nport ] && port_settings $nport
+	[ $istar ] && suffix="tar"
 
-	# 检查目录是否存在
-	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
-		echo "开始安装$webdir"
-	else
-		rm -rf /opt/wwwroot/$webdir && echo "已删除/opt/wwwroot/$webdir"
-	fi
+	# 检查是否原有文件存在
+	[ -d "/opt/wwwroot/$webdir" ] && rm -rf /opt/wwwroot/$webdir && \
+	rm -rf /opt/etc/nginx/vhost/$webdir.conf && echo "已删除以前的$webdir文件"
+	[ -e /opt/tmp/$name.$suffix ] && rm -rf /opt/tmp/$name.$suffix
 
 	# 下载程序并解压
-	suffix="zip"
-	[ -n "$istar" ] && suffix="tar"
-	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
-		rm -rf /opt/etc/nginx/vhost/$webdir.conf
-		if [[ ! -f /opt/wwwroot/$name.$suffix ]]; then
-			echo "正在下载安装包$name.$suffix，请耐心等待..."
-			[ -e /opt/tmp/$name.$suffix ] && rm -rf /opt/tmp/$name.$suffix
-			wget --no-check-certificate -O /opt/tmp/$name.$suffix $filelink
-			if [ $? != 0 ]; then
-				echo "下载异常"
-				rm /opt/tmp/$name.$suffix
-				exit 1
-			fi
-			_make_dir /opt/wwwroot
-			mv /opt/tmp/$name.* /opt/wwwroot/
-		fi
-		if [[ ! -f "/opt/wwwroot/$name.$suffix" ]]; then
-			echo "下载文件出错" && exit 1
+	echo "开始安装$webdir"
+	echo "正在下载安装包$name.$suffix，请耐心等待..."
+	if wget --no-check-certificate -O /opt/tmp/$name.$suffix $filelink; then
+		_make_dir /opt/wwwroot /opt/wwwroot/$hookdir
+		mv /opt/tmp/$name.* /opt/wwwroot/
+		echo "正在解压$name.$suffix..."
+		if [ $istar ]; then
+			tar zxf /opt/wwwroot/$name.$suffix -C /opt/wwwroot/$hookdir > /dev/null 2>&1
 		else
-			echo "正在解压..."
-		if [[ -n "$hookdir" ]]; then
-			_make_dir /opt/wwwroot/$hookdir
+			unzip /opt/wwwroot/$name.$suffix -d /opt/wwwroot/$hookdir > /dev/null 2>&1
 		fi
-			if [[ -n "$istar" ]]; then
-				tar zxf /opt/wwwroot/$name.$suffix -C /opt/wwwroot/$hookdir > /dev/null 2>&1
-			else
-				unzip /opt/wwwroot/$name.$suffix -d /opt/wwwroot/$hookdir > /dev/null 2>&1
-			fi
-
-			mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir
-			echo "解压完成..." #&& rm /opt/wwwroot/$name.$suffix
-		fi
-	fi
-
-	# 检测是否解压成功
-	if [[ ! -d "/opt/wwwroot/$webdir" ]] ; then
-		echo "安装不成功"
-		delete_website /opt/etc/nginx/vhost/$webdir.conf
+		mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir && echo "解压完成..." && rm /opt/wwwroot/$name.$suffix
+		# 检测是否解压成功
+		[ "`ls /opt/wwwroot/$webdir 2> /dev/null | wc -l`" -eq 0 ] && {
+			echo "$webdir安装失败，回滚操作"
+			delete_website /opt/etc/nginx/vhost/$webdir.conf
+			exit 1
+		}
+	else
+		echo "$name下载失败，检查网络。"
+		rm /opt/tmp/$name.$suffix
 		exit 1
 	fi
+
 }
 
 # 安装脚本的基本结构
