@@ -57,7 +57,7 @@ cat > "/etc/init.d/entware" <<-\ENTWARE
 START=51
 
 get_entware_path(){
-for mount_point in `lsblk -s | grep mnt | awk '{print $7}'`; do
+for mount_point in `lsblk -s | awk '/mnt/{print $7}'`; do
 if [ -d "$mount_point/opt/etc" ]; then
 echo "$mount_point"
 break
