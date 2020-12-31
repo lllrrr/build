@@ -63,21 +63,22 @@ handle_website(){
 	config_get port $1 port
 
 	if [ "$entware_enable" != "1" ]; then
-		echo "softwarecenter 没有启动"
+		echo_time "softwarecenter 没有启动"
 		exit 0
 	fi
 
 	# echo "获取网站配置文件名"
 	if [ -n "$autodeploy_enable" ]; then
-		#install_website $website_select $port
+		# 获取网站名称
 		website_name=`website_name_mapping $website_select`
 	elif [ -n "$customdeploy_enabled" ]; then
 		website_name="`echo $website_dir | awk -F"[/]" '{print $NF}'`"
 	else
 		return
 	fi
+
 	if [ -z "$website_enabled" ]; then
-		echo "$website_name 网站未启用"
+		echo_time "$website_name 网站未启用"
 		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
 		fi
@@ -87,7 +88,7 @@ handle_website(){
 			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			if [ -n "$autodeploy_enable" ]; then
-				install_website $website_select $port
+				install_website $website_select $port && echo_time "$name  安装完成" && exit 0
 			elif [ -n "$customdeploy_enabled" ]; then
 				#检查自定义网站是否正常工作？
 				install_custom $website_dir $port
@@ -139,50 +140,52 @@ cdg(){
 	source /etc/profile > /dev/null 2>&1
 	if [ $entware_enable ]; then
 		if [ ! -e /etc/init.d/entware ]; then
-			echo -e "\n开始部署entware环境\n" && entware_set $disk_mount $cpu_model
+			echo_time "开始部署entware环境\n" && entware_set $disk_mount $cpu_model
 			source /etc/profile > /dev/null 2>&1
 		fi
 	else
 		if [ -x /etc/init.d/entware ]; then
-			echo -e "\n开始删除entware环境\n" && entware_unset
+			echo_time "entware环境已删除\n" && entware_unset
 		fi
 		return
 	fi
 
 	# Nginx
 	if [ $deploy_nginx ]; then
-		[ ! -x /opt/etc/init.d/S80nginx ] && echo "开始安装Nginx" && init_nginx
+		[ ! -x /opt/etc/init.d/S80nginx ] && echo_time "开始安装Nginx" && init_nginx
 		if [ $nginx_enabled ]; then
 			[ "`pgrep nginx`" ] || nginx_manage start > /dev/null 2>&1
-			config_foreach handle_website website test
-			clean_vhost_config
-			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		else
 			nginx_manage stop > /dev/null 2>&1
 		fi
 	else
-		[ -x /opt/etc/init.d/S80nginx ] && echo "卸载Nginx相关的软件包" && del_nginx
+		[ -x /opt/etc/init.d/S80nginx ] && echo_time "卸载Nginx相关的软件包" && del_nginx
 	fi
 
 	# MySQL
 	if [ $deploy_mysql ]; then
-		[ ! -x /opt/etc/init.d/S70mysqld ] && echo "开始安装MySQL" && init_mysql
+		[ ! -x /opt/etc/init.d/S70mysqld ] && echo_time "开始安装MySQL" && init_mysql
 		if [ $mysql_enabled ]; then
 			[ "`pgrep mysqld`" ] || /opt/etc/init.d/S70mysqld start > /dev/null 2>&1
 		else
 			/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
 		fi
 	else
-		[ -x /opt/etc/init.d/S70mysqld ] && echo "卸载MySQL相关的软件包" && del_mysql
+		[ -x /opt/etc/init.d/S70mysqld ] && echo_time "卸载MySQL相关的软件包" && del_mysql
 	fi
 
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
+	if [ "`pgrep nginx`" ]; then
+		config_foreach handle_website website test
+		clean_vhost_config
+	fi
+
 	for PROC in nginx mysqld php-fpm; do
 		if [ "`pidof $PROC`" ]; then
-			echo -e "$PROC  已经启动"
+			echo_time "$PROC  已经启动"
 		else
-			[ "`which $PROC`" ] && echo "$PROC 没有开启" || echo "$PROC 没有安装"
+			[ "`which $PROC`" ] && echo_time "$PROC 没有开启" || echo_time "$PROC 没有安装"
 		fi
 	done
 
@@ -199,9 +202,9 @@ cdg(){
 			[ $p = S88transmission ] && f=transmission-daemon
 				if [ -z "`pidof $f`" ]; then
 					/opt/etc/init.d/$p start 1> /dev/null && sleep 5
-					[ "`pidof $f`" ] && echo "$f 启动成功" || echo "$f 启动失败"
+					[ "`pidof $f`" ] && echo_time "$f 启动成功" || echo_time "$f 启动失败"
 				else
-					echo "$f  运行中..."
+					echo_time "$f  运行中..."
 				fi
 		done
 	fi
