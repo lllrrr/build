@@ -18,7 +18,7 @@ init_php(){
 	# 安装php
 	install_soft $pkglist_php7 $phpmod
 
-	_make_dir /opt/usr/php/tmp/ > /dev/null 2>&1 && chmod -R 777 /opt/usr/php/tmp/
+	make_dir /opt/usr/php/tmp/ > /dev/null 2>&1 && chmod -R 777 /opt/usr/php/tmp/
 
 	sed -i "/^doc_root/d" /opt/etc/php.ini
 	sed -i "s|.*memory_limit.*|memory_limit = 128M|g" /opt/etc/php.ini
@@ -59,7 +59,7 @@ init_nginx(){
 	echo "安装php环境支持" && init_php
 	# 安装nginx软件包
 	install_soft "$pkglist_nginx"
-	_make_dir /opt/etc/nginx/vhost /opt/etc/nginx/no_use /opt/etc/nginx/conf > /dev/null 2>&1
+	make_dir /opt/etc/nginx/vhost /opt/etc/nginx/no_use /opt/etc/nginx/conf > /dev/null 2>&1
 
 	# 初始化nginx配置文件
 cat > "/opt/etc/nginx/nginx.conf" << EOF

@@ -96,7 +96,7 @@ web_installer(){
 	echo "开始安装$webdir"
 	echo "正在下载安装包$name.$suffix，请耐心等待..."
 	if wget --no-check-certificate -O /opt/tmp/$name.$suffix $filelink; then
-		_make_dir /opt/wwwroot /opt/wwwroot/$hookdir
+		make_dir /opt/wwwroot /opt/wwwroot/$hookdir
 		mv /opt/tmp/$name.* /opt/wwwroot/
 		echo "正在解压$name.$suffix..."
 		if [ $istar ]; then
@@ -277,7 +277,7 @@ install_tz(){
 	port_settings 81
 	[ $nport ] && port_settings $nport
 
-	_make_dir "/opt/wwwroot/tz"
+	make_dir "/opt/wwwroot/tz"
 	echo "开始下载雅黑PHP探针"
 	wget --no-check-certificate -O /opt/wwwroot/tz/index.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php > /dev/null 2>&1
 	if [ $? != 0 ]; then
@@ -305,7 +305,7 @@ install_phpmyadmin(){
 	cp /opt/wwwroot/$webdir/config.sample.inc.php /opt/wwwroot/$webdir/config.inc.php
 	chmod 644 /opt/wwwroot/$webdir/config.inc.php
 	# 取消-p参数，必须要求webdir创建才可创建文件夹，为部署检测做准备
-	_make_dir /opt/wwwroot/$webdir/tmp
+	make_dir /opt/wwwroot/$webdir/tmp
 	chmod 777 /opt/wwwroot/$webdir/tmp
 	sed -e "s/.*blowfish_secret.*/\$cfg['blowfish_secret'] = 'softwarecentersoftwarecentersoftwarecenter';/g" -i /opt/wwwroot/$webdir/config.inc.php
 

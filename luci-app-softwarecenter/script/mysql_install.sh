@@ -1,10 +1,5 @@
 #!/bin/sh
-#数据库安装脚本
-#version 1.5
-#本脚本实现参考于github开源项目ONMP
-#本脚本提供以下函数接口：
-#	init_mysql
-#	del_mysql
+#本脚本提供以下函数接口：init_mysql del_mysql
 
 # Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
 # This is free software, licensed under the GNU General Public License v3.
@@ -17,14 +12,14 @@ dblist="mariadb-server mariadb-server-extra mariadb-client mariadb-client-extra"
 init_mysql(){
 	get_env
 	install_soft "$dblist"
-	_make_dir "/opt/etc/mysql"
-	cat > "/opt/etc/mysql/my.cnf" <<-\MMM
+	make_dir /opt/etc/mysql
+	cat > "/opt/etc/mysql/my.cnf" << EOF
 [client-server]
 port               = 3306
 socket             = /opt/var/run/mysqld.sock
 
 [mysqld]
-user               = theOne
+user               = $username
 socket             = /opt/var/run/mysqld.sock
 pid-file           = /opt/var/run/mysqld.pid
 basedir            = /opt
@@ -55,11 +50,11 @@ key_buffer_size    = 24M
 
 [mysqlhotcopy]
 interactive-timeout
-MMM
+EOF
 
-	sed -i "s/theOne/$username/g" /opt/etc/mysql/my.cnf
+	# sed -i "s/theOne/$username/g" /opt/etc/mysql/my.cnf
 	chmod 644 /opt/etc/mysql/my.cnf
-	_make_dir "/opt/var/mysql"
+	make_dir /opt/var/mysql
 
 	# 数据库安装，同步方式，无需延时等待
 	echo -e "\n正在初始化数据库，请稍等1分钟"
@@ -71,7 +66,7 @@ MMM
 	sleep 10
 
 	# 设置数据库密码
-	if [[ $user ]] && [[ $pass ]]; then
+	if [ $user ] && [ $pass ]; then
 		mysqladmin -u $user password $pass
 		echo -e "使用自定义数据库用户：$user, 密码：$pass"
 	else
@@ -87,7 +82,7 @@ del_mysql(){
 	sleep 10
 
 	# 卸载相关的软件包
-	remove_soft "`opkg list-installed | grep mariadb | cut -d' ' -f1 | xargs echo`"
+	remove_soft "`opkg list-installed | awk '/mariadb/{print $1}' | xargs echo`"
 	# remove_soft "$dblist"
 
 	# 清理相关的文件与目录

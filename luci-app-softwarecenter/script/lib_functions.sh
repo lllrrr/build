@@ -16,7 +16,7 @@ status(){
 	fi
 }
 
-_make_dir(){
+make_dir(){
 	for p in "$@"; do
 		[ -d "$p" ] || { mkdir -p $p && echo "新建目录 $p";}
 	done
@@ -32,7 +32,7 @@ entware_set(){
 	echo "安装基本软件" && install_soft "$pkglist_base"
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
-	_make_dir "$USB_PATH/opt" "/opt"
+	make_dir "$USB_PATH/opt" "/opt"
 	mount -o bind $USB_PATH/opt /opt
 
 	if [ "$2" = "mips" ]; then
@@ -159,7 +159,7 @@ system_check(){
 		mkpart primary ext4 512s 100%
 		sync; sleep 2
 		echo y | mkfs.ext4 ${Partition_disk}1
-		_make_dir ${Partition_disk/dev/mnt}1
+		make_dir ${Partition_disk/dev/mnt}1
 		mount ${Partition_disk}1 ${Partition_disk/dev/mnt}1
 	fi
 
@@ -211,7 +211,7 @@ check_available_size(){
 opkg_install(){
 	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
 	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
-	_make_dir /opt/etc/config /opt/downloads > /dev/null 2>&1
+	make_dir /opt/etc/config /opt/downloads > /dev/null 2>&1
 	for i in $@; do
 		if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
 			echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
@@ -254,7 +254,7 @@ amule(){
 aria2(){
 	if opkg_install aria2; then
 		Pro="/opt/var/aria2"
-		_make_dir $Pro > /dev/null && cd $Pro
+		make_dir $Pro > /dev/null && cd $Pro
 		if for i in aria2.conf clean.sh delete.sh tracker.sh dht.dat core dht6.dat; do
 				if [ ! -s $i ]; then
 					wget -N -t2 -T3 https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
@@ -589,7 +589,7 @@ transmission(){
 		wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
 		if [ -e "tr.zip" ]; then
 			unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
-			_make_dir /opt/share/transmission/web > /dev/null 2>&1 
+			make_dir /opt/share/transmission/web > /dev/null 2>&1 
 			mv -f /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
 			rm -rf /opt/share/transmission-w*
 			sed -i 's|/torrent||g' /opt/etc/transmission/settings.json
