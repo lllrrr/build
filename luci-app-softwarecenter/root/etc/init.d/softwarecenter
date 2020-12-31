@@ -118,8 +118,9 @@ start(){
 
 cdg(){
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
-	disk_mount cpu_model user pass swap_enabled swap_size swap_path
+	Partition_disk disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
+	config_load ipk
 	config_load softwarecenter
 
 	config_get_bool deploy_entware	main deploy_entware
@@ -130,12 +131,13 @@ cdg(){
 	config_get_bool mysql_enabled	main mysql_enabled
 	config_get_bool swap_enabled	main swap_enabled
 
-	config_get disk_mount	main disk_mount
-	config_get cpu_model	main cpu_model
-	config_get swap_size	main swap_size
-	config_get swap_path	main swap_path
-	config_get user			main user
-	config_get pass			main pass
+	config_get Partition_disk	main Partition_disk
+	config_get disk_mount		main disk_mount
+	config_get cpu_model		main cpu_model
+	config_get swap_size		main swap_size
+	config_get swap_path		main swap_path
+	config_get user				main user
+	config_get pass				main pass
 	# entware环境
 	source /etc/profile > /dev/null 2>&1
 	if [ $entware_enable ]; then

@@ -149,13 +149,13 @@ port_settings(){
 [ "`which lsof`" ] || opkg_install lsof > /dev/null 2>&1
 # if [ "`lsof -i:$1`" ];then
 	# echo "$1 端口已经在用"
-	for f in `seq 80 110`;do
+	for f in `seq 100 120`;do
 		if [ -z "`lsof -i:$f`" ]; then
 			port=$f
 			break
 		fi
 	done
-	echo_time "使用查寻到 \"$port\" 的空闲端口"
+	echo_time "使用 \"$port\" 的端口"
 # else
 	# port=$1
 	# echo "使用 $port 的自定义端口"
@@ -245,7 +245,7 @@ install_custom(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "$webdir 安装完成"
 }
 
@@ -262,7 +262,7 @@ install_tz(){
 	echo_time "正在配置雅黑PHP探针"
 	port_settings
 	add_vhost $port tz
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/tz.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/tz.conf
 	chmod -R 777 /opt/wwwroot/tz
 }
 
@@ -284,7 +284,7 @@ install_phpmyadmin(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "phpMyaAdmin的用户、密码就是数据库用户、密码"
 }
@@ -302,7 +302,7 @@ install_wordpress(){
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	# WordPress的配置文件中有php-fpm了, 不需要外部引入
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/wordpress.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#otherconf.*|    include /opt/etc/nginx/conf/wordpress.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "可以用phpMyaAdmin建立数据库，然后在这个站点上一步步配置网站信息"
 }
@@ -321,8 +321,8 @@ install_h5ai(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-	sed -e "s/.*\index index.html.*/    index  index.html  index.php  \/_h5ai\/public\/index.php;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*index.*|    index  index.html  index.php  /_h5ai/public/index.php;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "配置文件在/opt/wwwroot/$webdir/_h5ai/private/conf/options.json"
 	echo_time "你可以通过修改它来获取更多功能"
@@ -340,7 +340,7 @@ install_lychee(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "首次打开会要配置数据库信息"
 	echo_time "地址：127.0.0.1 用户、密码你自己设置的或者默认是root 123456"
@@ -360,7 +360,7 @@ install_kodexplorer(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	sed -i 's/config.php/configg.php/g' /opt/wwwroot/Kodexplorer/index.php
 	cp /opt/wwwroot/Kodexplorer/config/config.php /opt/wwwroot/Kodexplorer/config/configg.php
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
@@ -379,8 +379,8 @@ install_typecho(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/typecho.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#otherconf.*|    include /opt/etc/nginx/conf/typecho.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "可以用phpMyaAdmin建立数据库，然后在这个站点上一步步配置网站信息"
 }
@@ -398,7 +398,7 @@ install_zblog(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 }
 
@@ -414,7 +414,7 @@ install_dzzoffice(){
 
 	# 添加到虚拟主机
 	add_vhost $port $webdir
-	sed -e "s/.*\#php-fpm.*/    include \/opt\/etc\/nginx\/conf\/php-fpm.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf # 添加php-fpm支持
+	sed -i "s|.*#php-fpm.*|    include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf # 添加php-fpm支持
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "DzzOffice应用市场中，某些应用无法自动安装的，请自行参看官网给的手动安装教程"
 }
@@ -432,7 +432,7 @@ install_owncloud(){
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	# Owncloud的配置文件中有php-fpm了, 不需要外部引入
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/owncloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#otherconf.*|    include /opt/etc/nginx/conf/owncloud.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "首次打开会要配置用户和数据库信息"
 	echo_time "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"
@@ -453,7 +453,7 @@ install_nextcloud(){
 	# 添加到虚拟主机
 	add_vhost $port $webdir
 	# nextcloud的配置文件中有php-fpm了, 不需要外部引入
-	sed -e "s/.*\#otherconf.*/    include \/opt\/etc\/nginx\/conf\/nextcloud.conf\;/g" -i /opt/etc/nginx/vhost/$webdir.conf
+	sed -i "s|.*#otherconf.*|    include /opt/etc/nginx/conf/nextcloud.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
 	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 	echo_time "首次打开会要配置用户和数据库信息"
 	echo_time "地址默认 localhost 用户、密码你自己设置的或者默认是root 123456"

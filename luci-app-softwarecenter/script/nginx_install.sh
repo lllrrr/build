@@ -100,8 +100,7 @@ EOF
 	nginx_special_conf
 
 	# 初始化redis
-	echo 'unixsocket /opt/var/run/redis.sock' >> /opt/etc/redis.conf
-	echo 'unixsocketperm 777' >> /opt/etc/redis.conf
+	echo -e "unixsocket /opt/var/run/redis.sock\nunixsocketperm 777" >> /opt/etc/redis.conf
 }
 
 # 卸载nginx
