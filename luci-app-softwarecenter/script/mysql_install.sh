@@ -57,28 +57,28 @@ EOF
 	make_dir /opt/var/mysql
 
 	# 数据库安装，同步方式，无需延时等待
-	echo -e "\n正在初始化数据库，请稍等1分钟"
+	echo_time "\n正在初始化数据库，请稍等1分钟"
 	mysql_install_db --user=$username --basedir=/opt --datadir=/opt/var/mariadb/ > /dev/null 2>&1
 
 	# 初次启动MySQL，异步方式，加延时等待
 	/opt/etc/init.d/S70mysqld start
-	echo "正在启动MySQL"
+	echo_time "正在启动MySQL"
 	sleep 10
 
 	# 设置数据库密码
 	if [ $user ] && [ $pass ]; then
 		mysqladmin -u $user password $pass
-		echo -e "使用自定义数据库用户：$user, 密码：$pass"
+		echo_time "使用自定义数据库用户：$user, 密码：$pass"
 	else
 		mysqladmin -u root password 123456
-		echo -e "使用默认数据库用户：root, 密码：123456"
+		echo_time -e "使用默认数据库用户：root, 密码：123456"
 	fi
 }
 
 del_mysql(){
 	# 停止MySQL
 	/opt/etc/init.d/S70mysqld stop
-	echo "正在停止MySQL"
+	echo_time "正在停止MySQL"
 	sleep 10
 
 	# 卸载相关的软件包

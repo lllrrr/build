@@ -18,18 +18,18 @@ status(){
 
 make_dir(){
 	for p in "$@"; do
-		[ -d "$p" ] || { mkdir -p $p && echo "新建目录 $p";}
+		[ -d "$p" ] || { mkdir -p $p && echo_time "新建目录 $p";}
 	done
 	return 0
 }
 
-# entware环境设定 参数：$1:设备底层架构 $2:安装位置 说明：此函数用于写入新配置
+# entware环境设定 参数：$1:安装位置 $2:设备底层架构 说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
 	[ "$1" ] && USB_PATH="$1"
-	[ "$2" ] || { echo "未选择CPU架构！" && exit 1; }
+	[ "$2" ] || { echo_time "未选择CPU架构！" && exit 1; }
 	system_check $USB_PATH
-	echo "安装基本软件" && install_soft "$pkglist_base"
+	echo_time "安装基本软件" && install_soft "$pkglist_base"
 	Kernel_V=$(expr substr `uname -r` 1 3)
 
 	make_dir "$USB_PATH/opt" "/opt"
@@ -49,9 +49,16 @@ entware_set(){
 	[ "$2" = "mipsel_24kc" ] && INST_URL="http://bin.entware.net/mipselsf-k3.4/installer/generic.sh"
 	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
 	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
-	[ $INST_URL ] || { echo "没有找到你选择的CPU架构！" && exit 1; }
-	wget -t 5 -qcNO - $INST_URL | /bin/sh
-	[ -e "$USB_PATH/opt/etc/init.d/rc.func" ] || { echo 安装 Entware 出错！ && exit 1; }
+
+	if [ $INST_URL ]; then
+		wget -t 5 -qcNO - $INST_URL | /bin/sh
+	else
+		echo_time "没有找到你选择的CPU架构！"
+		exit 1
+	fi
+
+	[ -e "$USB_PATH/opt/etc/init.d/rc.func" ] || { echo_time 安装 Entware 出错！ && exit 1; }
+
 cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
 START=51
@@ -89,10 +96,10 @@ ENTWARE
 
 	i18n_URL=http://pkg.entware.net/sources/i18n_glib223.tar.gz
 	wget -qcNO- -t 5 $i18n_URL | tar xvz -C /opt/usr/share/ > /dev/null
-	echo "添加 zh_CN.UTF-8"
+	echo_time "添加 zh_CN.UTF-8"
 	/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
 	sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
-	echo -e "\nEntware 安装成功！\n"
+	echo_time -e "\nEntware 安装成功！\n"
 }
 
 # entware环境解除 说明：此函数用于删除OPKG配置设定
@@ -111,13 +118,13 @@ install_soft(){
 	source /etc/profile > /dev/null 2>&1 && opkg update > /dev/null 2>&1
 	for ipk in $@; do
 		if [ "`which $ipk`" ]; then
-			echo "$ipk	已经安装"
+			echo_time "$ipk	已经安装"
 		else
-			echo -e "`date_time`  正在安装  $ipk\c"
+			echo_time "正在安装  $ipk\c"
 			opkg install $ipk > /dev/null 2>&1
 			status
 			if [ $? != 0 ]; then
-				echo -e "`date_time`  强制安装  $ipk\c"
+				echo_time "强制安装  $ipk\c"
 				opkg --force-depends --force-overwrite install $ipk > /dev/null 2>&1
 				status
 			fi
@@ -135,8 +142,8 @@ remove_soft(){
 
 }
 
-date_time() {
-	date +"%Y-%m-%d %H:%M:%S"
+echo_time() {
+	echo -e "[ `date +"%m-%d %H:%M:%S"` ] $@"
 }
 
 # 磁盘分区挂载
@@ -146,14 +153,14 @@ system_check(){
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
-			echo "$(date_time) 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
+			echo_time "$(date_time) 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk}
 			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
 			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
-		echo "$(date_time) 磁盘$Partition_disk没有分区，进行分区并格式化。"
+		echo_time "$(date_time) 磁盘$Partition_disk没有分区，进行分区并格式化。"
 		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
@@ -169,17 +176,17 @@ system_check(){
 config_swap_init(){
 	status=$(cat /proc/swaps | awk 'NR==2')
 	if [ "$status" ]; then
-		echo "Swap 已经启用"
+		echo_time "Swap 已经启用"
 	else
 		[ -e "$1/opt/.swap" ] || {
-			echo "正在生成swap文件，请耐心等待..."
+			echo_time "正在生成swap文件，请耐心等待..."
 			dd if=/dev/zero of=$2/opt/.swap bs=1M count=$1
 			mkswap $2/opt/.swap
 			chmod 0600 $2/opt/.swap
 		}
 		# 启用交换分区
 		swapon $2/opt/.swap
-		echo "现在你可以使用 free 命令查看swap是否启用"
+		echo_time "现在你可以使用 free 命令查看swap是否启用"
 	fi
 }
 
@@ -188,7 +195,7 @@ config_swap_del(){
 	[ -e /opt/.swap ] && {
 		swapoff /opt/.swap
 		rm -f /opt/.swap
-		echo -e "\n$1/opt/.swap文件已删除！\n"
+		echo_time "\n$1/opt/.swap文件已删除！\n"
 		}
 }
 
@@ -209,14 +216,14 @@ check_available_size(){
 }
 
 opkg_install(){
-	[ -x /etc/init.d/entware ] || { echo "安装应用前应先部署或开启Entware" && exit 1; }
-	source /etc/profile > /dev/null 2>&1 && echo "更新软件源中" && opkg update > /dev/null 2>&1
+	[ -x /etc/init.d/entware ] || { echo_time "安装应用前应先部署或开启Entware" && exit 1; }
+	source /etc/profile > /dev/null 2>&1 && echo_time "更新软件源中" && opkg update > /dev/null 2>&1
 	make_dir /opt/etc/config /opt/downloads > /dev/null 2>&1
 	for i in $@; do
 		if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
-			echo -e "\n$(date_time)   请耐心等待$i安装中" && opkg install $i
+			echo_time "请耐心等待 $i 安装中" && opkg install $i
 		else
-			echo -e $i 不在 Entware 软件源，跳过安装！
+			echo $i 不在 Entware 软件源，跳过安装！
 		fi
 	done
 }
@@ -230,7 +237,7 @@ amule(){
 			mv -f /opt/share/amule/AmuleWebUI-Reloaded-master /opt/share/amule/webserver/AmuleWebUI-Reloaded
 			sed -i 's/ajax.googleapis.com/ajax.lug.ustc.edu.cn/g' /opt/share/amule/webserver/AmuleWebUI-Reloaded/*.php
 		else
-			echo AmuleWebUI-Reloaded 下载失败，使用原版UI。
+			echo_time AmuleWebUI-Reloaded 下载失败，使用原版UI。
 		fi
 		pp=`echo -n admin | md5sum | awk '{print $1}'`
 		sed -i "{
@@ -244,11 +251,11 @@ amule(){
 		s|^IncomingDir=.*|IncomingDir=/opt/downloads|g
 		}" /opt/var/amule/amule.conf
 	else
-		echo amule 安装失败，再重试安装！ && exit 1
+		echo_time amule 安装失败，再重试安装！ && exit 1
 	fi
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
 	/opt/etc/init.d/S57amuled restart > /dev/null 2>&1 && \
-	[ -n "`pidof amuled`" ] && echo amule 已经运行 || echo amule 没有运行
+	[ -n "`pidof amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
 }
 
 aria2(){
@@ -261,7 +268,7 @@ aria2(){
 					curl -fsSLO https://raw.githubusercontent.com/P3TERX/aria2.conf/master/$i || \
 					wget -N -t2 -T3 https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i || \
 					curl -fsSLO https://cdn.jsdelivr.net/gh/P3TERX/aria2.conf/$i
-					[ -s $i ] && echo "$i 下载成功 !" || echo "$i 下载失败 !"
+					[ -s $i ] && echo_time "$i 下载成功 !" || echo_time "$i 下载失败 !"
 				fi
 			done
 			sed -i -e "s|session.dat|aria2.session|g;s|=/opt/etc|=$Pro|" /opt/etc/init.d/S81aria2
@@ -270,15 +277,15 @@ aria2(){
 			sed -i -e '/^INFO/d;/^ERROR/d;/^FONT/d;/^LIGHT/d' ./tracker.sh
 			sed -i 's|\#!/usr.*|\#!/bin/sh|g' ./*.sh; then
 				chmod +x *.sh && sh ./tracker.sh > /dev/null 2>&1 && [ $? = 0 ] && \
-				echo "BT 服务器地址下载成功！" || echo "BT 服务器地址下载失败！"
+				echo_time "BT 服务器地址下载成功！" || echo_time "BT 服务器地址下载失败！"
 				ln -sf $Pro/aria2.conf /opt/etc/config/aria2.conf
 				rm /opt/etc/aria2.conf
 		fi
 	else
-		echo aria2 安装失败，再重试安装！ && exit 1
+		echo_time aria2 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && \
-	[ -n "`pidof aria2c`" ] && echo aria2 已经运行 || echo aria2 没有运行
+	[ -n "`pidof aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
 }
 
 deluge(){
@@ -321,12 +328,12 @@ EOF
 	sed -i 's|root/Down|opt/down|g' /opt/etc/deluge/core.conf
 	ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 else
-	echo deluge 安装失败，再重试安装！ && exit 1
+	echo_time deluge 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && \
-	[ "`pidof deluged`" ] && echo deluge 已经运行 || echo deluge 没有运行
+	[ "`pidof deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
 	/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && \
-	[ "`pidof deluge-web`" ] && echo deluge-web 已经运行 || echo deluge-web 没有运行
+	[ "`pidof deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
 }
 
 qbittorrent(){
@@ -346,10 +353,10 @@ Downloads\SavePath=/opt/downloads/
 EOF
 	ln -sf /opt/etc/qBittorrent_entware/config/qBittorrent.conf /opt/etc/config/qBittorrent.conf
 else
-	echo qBittorrent 安装失败，再重试安装！ && exit 1
+	echo_time qBittorrent 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && \
-	[ -n "`pidof qbittorrent-nox`" ] && echo qbittorrent 已经运行 || echo qbittorrent 没有运行
+	[ -n "`pidof qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
 }
 
 rtorrent(){
@@ -362,7 +369,7 @@ rtorrent(){
 			sed -i "s/^server.port = .*/server.port = $web_port/g" $www_cfg
 		fi
 	else
-		echo rtorrent 安装失败，再重试安装！ && exit 1
+		echo_time rtorrent 安装失败，再重试安装！ && exit 1
 	fi
 
 	install_soft ffmpeg mediainfo unrar php7-mod-json git-http > /dev/null
@@ -578,9 +585,9 @@ EOF
 
 	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 	/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && \
-	[ -n "`pidof lighttpd`" ] && echo lighttpd 已经运行 || echo lighttpd 没有运行
+	[ -n "`pidof lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
 	/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && \
-	[ -n "`pidof rtorrent`" ] && echo rtorrent 已经运行 || echo rtorrent 没有运行
+	[ -n "`pidof rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
 }
 
 transmission(){
@@ -594,14 +601,14 @@ transmission(){
 			rm -rf /opt/share/transmission-w*
 			sed -i 's|/torrent||g' /opt/etc/transmission/settings.json
 		else
-			echo "下载 transmission-web-control 出错！" && opkg_install transmission-web-control
-			echo "使用 Entware transmission-web-control"
+			echo_time "下载 transmission-web-control 出错！" && opkg_install transmission-web-control
+			echo_time "使用 Entware transmission-web-control"
 		fi
 	else
-		echo transmission 安装失败，再重试安装！ && exit 1
+		echo_time transmission 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && \
-	[ -n "`pidof transmission-daemon`" ] && echo transmission 已经运行 || echo transmission 没有运行
+	[ -n "`pidof transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
 }
 
 onmp_restart(){

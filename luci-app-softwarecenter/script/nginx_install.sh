@@ -56,7 +56,7 @@ PHPFPM
 init_nginx(){
 	get_env
 
-	echo "安装php环境支持" && init_php
+	echo_time "安装php环境支持" && init_php
 	# 安装nginx软件包
 	install_soft "$pkglist_nginx"
 	make_dir /opt/etc/nginx/vhost /opt/etc/nginx/no_use /opt/etc/nginx/conf > /dev/null 2>&1
