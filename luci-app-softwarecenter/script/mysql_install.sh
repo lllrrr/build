@@ -71,7 +71,7 @@ EOF
 		echo_time "使用自定义数据库用户：$user, 密码：$pass"
 	else
 		mysqladmin -u root password 123456
-		echo_time -e "使用默认数据库用户：root, 密码：123456"
+		echo_time "使用默认数据库用户：root, 密码：123456"
 	fi
 }
 
@@ -83,7 +83,6 @@ del_mysql(){
 
 	# 卸载相关的软件包
 	remove_soft "`opkg list-installed | awk '/mariadb/{print $1}' | xargs echo`"
-	# remove_soft "$dblist"
 
 	# 清理相关的文件与目录
 	rm -rf /opt/etc/mysql

@@ -99,7 +99,7 @@ ENTWARE
 	echo_time "添加 zh_CN.UTF-8"
 	/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
 	sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
-	echo_time -e "\nEntware 安装成功！\n"
+	echo_time "Entware 安装成功！\n"
 }
 
 # entware环境解除 说明：此函数用于删除OPKG配置设定
@@ -135,7 +135,7 @@ install_soft(){
 # 软件包卸载 参数: $1:卸载列表 说明：本函数将负责强制卸载指定的软件包
 remove_soft(){
 	for ipk in $@ ; do
-		echo -e "正在卸载 $ipk\c"
+		echo_time "正在卸载 $ipk\c"
 		opkg remove --force-depends $ipk > /dev/null 2>&1
 		status
 	done
@@ -143,7 +143,7 @@ remove_soft(){
 }
 
 echo_time() {
-	echo -e "[ `date +"%m-%d %H:%M:%S"` ] $@"
+	echo -e "[ `date +"%m-%d %H:%M:%S"` ]  $@"
 }
 
 # 磁盘分区挂载
@@ -153,14 +153,14 @@ system_check(){
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "ext4" != $filesystem ]; then
-			echo_time "$(date_time) 磁盘$Partition_disk原是$filesystem重新格式化ext4。"
+			echo_time "磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk}
 			echo y | mkfs.ext4 ${Partition_disk/mnt/dev}
 			mount ${Partition_disk/mnt/dev} ${Partition_disk}
 		fi
 	else
 		[ $1 ] || Partition_disk=`uci get softwarecenter.main.Partition_disk`
-		echo_time "$(date_time) 磁盘$Partition_disk没有分区，进行分区并格式化。"
+		echo_time "磁盘$Partition_disk没有分区，进行分区并格式化。"
 		parted -s ${Partition_disk} mklabel msdos
 		parted -s ${Partition_disk} mklabel gpt \
 		mkpart primary ext4 512s 100%
@@ -195,7 +195,7 @@ config_swap_del(){
 	[ -e /opt/.swap ] && {
 		swapoff /opt/.swap
 		rm -f /opt/.swap
-		echo_time "\n$1/opt/.swap文件已删除！\n"
+		echo_time "$1/opt/.swap文件已删除！\n"
 		}
 }
 
@@ -223,7 +223,7 @@ opkg_install(){
 		if [ "`opkg list | awk '{print $1}' | grep -w $i`" ]; then
 			echo_time "请耐心等待 $i 安装中" && opkg install $i
 		else
-			echo $i 不在 Entware 软件源，跳过安装！
+			echo_time $i 不在 Entware 软件源，跳过安装！
 		fi
 	done
 }
