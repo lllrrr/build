@@ -86,13 +86,14 @@ web_installer(){
 	suffix="zip"
 	[ $istar ] && suffix="tar"
 
+	echo_time "开始安装 $webdir"
+
 	# 检查是否原有文件存在
 	[ -d "/opt/wwwroot/$webdir" ] && rm -rf /opt/wwwroot/$webdir && \
 	rm -rf /opt/etc/nginx/vhost/$webdir.conf && echo_time "已删除以前的$webdir文件"
 	[ -e /opt/tmp/$name.$suffix ] && rm -rf /opt/tmp/$name.$suffix
 
 	# 下载程序并解压
-	echo_time "开始安装 $webdir"
 	echo_time "正在下载安装包 $name.$suffix，请耐心等待..."
 	if wget --no-check-certificate -O /opt/tmp/$name.$suffix $filelink; then
 		make_dir /opt/wwwroot /opt/wwwroot/$hookdir > /dev/null 2>&1
@@ -103,7 +104,7 @@ web_installer(){
 		else
 			unzip /opt/wwwroot/$name.$suffix -d /opt/wwwroot/$hookdir > /dev/null 2>&1
 		fi
-		mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir && echo_time "$name.$suffix 解压完成..." && rm /opt/wwwroot/$name.$suffix
+		mv /opt/wwwroot/$dirname /opt/wwwroot/$webdir && echo_time "$name.$suffix 解压完成..." 
 		# 检测是否解压成功
 		[ "`ls /opt/wwwroot/$webdir 2> /dev/null | wc -l`" -eq 0 ] && {
 			echo_time "$webdir 安装失败，回滚操作"
@@ -193,12 +194,10 @@ echo_time "$webdir已开启Redis"
 # 网站删除 参数：$1:conf文件位置 $2:website_dir
 #说明：本函数仅删除配置文件和目录，并不负责重载Nginx服务器配置，请调用层负责处理
 delete_website(){
-	rm -rf $1
-	rm -rf $2
-	prefix="`echo $2 | sed 's/.$//'`"
-	rm -rf $prefix.*
-	f=`echo $2 | cut -d/ -f4`
-	echo_time "网站 $webdir 已删除"
+	rm -rf $1 $2 $2.*
+	prefix="`echo $2 | cut -d/ -f4`"
+	echo_time "网站 $prefix 已删除"
+	/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 }
 
 # 网站配置文件基本属性列表 参数：$1:配置文件位置

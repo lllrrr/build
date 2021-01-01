@@ -256,6 +256,7 @@ amule(){
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
 	/opt/etc/init.d/S57amuled restart > /dev/null 2>&1 && \
 	[ -n "`pidof amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
+	echo
 }
 
 aria2(){
@@ -286,6 +287,7 @@ aria2(){
 	fi
 	/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && \
 	[ -n "`pidof aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
+	echo
 }
 
 deluge(){
@@ -334,6 +336,7 @@ fi
 	[ "`pidof deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
 	/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && \
 	[ "`pidof deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
+	echo
 }
 
 qbittorrent(){
@@ -357,6 +360,7 @@ else
 fi
 	/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && \
 	[ -n "`pidof qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
+	echo
 }
 
 rtorrent(){
@@ -588,6 +592,7 @@ EOF
 	[ -n "`pidof lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
 	/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && \
 	[ -n "`pidof rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
+	echo
 }
 
 transmission(){
@@ -609,6 +614,7 @@ transmission(){
 	fi
 	/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && \
 	[ -n "`pidof transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
+	echo
 }
 
 onmp_restart(){
