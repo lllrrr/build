@@ -17,7 +17,7 @@ url_h5ai="https://release.larsjung.de/h5ai/h5ai-0.29.0.zip"
 # (6) Lychee（一个很好看，易于使用的Web相册）
 url_Lychee="https://github.com/electerious/Lychee/archive/master.zip"
 # (7) Kodexplorer（可道云aka芒果云在线文档管理器）
-url_Kodexplorer="http://static.kodcloud.com/update/download/kodbox.1.14.zip"
+url_Kodexplorer="http://static.kodcloud.com/update/download/kodbox.1.15.zip"
 # (8) Typecho (流畅的轻量级开源博客程序)
 url_Typecho="http://typecho.org/downloads/1.1-17.10.30-release.tar.gz"
 # (9) Z-Blog (体积小，速度快的PHP博客程序)
@@ -30,7 +30,6 @@ url_DzzOffice="https://codeload.github.com/zyx0814/dzzoffice/zip/master"
 install_website(){
 	# 通用环境变量获取
 	get_env
-	nport="$2"
 
 	# 初始化全局变量
 	unset filelink
@@ -109,7 +108,6 @@ web_installer(){
 		[ "`ls /opt/wwwroot/$webdir 2> /dev/null | wc -l`" -eq 0 ] && {
 			echo_time "$webdir 安装失败，回滚操作"
 			delete_website /opt/etc/nginx/vhost/$webdir.conf
-			exit 1
 		}
 		chmod -R 777 /opt/wwwroot/$webdir
 	else
@@ -146,27 +144,20 @@ web_installer(){
 # }
 
 port_settings(){
-[ "`which lsof`" ] || opkg_install lsof > /dev/null 2>&1
-# if [ "`lsof -i:$1`" ];then
-	# echo "$1 端口已经在用"
-	for f in `seq 100 120`;do
-		if [ -z "`lsof -i:$f`" ]; then
+	for f in `seq 311 330`; do
+		if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
 			port=$f
 			break
 		fi
 	done
-	echo_time "使用 \"$port\" 的端口"
-# else
-	# port=$1
-	# echo "使用 $port 的自定义端口"
-# fi
+	echo_time "$name 使用 \"$port\" 的端口"
 }
 
 # 网站程序卸载（by自动化接口安装）参数；$1:删除的目标
 delete_website_byauto(){
 	local name
 	name=`website_name_mapping $1`
-	delete_website /opt/etc/nginx/vhost/$name.conf /opt/wwwroot/$name
+	delete_website /opt/etc/nginx/vhost/$name.conf /opt/wwwroot/$name.*
 }
 
 # 添加到虚拟主机 参数：$1：端口 $2：虚拟主机配置名
@@ -207,7 +198,7 @@ delete_website(){
 	prefix="`echo $2 | sed 's/.$//'`"
 	rm -rf $prefix.*
 	f=`echo $2 | cut -d/ -f4`
-	echo_time "网站 $f 已删除"
+	echo_time "网站 $webdir 已删除"
 }
 
 # 网站配置文件基本属性列表 参数：$1:配置文件位置

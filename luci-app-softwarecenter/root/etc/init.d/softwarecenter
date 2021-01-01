@@ -88,7 +88,7 @@ handle_website(){
 			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			if [ -n "$autodeploy_enable" ]; then
-				install_website $website_select $port && echo_time "$name  安装完成" && exit 0
+				install_website $website_select $port && echo_time "$name  安装完成"
 			elif [ -n "$customdeploy_enabled" ]; then
 				#检查自定义网站是否正常工作？
 				install_custom $website_dir $port
@@ -120,7 +120,6 @@ cdg(){
 	local deploy_entware entware_enable deploy_nginx deploy_mysql nginx_enabled mysql_enabled \
 	Partition_disk disk_mount cpu_model user pass swap_enabled swap_size swap_path
 
-	config_load ipk
 	config_load softwarecenter
 
 	config_get_bool deploy_entware	main deploy_entware
@@ -157,6 +156,8 @@ cdg(){
 		[ ! -x /opt/etc/init.d/S80nginx ] && echo_time "开始安装Nginx" && init_nginx
 		if [ $nginx_enabled ]; then
 			[ "`pgrep nginx`" ] || nginx_manage start > /dev/null 2>&1
+			config_foreach handle_website website test
+			clean_vhost_config
 		else
 			nginx_manage stop > /dev/null 2>&1
 		fi
@@ -177,11 +178,6 @@ cdg(){
 	fi
 
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
-
-	if [ "`pgrep nginx`" ]; then
-		config_foreach handle_website website test
-		clean_vhost_config
-	fi
 
 	for PROC in nginx mysqld php-fpm; do
 		if [ "`pidof $PROC`" ]; then

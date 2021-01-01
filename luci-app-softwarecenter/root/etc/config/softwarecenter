@@ -1,2 +1,24 @@
 config softwarecenter 'main'
 config ipk
+config website
+	option website_select '0'
+config website
+	option website_select '1'
+config website
+	option website_select '2'
+config website
+	option website_select '3'
+config website
+	option website_select '4'
+config website
+	option website_select '5'
+config website
+	option website_select '6'
+config website
+	option website_select '7'
+config website
+	option website_select '8'
+config website
+	option website_select '9'
+config website
+	option website_select '10'

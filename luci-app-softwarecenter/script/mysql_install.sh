@@ -12,7 +12,6 @@ dblist="mariadb-server mariadb-server-extra mariadb-client mariadb-client-extra"
 init_mysql(){
 	get_env
 	install_soft "$dblist"
-	make_dir /opt/etc/mysql
 	cat > "/opt/etc/mysql/my.cnf" << EOF
 [client-server]
 port               = 3306
@@ -52,17 +51,16 @@ key_buffer_size    = 24M
 interactive-timeout
 EOF
 
-	# sed -i "s/theOne/$username/g" /opt/etc/mysql/my.cnf
 	chmod 644 /opt/etc/mysql/my.cnf
 	make_dir /opt/var/mysql
 
 	# 数据库安装，同步方式，无需延时等待
-	echo_time "\n正在初始化数据库，请稍等1分钟"
+	echo_time "正在初始化数据库，请稍等1分钟"
 	mysql_install_db --user=$username --basedir=/opt --datadir=/opt/var/mariadb/ > /dev/null 2>&1
 
 	# 初次启动MySQL，异步方式，加延时等待
-	/opt/etc/init.d/S70mysqld start
 	echo_time "正在启动MySQL"
+	/opt/etc/init.d/S70mysqld start
 	sleep 10
 
 	# 设置数据库密码
