@@ -89,6 +89,7 @@ handle_website(){
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			if [ -n "$autodeploy_enable" ]; then
 				install_website $website_select $port && echo_time "$name  安装完成"
+				/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 			elif [ -n "$customdeploy_enabled" ]; then
 				#检查自定义网站是否正常工作？
 				install_custom $website_dir $port
