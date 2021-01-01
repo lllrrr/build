@@ -53,7 +53,6 @@ install_website(){
 		10) install_dzzoffice;;
 		*)break;;
 	esac
-	/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 
 }
 
