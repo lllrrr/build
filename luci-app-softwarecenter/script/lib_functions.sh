@@ -55,7 +55,7 @@ entware_set(){
 		exit 1
 	fi
 
-	[ "ls /opt/etc/init.d 2>/dev/null | wc -l" -gt 0 ] || { echo_time 安装 Entware 出错！ && exit 1; }
+	[ "ls /opt/etc/init.d 2>/dev/null | wc -l" -gt 0 ] && { echo_time 安装 Entware 出错！ && exit 1; }
 
 cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
@@ -647,14 +647,16 @@ onmp_restart(){
 
 	if [ $1 ]; then
 		log="/tmp/log/softwarecenter.log"
-		[ $1 = "amule" ] && amule >> $log
-		[ $1 = "aria2" ] && aria2 >> $log
-		[ $1 = "deluge" ] && deluge >> $log
-		[ $1 = "rtorrent" ] && rtorrent $@ >> $log
-		[ $1 = "qbittorrent" ] && qbittorrent >> $log
-		[ $1 = "transmission" ] && transmission >> $log
-		[ $1 = "system_check" ] && system_check >> $log
-		[ $1 = "onmp_restart" ] && onmp_restart >> $log
-		[ $1 = "opkg_install" ] && opkg_install $@ >> $log
-		[ $1 = "install_soft" ] && install_soft $2 $3 >> $log
+		case $1 in
+			amule) amule >> $log;;
+			aria2) aria2 >> $log;;
+			deluge) deluge >> $log;;
+			rtorrent) rtorrent >> $log;;
+			qbittorrent) qbittorrent >> $log;;
+			transmission) transmission >> $log;;
+			system_check) system_check >> $log;;
+			onmp_restart) onmp_restart >> $log;;
+			opkg_install) opkg_install >> $log;;
+			install_soft) install_soft >> $log;;
+		esac
 	fi
