@@ -37,27 +37,25 @@ entware_set(){
 
 	if [ "$2" = "mips" ]; then
 		if [ $Kernel_V = "2.6" ]; then
-			INST_URL="http://pkg.entware.net/binaries/mipsel/installer/installer.sh"
+			INST_URL=http://pkg.entware.net/binaries/mipsel/installer/installer.sh
 		else
-			INST_URL="http://bin.entware.net/mipssf-k3.4/installer/generic.sh"
+			INST_URL=http://bin.entware.net/mipselsf-k3.4/installer/generic.sh
 		fi
 	fi
-	[ "$2" = "x86_64" ] && INST_URL="http://bin.entware.net/x64-k3.2/installer/generic.sh"
-	[ "$2" = "armv7" ] && INST_URL="http://bin.entware.net/armv7sf-k3.2/installer/generic.sh"
-	[ "$2" = "armv5*" ] && INST_URL="http://bin.entware.net/armv5sf-k3.2/installer/generic.sh"
-	[ "$2" = "aarch64" ] && INST_URL="http://bin.entware.net/aarch64-k3.10/installer/generic.sh"
-	[ "$2" = "mipsel_24kc" ] && INST_URL="http://bin.entware.net/mipselsf-k3.4/installer/generic.sh"
-	[ "$2" = "armv7l" ] && INST_URL="http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh"
-	[ "$2" = "x86_32" ] && INST_URL="http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh"
+	[ "$2" = "x86_64" ] && INST_URL=http://bin.entware.net/x64-k3.2/installer/generic.sh
+	[ "$2" = "x86_32" ] && INST_URL=http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh
+	[ "$2" = "armv5*" ] && INST_URL=http://bin.entware.net/armv5sf-k3.2/installer/generic.sh
+	[ "$2" = "aarch64" ] && INST_URL=http://bin.entware.net/aarch64-k3.10/installer/generic.sh
+	[ "$2" = "armv7l" ] && INST_URL=http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh
 
 	if [ $INST_URL ]; then
 		wget -t 5 -qcNO - $INST_URL | /bin/sh
 	else
-		echo_time "没有找到你选择的CPU架构！"
+		echo_time "抱歉，不支持您的设备！"
 		exit 1
 	fi
 
-	[ -e "$USB_PATH/opt/etc/init.d/rc.func" ] || { echo_time 安装 Entware 出错！ && exit 1; }
+	[ "ls /opt/etc/init.d 2>/dev/null | wc -l" -gt 0 ] || { echo_time 安装 Entware 出错！ && exit 1; }
 
 cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common

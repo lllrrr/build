@@ -15,7 +15,7 @@ s.anonymous = true
 
 s:tab("entware",translate("ONMP部署"))
 p = s:taboption("entware",Flag,"entware_enable",translate("启用"),translate("部署ONMP环境"))
-local model = SYS.exec("opkg print-architecture | awk '{print $2}' | grep -vE 'all|noarch'")
+local model = SYS.exec("uname -m")
 local cpu_model = s:taboption("entware",Value,"cpu_model",translate("CPU架构"),translate("检测到CPU架构是：")..[[<font color="green">]]..[[<strong>]]..model..[[</strong>]]..[[</font>]]..' '.." (如有错误自定义)")
 cpu_model:value("", translate("-- 可选是系统检测到CPU架构 --"))
 cpu_model:value(model)

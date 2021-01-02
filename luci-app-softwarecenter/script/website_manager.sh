@@ -38,6 +38,7 @@ install_website(){
 	unset port
 	unset hookdir
 	unset istar
+	[ $2 ] && port=$2
 
 	case $1 in
 		0) install_tz;;
@@ -83,6 +84,7 @@ web_installer(){
 	# 获取用户自定义设置
 	webdir=$name
 	suffix="zip"
+	
 	[ $istar ] && suffix="tar"
 
 	echo_time "开始安装 $webdir"
@@ -144,12 +146,27 @@ web_installer(){
 # }
 
 port_settings(){
-	for f in `seq 311 330`; do
-		if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
-			port=$f
-			break
+	if [ $port ]; then
+		if [ -n "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $port`" ]; then
+			echo_time " 端口 \"$port\" 已在用，查找可用端口。"
+			for f in `seq 311 330`; do
+				if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
+					port=$f
+					break
+				fi
+			done
+		else
+			port=$port
 		fi
-	done
+	else
+		echo_time "$name 没有设置端口查找可用端口。"
+		for f in `seq 311 330`; do
+			if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
+				port=$f
+				break
+			fi
+		done
+	fi
 	echo_time "$name 使用 \"$port\" 的端口"
 }
 
@@ -221,7 +238,7 @@ vhost_list(){
 # 自定义部署通用函数 参数：$1:文件目录 $2:端口号
 install_custom(){
 	webdir=$1
-	[ $2 ] && port=$2 || port_settings
+	port_settings
 	# 运行安装程序
 	echo_time "正在配置$webdir..."
 

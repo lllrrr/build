@@ -6,10 +6,9 @@ s.addremove = true
 s.sortable = false
 s.template = "cbi/tblsection"
 s.rmempty = false
-p = s:option(Flag,"website_enabled",translate("Enabled"))
+p = s:option(Flag,"website_enabled",translate("启用"))
 p = s:option(Flag,"autodeploy_enable",translate("自动部署"))
-p = s:option(ListValue,"website_select",translate("网站列表"),
-translate("系统会自动获取311-330的空闲端口"))
+p = s:option(ListValue,"website_select",translate("网站列表"),translate("选择要部署的选项"))
 p:value("0","tz（雅黑PHP探针）")
 p:value("1","phpMyAdmin（数据库管理工具）")
 p:value("2","WordPress（使用最广泛的CMS）")
@@ -21,5 +20,6 @@ p:value("7","Kodexplorer（可道云•资源管理器）")
 p:value("8","Typecho (流畅的轻量级开源博客程序)")
 p:value("9","Z-Blog (体积小，速度快的PHP博客程序)")
 p:value("10","DzzOffice (开源办公平台)")
-p = s:option(Flag,"redis_enabled",translate("启用Redis"),translate("只有Owncloud和Nextcloud才可以使用。"))
+p = s:option(Value,"port",translate("端口"),translate("自定义端口，自动设置留空"))
+p = s:option(Flag,"redis_enabled",translate("启用Redis"),translate("只有Owncloud和Nextcloud可以使用。"))
 return m
