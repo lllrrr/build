@@ -1,4 +1,8 @@
 #!/bin/sh
+#Write for Almquist Shell version: 1.8
+
+# Copyright (C) 2019 Jianpeng Xiang (1505020109@mail.hnust.edu.cn)
+# This is free software, licensed under the GNU General Public License v3.
 
 pkglist_base="wget unzip e2fsprogs ca-certificates"
 
@@ -141,7 +145,7 @@ remove_soft(){
 }
 
 echo_time() {
-	echo -e "[ `date +"%m-%d %H:%M:%S"` ]  $@"
+	echo -e "[ `date +"%m月%d日 %H:%M:%S"` ]  $@"
 }
 
 # 磁盘分区挂载
