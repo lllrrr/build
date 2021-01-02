@@ -40,17 +40,17 @@ install_website(){
 	[ $2 ] && port=$2
 
 	case $1 in
-		0) install_tz;;
-		1) install_phpmyadmin;;
-		2) install_wordpress;;
-		3) install_owncloud;;
-		4) install_nextcloud;;
-		5) install_h5ai;;
-		6) install_lychee;;
-		7) install_kodexplorer;;
-		8) install_typecho;;
-		9) install_zblog;;
-		10) install_dzzoffice;;
+		0)	install_tz;;
+		1)	install_phpmyadmin;;
+		2)	install_wordpress;;
+		3)	install_owncloud;;
+		4)	install_nextcloud;;
+		5)	install_h5ai;;
+		6)	install_lychee;;
+		7)	install_kodexplorer;;
+		8)	install_typecho;;
+		9)	install_zblog;;
+		10)	install_dzzoffice;;
 		*)break;;
 	esac
 
