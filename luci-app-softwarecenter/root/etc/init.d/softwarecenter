@@ -68,35 +68,30 @@ handle_website(){
 	fi
 
 	# echo "获取网站配置文件名"
-	if [ -n "$autodeploy_enable" ]; then
+	if [ "$autodeploy_enable" ]; then
 		# 获取网站名称
 		website_name=`website_name_mapping $website_select`
-	elif [ -n "$customdeploy_enabled" ]; then
+	elif [ "$customdeploy_enabled" ]; then
 		website_name="`echo $website_dir | awk -F"[/]" '{print $NF}'`"
 	else
 		return
 	fi
 
-	if [ -z "$website_enabled" ]; then
-		echo_time "$website_name 网站未启用"
-		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
-			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
-		fi
-	else
+	if [ "$website_enabled" ]; then
 		if [ -f /opt/etc/nginx/no_use/$website_name.conf ]; then
-			echo "$website_name已安装但被禁用"
-			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
+			echo_time "$website_name 重新启用"
+			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf && \
+			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
-			if [ -n "$autodeploy_enable" ]; then
-				install_website $website_select $port && echo_time "$name  安装完成"
+			if [ "$autodeploy_enable" ]; then
+				install_website $website_select $port && echo_time "$name 安装完成"
 				/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
-			elif [ -n "$customdeploy_enabled" ]; then
-				#检查自定义网站是否正常工作？
-				install_custom $website_dir $port
+			elif [ "$customdeploy_enabled" ]; then
+				install_custom $website_dir $port #检查自定义网站是否正常工作？
 			fi
 		fi
-		if [ -n "$autodeploy_enable" ]; then
-			if [ -n "$redis_enabled" ]; then
+		if [ "$autodeploy_enable" ]; then
+			if [ "$redis_enabled" ]; then
 				if [ -d /opt/wwwroot/$website_name ]; then
 					if [ ! -f /opt/wwwroot/$website_name/redis_enabled ]; then
 						if [ "$website_name" = "Nextcloud" ] || [ "$website_name" = "Owncloud" ]; then
@@ -109,6 +104,11 @@ handle_website(){
 				rm -rf /opt/wwwroot/$website_name/config/config.php
 				rm -rf /opt/wwwroot/$website_name/redis_enabled
 			fi
+		fi
+	else
+		echo_time "网站 $website_name 没有开启"
+		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
+			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
 		fi
 	fi
 

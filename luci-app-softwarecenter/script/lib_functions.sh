@@ -621,34 +621,38 @@ transmission(){
 	echo
 }
 
+onmp_pp(){
+	/opt/etc/init.d/S70mysqld $1 > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm $1 > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx $1 > /dev/null 2>&1
+}
+
 onmp_restart(){
-	/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
-	/opt/etc/init.d/S79php7-fpm stop > /dev/null 2>&1
-	/opt/etc/init.d/S80nginx stop > /dev/null 2>&1
+	onmp_pp stop
 	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
 	sleep 3
-	/opt/etc/init.d/S70mysqld start > /dev/null 2>&1
-	/opt/etc/init.d/S79php7-fpm start > /dev/null 2>&1
-	/opt/etc/init.d/S80nginx start > /dev/null 2>&1
+	onmp_pp start
 	sleep 3
-	num=0
-	for PROC in 'nginx' 'php-fpm' 'mysqld'; do
-		if [ -n "`pidof $PROC`" ]; then
-			echo $PROC "启动成功";
-		else
-			echo $PROC "启动失败";
-			num=`expr $num + 1`
-		fi
+	for PROC in nginx mysqld php-fpm; do
+		[ "`pidof $PROC`" ] && echo_time $PROC 重启成功
 	done
+}
 
-	if [ $num -gt 0 ]; then
-		echo "onmp启动失败"
-		logger -t "【ONMP】" "启动失败"
-	else
-		echo "onmp已启动"
-		logger -t "【ONMP】" "已启动"
-		vhost_list
-	fi
+onmp_start(){
+	onmp_pp start
+	sleep 3
+	for PROC in nginx mysqld php-fpm; do
+		[ "`pidof $PROC`" ] && echo_time $PROC 启动成功
+	done
+}
+
+onmp_stop(){
+	onmp_pp stop
+	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
+	sleep 3
+	for PROC in nginx mysqld php-fpm; do
+		[ -z "`pidof $PROC`" ] && echo_time $PROC 已经关闭
+	done
 }
 
 	if [ $1 ]; then
@@ -658,6 +662,8 @@ onmp_restart(){
 			aria2)			aria2 >> $log;;
 			deluge)			deluge >> $log;;
 			rtorrent)		rtorrent >> $log;;
+			onmp_stop)		onmp_stop >> $log;;
+			onmp_start)		onmp_start >> $log;;
 			qbittorrent)	qbittorrent >> $log;;
 			transmission)	transmission >> $log;;
 			system_check)	system_check >> $log;;
