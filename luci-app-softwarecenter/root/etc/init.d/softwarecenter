@@ -188,9 +188,7 @@ cdg(){
 		fi
 	done
 
-	ipk_start="`ls /opt/etc/init.d | grep -E "aria2|deluge|transmission|rtorrent|qbittorrent|amuled|lighttpd"`"
-	if [ "$ipk_start" ]; then
-		for p in $ipk_start; do
+		for p in ls /opt/etc/init.d; do
 			[ $p = S81aria2 ] && f=aria2c
 			[ $p = S57amuled ] && f=amuled
 			[ $p = S80deluged ] && f=deluged
@@ -199,14 +197,13 @@ cdg(){
 			[ $p = S81deluge-web ] && f=deluge-web
 			[ $p = S89qbittorrent ] && f=qbittorrent-nox
 			[ $p = S88transmission ] && f=transmission-daemon
-				if [ -z "`pidof $f`" ]; then
+				if [ "`pidof $f`" ]; then
+					echo_time "$f  运行中"
+				else
 					/opt/etc/init.d/$p start 1> /dev/null && sleep 5
 					[ "`pidof $f`" ] && echo_time "$f 启动成功" || echo_time "$f 启动失败"
-				else
-					echo_time "$f  运行中..."
 				fi
 		done
-	fi
 }
 
 cdg >> /tmp/log/softwarecenter.log
