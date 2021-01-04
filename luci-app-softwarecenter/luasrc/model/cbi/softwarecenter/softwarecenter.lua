@@ -7,30 +7,33 @@ local util = require "nixio.util"
 
 --得到Map对象，并初始化。参一：指定cbi文件，参二：设置标题，参三：设置标题下的注释
 m = Map("softwarecenter",translate("软件中心"),translate("自动部署Entware-opt/Nginx/MySQ/PHP(ONMP)和应用安装<br>原项目地址：") .. " ".. [[<a href="https://github.com/jsp1256/openwrt-package" target="_blank">]] ..translate("https://github.com/jsp1256/openwrt-package") .. [[</a>]])
-m:section(SimpleSection).template = "softwarecenter/software_status"
 
-local t = {
-    {Commit, Apply, reset}
-}
-a = m:section(Table, t)
-o = a:option(Button, "Commit") 
-o.inputtitle = translate("开启ONMP")
-o.inputstyle = "apply"
-o.write = function()
-	SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_start >/dev/null 2>&1 &")
-end
-o = a:option(Button, "Apply")
-o.inputtitle = translate("关闭ONMP")
-o.inputstyle = "reset"
-o.write = function()
-	SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_stop >/dev/null 2>&1 &")
-end
+local software_status=(SYS.call("pidof nginx > /dev/null") == 0)
+if software_status then
+	m:section(SimpleSection).template = "softwarecenter/software_status"
+	local t = {
+		{Commit, Apply, reset}
+	}
+	a = m:section(Table, t)
+	o = a:option(Button, "Commit") 
+	o.inputtitle = translate("开启ONMP")
+	o.inputstyle = "apply"
+	o.write = function()
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_start >/dev/null 2>&1 &")
+	end
+	o = a:option(Button, "Apply")
+	o.inputtitle = translate("关闭ONMP")
+	o.inputstyle = "reset"
+	o.write = function()
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_stop >/dev/null 2>&1 &")
+	end
 
-o = a:option(Button, "reset")
-o.inputtitle = translate("重启ONMP")
-o.inputstyle = "reset"
-o.write = function()
-	SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_restart >/dev/null 2>&1 &")
+	o = a:option(Button, "reset")
+	o.inputtitle = translate("重启ONMP")
+	o.inputstyle = "reset"
+	o.write = function()
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_restart >/dev/null 2>&1 &")
+	end
 end
 
 s = m:section(TypedSection,"softwarecenter",translate("设置"))

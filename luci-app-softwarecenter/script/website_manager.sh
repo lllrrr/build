@@ -221,7 +221,7 @@ vhost_config_list(){
 	if [ "$#" -eq "1" ]; then
 		path=$(awk '/wwwroot/{print $2}' $1 | sed 's/;//')
 		port=$(awk '/listen/{print $2}' $1 | sed 's/;//')
-		echo_time "网站列表：$path $localhost:$port"
+		echo "$path $localhost:$port"
 	fi
 }
 
