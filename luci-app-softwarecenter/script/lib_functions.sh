@@ -296,7 +296,7 @@ aria2(){
 
 deluge(){
 if opkg_install deluge-ui-web; then
-	/opt/etc/init.d/S80deluged start > /dev/null 2>&1 &&  sleep 10
+	/opt/etc/init.d/S80deluged start > /dev/null 2>&1
 	/opt/etc/init.d/S80deluged stop > /dev/null 2>&1 
 cat > "/opt/etc/deluge/web.conf" << EOF
 {
@@ -330,7 +330,7 @@ cat > "/opt/etc/deluge/web.conf" << EOF
 "theme": "gray"
 }
 EOF
-	killall deluged && killall deluge-web
+	killall deluged && killall deluge-web &&  sleep 10
 	sed -i 's|root/Down|opt/down|g' /opt/etc/deluge/core.conf
 	ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 else
@@ -622,9 +622,9 @@ transmission(){
 }
 
 onmp_pp(){
+	/opt/etc/init.d/S80nginx $1 > /dev/null 2>&1
 	/opt/etc/init.d/S70mysqld $1 > /dev/null 2>&1
 	/opt/etc/init.d/S79php7-fpm $1 > /dev/null 2>&1
-	/opt/etc/init.d/S80nginx $1 > /dev/null 2>&1
 }
 
 onmp_restart(){
