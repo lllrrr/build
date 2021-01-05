@@ -259,7 +259,7 @@ amule(){
 	fi
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
 	/opt/etc/init.d/S57amuled restart > /dev/null 2>&1 && \
-	[ -n "`pidof amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
+	[ -n "`pid_of amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
 	echo
 }
 
@@ -290,7 +290,7 @@ aria2(){
 		echo_time aria2 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && \
-	[ -n "`pidof aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
+	[ -n "`pid_of aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
 	echo
 }
 
@@ -337,9 +337,9 @@ else
 	echo_time deluge 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && \
-	[ "`pidof deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
+	[ "`pid_of deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
 	/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && \
-	[ "`pidof deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
+	[ "`pid_of deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
 	echo
 }
 
@@ -363,7 +363,7 @@ else
 	echo_time qBittorrent 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && \
-	[ -n "`pidof qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
+	[ -n "`pid_of qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
 	echo
 }
 
@@ -593,9 +593,9 @@ EOF
 
 	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 	/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && \
-	[ -n "`pidof lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
+	[ -n "`pid_of lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
 	/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && \
-	[ -n "`pidof rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
+	[ -n "`pid_of rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
 	echo
 }
 
@@ -617,7 +617,7 @@ transmission(){
 		echo_time transmission 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && \
-	[ -n "`pidof transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
+	[ -n "`pid_of transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
 	echo
 }
 
@@ -634,7 +634,7 @@ onmp_restart(){
 	onmp_pp start
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ "`pidof $PROC`" ] && echo_time $PROC 重启成功
+		[ "`pid_of $PROC`" ] && echo_time $PROC 重启成功
 	done
 }
 
@@ -642,7 +642,7 @@ onmp_start(){
 	onmp_pp start
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ "`pidof $PROC`" ] && echo_time $PROC 启动成功
+		[ "`pid_of $PROC`" ] && echo_time $PROC 启动成功
 	done
 }
 
@@ -651,7 +651,7 @@ onmp_stop(){
 	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ -z "`pidof $PROC`" ] && echo_time $PROC 已经关闭
+		[ -z "`pid_of $PROC`" ] && echo_time $PROC 已经关闭
 	done
 }
 

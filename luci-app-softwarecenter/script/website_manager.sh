@@ -145,26 +145,26 @@ web_installer(){
 # }
 
 port_settings(){
+
+	Find_port(){
+	for f in `seq 311 330`; do
+		if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
+			port=$f
+			break
+		fi
+	done
+	}
+
 	if [ $port ]; then
-		if [ -n "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $port`" ]; then
-			echo_time " 设置的端口 \"$port\" 已在用，查找可用端口。"
-			for f in `seq 311 330`; do
-				if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
-					port=$f
-					break
-				fi
-			done
+		if [ "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $port`" ]; then
+			echo_time "$name 设置的端口 \"$port\" 已在用，查找可用端口。"
+			Find_port
 		else
 			port=$port
 		fi
 	else
 		echo_time "$name 没有设置端口，查找可用端口。"
-		for f in `seq 311 330`; do
-			if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
-				port=$f
-				break
-			fi
-		done
+		Find_port
 	fi
 	echo_time "$name 使用 \"$port\" 的端口"
 }
@@ -232,6 +232,15 @@ vhost_list(){
 	for conf in /opt/etc/nginx/vhost/*; do
 		vhost_config_list $conf
 	done
+}
+
+# 恢复网站查端口
+port_custom(){
+	port=$(awk '/listen/{print $2}' $1 | sed 's/;//')
+	name=$website_name
+	port_settings
+	sed -i -r "s|listen (.*);|listen $port;|" $1
+	echo_time "$name 恢复完成"
 }
 
 # 自定义部署通用函数 参数：$1:文件目录 $2:端口号

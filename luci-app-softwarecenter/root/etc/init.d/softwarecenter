@@ -11,6 +11,10 @@ STOP=10
 . /usr/bin/softwarecenter/nginx_install.sh
 website_config_list=""
 
+pid_of(){
+ps|grep -E "$@"|grep -v grep|awk '{print $1}'
+}
+
 #本函数负责清理未写入配置的网站
 clean_vhost_config(){
 	local_config_list="`ls /opt/etc/nginx/vhost | cut -d. -f1`"
@@ -79,8 +83,9 @@ handle_website(){
 
 	if [ "$website_enabled" ]; then
 		if [ -f /opt/etc/nginx/no_use/$website_name.conf ]; then
-			echo_time "$website_name 重新启用"
-			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf && \
+			echo_time "启用 $website_name"
+			mv /opt/etc/nginx/no_use/$website_name.conf /opt/etc/nginx/vhost/$website_name.conf
+			port_custom /opt/etc/nginx/vhost/$website_name.conf
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		elif [ ! -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			if [ "$autodeploy_enable" ]; then
@@ -106,9 +111,10 @@ handle_website(){
 			fi
 		fi
 	else
-		echo_time "网站 $website_name 没有开启"
+		echo_time "网站 $website_name 已关闭"
 		if [ -f /opt/etc/nginx/vhost/$website_name.conf ]; then
 			mv /opt/etc/nginx/vhost/$website_name.conf /opt/etc/nginx/no_use/$website_name.conf
+			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
 	fi
 
@@ -181,8 +187,8 @@ cdg(){
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
 	for PROC in nginx mysqld php-fpm; do
-		if [ "`pidof $PROC`" ]; then
-			echo_time "$PROC  已经启动"
+		if [ "`pid_of $PROC`" ]; then
+			echo_time "$PROC  运行中"
 		else
 			[ "`which $PROC`" ] && echo_time "$PROC 没有开启" || echo_time "$PROC 没有安装"
 		fi
@@ -199,11 +205,16 @@ cdg(){
 		[ $p = S81deluge-web ] && f=deluge-web
 		[ $p = S89qbittorrent ] && f=qbittorrent-nox
 		[ $p = S88transmission ] && f=transmission-daemon
-			if [ "`pidof $f`" ]; then
+			if [ "`pid_of $f`" ]; then
 				echo_time "$f  运行中"
 			else
-				/opt/etc/init.d/$p start 1> /dev/null && sleep 5
-				[ "`pidof $f`" ] && echo_time "$f 启动成功" || echo_time "$f 启动失败"
+				/opt/etc/init.d/$p start 1> /dev/null
+				sleep 5
+				if [ "`pid_of $f`" ]; then
+					echo_time "$f 启动成功"
+				else
+					echo_time "$f 启动失败"
+				fi
 			fi
 		done
 	fi
