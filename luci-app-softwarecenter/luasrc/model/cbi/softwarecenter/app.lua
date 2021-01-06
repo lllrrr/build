@@ -51,7 +51,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	p.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 2 &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 20 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("Aria2 没有运行") .. font_off

@@ -659,7 +659,7 @@ onmp_stop(){
 		log="/tmp/log/softwarecenter.log"
 		case $1 in
 			1)	amule >> $log;;
-			2)	aria2 >> $log;;
+			20)	aria2 >> $log;;
 			3)	deluge >> $log;;
 			4)	rtorrent >> $log;;
 			5)	qbittorrent >> $log;;
