@@ -144,7 +144,7 @@ remove_soft(){
 }
 
 echo_time() {
-	echo -e "[ `date +"%m月%d日 %H:%M:%S"` ]  $@"
+	echo -e "`date +"%m月%d日 %H:%M:%S"`: $@"
 }
 
 # 磁盘分区挂载
@@ -154,7 +154,7 @@ system_check(){
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "$filesystem" = "ext4" ]; then
-			echo_time "磁盘${Partition_disk:0:8}符合安装要求"
+			echo_time "磁盘 ${Partition_disk:0:8}1 符合安装要求"
 		else
 			echo_time "磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk}
@@ -259,7 +259,7 @@ amule(){
 	fi
 	ln -sf /opt/var/amule/amule.conf /opt/etc/config/amule.conf
 	/opt/etc/init.d/S57amuled restart > /dev/null 2>&1 && \
-	[ -n "`pid_of amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
+	[ -n "`pidof amuled`" ] && echo_time amule 已经运行 || echo_time amule 没有运行
 	echo
 }
 
@@ -290,7 +290,7 @@ aria2(){
 		echo_time aria2 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S81aria2 restart > /dev/null 2>&1 && \
-	[ -n "`pid_of aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
+	[ -n "`pidof aria2c`" ] && echo_time aria2 已经运行 || echo_time aria2 没有运行
 	echo
 }
 
@@ -337,9 +337,9 @@ else
 	echo_time deluge 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S80deluged restart > /dev/null 2>&1 && \
-	[ "`pid_of deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
+	[ "`pidof deluged`" ] && echo_time deluge 已经运行 || echo_time deluge 没有运行
 	/opt/etc/init.d/S81deluge-web restart > /dev/null 2>&1 && \
-	[ "`pid_of deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
+	[ "`pidof deluge-web`" ] && echo_time deluge-web 已经运行 || echo_time deluge-web 没有运行
 	echo
 }
 
@@ -363,7 +363,7 @@ else
 	echo_time qBittorrent 安装失败，再重试安装！ && exit 1
 fi
 	/opt/etc/init.d/S89qbittorrent restart > /dev/null 2>&1 && \
-	[ -n "`pid_of qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
+	[ -n "`pidof qbittorrent-nox`" ] && echo_time qbittorrent 已经运行 || echo_time qbittorrent 没有运行
 	echo
 }
 
@@ -593,9 +593,9 @@ EOF
 
 	ln -sf /opt/etc/rtorrent/rtorrent.conf /opt/etc/config/rtorrent.conf
 	/opt/etc/init.d/S80lighttpd start > /dev/null 2>&1 && \
-	[ -n "`pid_of lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
+	[ -n "`pidof lighttpd`" ] && echo_time lighttpd 已经运行 || echo_time lighttpd 没有运行
 	/opt/etc/init.d/S85rtorrent restart > /dev/null 2>&1 && \
-	[ -n "`pid_of rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
+	[ -n "`pidof rtorrent`" ] && echo_time rtorrent 已经运行 || echo_time rtorrent 没有运行
 	echo
 }
 
@@ -617,7 +617,7 @@ transmission(){
 		echo_time transmission 安装失败，再重试安装！ && exit 1
 	fi
 	/opt/etc/init.d/S88transmission start > /dev/null 2>&1 && \
-	[ -n "`pid_of transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
+	[ -n "`pidof transmission-daemon`" ] && echo_time transmission 已经运行 || echo_time transmission 没有运行
 	echo
 }
 
@@ -634,7 +634,7 @@ onmp_restart(){
 	onmp_pp start
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ "`pid_of $PROC`" ] && echo_time $PROC 重启成功
+		[ "`pidof $PROC`" ] && echo_time $PROC 重启成功
 	done
 }
 
@@ -642,7 +642,7 @@ onmp_start(){
 	onmp_pp start
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ "`pid_of $PROC`" ] && echo_time $PROC 启动成功
+		[ "`pidof $PROC`" ] && echo_time $PROC 启动成功
 	done
 }
 
@@ -651,23 +651,23 @@ onmp_stop(){
 	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
 	sleep 3
 	for PROC in nginx mysqld php-fpm; do
-		[ -z "`pid_of $PROC`" ] && echo_time $PROC 已经关闭
+		[ -z "`pidof $PROC`" ] && echo_time $PROC 已经关闭
 	done
 }
 
 	if [ $1 ]; then
 		log="/tmp/log/softwarecenter.log"
 		case $1 in
-			amule)			amule >> $log;;
-			aria2)			aria2 >> $log;;
-			deluge)			deluge >> $log;;
-			rtorrent)		rtorrent >> $log;;
-			onmp_stop)		onmp_stop >> $log;;
-			onmp_start)		onmp_start >> $log;;
-			qbittorrent)	qbittorrent >> $log;;
-			transmission)	transmission >> $log;;
+			1)	amule >> $log;;
+			2)	aria2 >> $log;;
+			3)	deluge >> $log;;
+			4)	rtorrent >> $log;;
+			5)	qbittorrent >> $log;;
+			6)	transmission >> $log;;
+			10)	onmp_stop >> $log;;
+			11)	onmp_start >> $log;;
+			12)	onmp_restart >> $log;;
 			system_check)	system_check >> $log;;
-			onmp_restart)	onmp_restart >> $log;;
 			opkg_install)	opkg_install >> $log;;
 			install_soft)	install_soft >> $log;;
 			*)				break;;

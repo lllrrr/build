@@ -19,20 +19,20 @@ if software_status then
 	o.inputtitle = translate("开启ONMP")
 	o.inputstyle = "apply"
 	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_start >/dev/null 2>&1 &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 11 >/dev/null 2>&1 &")
 	end
 	o = a:option(Button, "Apply")
 	o.inputtitle = translate("关闭ONMP")
 	o.inputstyle = "reset"
 	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_stop >/dev/null 2>&1 &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 10 >/dev/null 2>&1 &")
 	end
 
 	o = a:option(Button, "reset")
 	o.inputtitle = translate("重启ONMP")
 	o.inputstyle = "reset"
 	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh onmp_restart >/dev/null 2>&1 &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 12 >/dev/null 2>&1 &")
 	end
 end
 

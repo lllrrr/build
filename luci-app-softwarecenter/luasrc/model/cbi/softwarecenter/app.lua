@@ -26,7 +26,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	function p.write(self, section)
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh amule &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 1 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("aMule 没有运行") .. font_off
@@ -51,7 +51,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	p.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh aria2 &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 2 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("Aria2 没有运行") .. font_off
@@ -76,7 +76,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	p.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh deluge &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 3 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("Deluge 没有运行") .. font_off
@@ -101,7 +101,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	function p.write(self, section)
-	SYS.call("/usr/bin/softwarecenter/lib_functions.sh qbittorrent &")
+	SYS.call("/usr/bin/softwarecenter/lib_functions.sh 5 &")
 	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
 	state_msg = font_red .. translate("qBittorrent 没有运行") .. font_off
@@ -126,7 +126,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	function p.write(self, section)
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh rtorrent &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 4 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("rTorrent 没有运行") .. font_off
@@ -151,7 +151,7 @@ else
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	function p.write(self, section)
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh transmission &")
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 6 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("Transmission 没有运行") .. font_off

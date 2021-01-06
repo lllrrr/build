@@ -115,5 +115,5 @@ msgstr "只有Owncloud和Nextcloud可以使用"
 msgid "Enable Redis"
 msgstr "启用 远程字典服务"
 
-msgid ""
-msgstr ""
+msgid "Clear logs"
+msgstr "清空日志"

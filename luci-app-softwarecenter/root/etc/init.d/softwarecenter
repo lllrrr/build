@@ -11,10 +11,6 @@ STOP=10
 . /usr/bin/softwarecenter/nginx_install.sh
 website_config_list=""
 
-pid_of(){
-ps|grep -E "$@"|grep -v grep|awk '{print $1}'
-}
-
 #本函数负责清理未写入配置的网站
 clean_vhost_config(){
 	local_config_list="`ls /opt/etc/nginx/vhost | cut -d. -f1`"
@@ -187,7 +183,7 @@ cdg(){
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
 	for PROC in nginx mysqld php-fpm; do
-		if [ "`pid_of $PROC`" ]; then
+		if [ "`pidof $PROC`" ]; then
 			echo_time "$PROC  运行中"
 		else
 			[ "`which $PROC`" ] && echo_time "$PROC 没有开启" || echo_time "$PROC 没有安装"
@@ -205,12 +201,12 @@ cdg(){
 		[ $p = S81deluge-web ] && f=deluge-web
 		[ $p = S89qbittorrent ] && f=qbittorrent-nox
 		[ $p = S88transmission ] && f=transmission-daemon
-			if [ "`pid_of $f`" ]; then
+			if [ "`pidof $f`" ]; then
 				echo_time "$f  运行中"
 			else
 				/opt/etc/init.d/$p start 1> /dev/null
 				sleep 5
-				if [ "`pid_of $f`" ]; then
+				if [ "`pidof $f`" ]; then
 					echo_time "$f 启动成功"
 				else
 					echo_time "$f 启动失败"
