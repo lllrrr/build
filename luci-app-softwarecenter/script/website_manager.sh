@@ -147,7 +147,7 @@ web_installer(){
 port_settings(){
 
 	Find_port(){
-	for f in `seq 311 330`; do
+	for f in `seq 2100 2150`; do
 		if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
 			port=$f
 			break
@@ -155,18 +155,19 @@ port_settings(){
 	done
 	}
 
-	if [ $port ]; then
+	if [ -n "$port" ]; then
 		if [ "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $port`" ]; then
 			echo_time "$name 设置的端口 \"$port\" 已在用，查找可用端口。"
 			Find_port
 		else
 			port=$port
+			echo_time "$name 自定义 \"$port\" 的端口可用"
 		fi
 	else
 		echo_time "$name 没有设置端口，查找可用端口。"
 		Find_port
+		echo_time "$name 使用空闲 \"$port\" 的端口"
 	fi
-	echo_time "$name 使用 \"$port\" 的端口"
 }
 
 # 网站程序卸载（by自动化接口安装）参数；$1:删除的目标
@@ -241,6 +242,28 @@ port_custom(){
 	port_settings
 	sed -i -r "s|listen (.*);|listen $port;|" $1
 	echo_time "$name 恢复完成"
+}
+
+# 端口修改
+Port_modification(){
+	if [ $port ]; then
+		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -ne $port ]; then
+			name=$website_name
+			port_settings
+			sed -i "s|listen .*|listen $port;|" $1
+			echo_time "$name 端口修改完成"
+			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
+		fi
+	else
+		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2000 ]; then
+			port=""
+			name=$website_name
+			port_settings
+			sed -i "s|listen .*|listen $port;|" $1
+			echo_time "$name 端口修改完成"
+			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
+		fi
+	fi
 }
 
 # 自定义部署通用函数 参数：$1:文件目录 $2:端口号

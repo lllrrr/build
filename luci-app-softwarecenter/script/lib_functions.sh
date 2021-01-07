@@ -144,7 +144,7 @@ remove_soft(){
 }
 
 echo_time() {
-	echo -e "`date +"%m月%d日 %H:%M:%S"`: $@"
+	echo -e "[ `date +"%m月%d日 %H:%M:%S"` ]  $@"
 }
 
 # 磁盘分区挂载
@@ -154,7 +154,7 @@ system_check(){
 	if [ -n "`lsblk -p | grep ${Partition_disk}`" ]; then
 		filesystem="`blkid -s TYPE | grep ${Partition_disk/mnt/dev} | cut -d'"' -f2`"
 		if [ "$filesystem" = "ext4" ]; then
-			echo_time "磁盘 ${Partition_disk:0:8}1 符合安装要求"
+			echo_time "磁盘 $1 符合安装要求"
 		else
 			echo_time "磁盘$Partition_disk原是$filesystem重新格式化ext4。"
 			umount -l ${Partition_disk}
@@ -297,41 +297,12 @@ aria2(){
 deluge(){
 if opkg_install deluge-ui-web; then
 	/opt/etc/init.d/S80deluged start > /dev/null 2>&1
-	/opt/etc/init.d/S80deluged stop > /dev/null 2>&1 
-cat > "/opt/etc/deluge/web.conf" << EOF
-{
-"file": 2,
-"format": 1
-}{
-"base": "/",
-"cert": "ssl/daemon.cert",
-"default_daemon": "",
-"enabled_plugins": [],
-"first_login": false,
-"https": false,
-"interface": "0.0.0.0",
-"language": "zh_CN",
-"pkey": "ssl/daemon.pkey",
-"port": 8112,
-"pwd_salt": "c26ab3bbd8b137f99cd83c2c1c0963bcc1a35cad",
-"pwd_sha1": "2ce1a410bcdcc53064129b6d950f2e9fee4edc1e",
-"session_timeout": 3600,
-"sessions": {
-"e62e391f764e83f41ef10cd60e7ea68e88057b8a9737de1920900c936abfe0d5": {
-"expires": 1608831495.0,
-"level": 10,
-"login": "admin"
-}
-},
-"show_session_speed": false,
-"show_sidebar": true,
-"sidebar_multiple_filters": true,
-"sidebar_show_zero": false,
-"theme": "gray"
-}
-EOF
-	killall deluged && killall deluge-web &&  sleep 10
+	/opt/etc/init.d/S81deluge-web start > /dev/null 2>&1 
+	sleep 5
+	/opt/etc/init.d/S80deluged stop > /dev/null 2>&1
+	/opt/etc/init.d/S81deluge-web stop > /dev/null 2>&1
 	sed -i 's|root/Down|opt/down|g' /opt/etc/deluge/core.conf
+	sed -i 's|"language.*|"language": "zh_CN",|g' /opt/etc/deluge/web.conf
 	ln -sf /opt/etc/deluge/core.conf /opt/etc/config/deluge.conf
 else
 	echo_time deluge 安装失败，再重试安装！ && exit 1
@@ -621,52 +592,15 @@ transmission(){
 	echo
 }
 
-onmp_pp(){
-	/opt/etc/init.d/S80nginx $1 > /dev/null 2>&1
-	/opt/etc/init.d/S70mysqld $1 > /dev/null 2>&1
-	/opt/etc/init.d/S79php7-fpm $1 > /dev/null 2>&1
-}
-
-onmp_restart(){
-	onmp_pp stop
-	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
-	sleep 3
-	onmp_pp start
-	sleep 3
-	for PROC in nginx mysqld php-fpm; do
-		[ "`pidof $PROC`" ] && echo_time $PROC 重启成功
-	done
-}
-
-onmp_start(){
-	onmp_pp start
-	sleep 3
-	for PROC in nginx mysqld php-fpm; do
-		[ "`pidof $PROC`" ] && echo_time $PROC 启动成功
-	done
-}
-
-onmp_stop(){
-	onmp_pp stop
-	killall -9 nginx mysqld php-fpm > /dev/null 2>&1
-	sleep 3
-	for PROC in nginx mysqld php-fpm; do
-		[ -z "`pidof $PROC`" ] && echo_time $PROC 已经关闭
-	done
-}
-
 	if [ $1 ]; then
 		log="/tmp/log/softwarecenter.log"
 		case $1 in
-			1)	amule >> $log;;
-			20)	aria2 >> $log;;
-			3)	deluge >> $log;;
-			4)	rtorrent >> $log;;
-			5)	qbittorrent >> $log;;
-			6)	transmission >> $log;;
-			10)	onmp_stop >> $log;;
-			11)	onmp_start >> $log;;
-			12)	onmp_restart >> $log;;
+			amule)			amule >> $log;;
+			aria2)			aria2 >> $log;;
+			deluge)			deluge >> $log;;
+			rtorrent)		rtorrent >> $log;;
+			qbittorrent)	qbittorrent >> $log;;
+			transmission)	transmission >> $log;;
 			system_check)	system_check >> $log;;
 			opkg_install)	opkg_install >> $log;;
 			install_soft)	install_soft >> $log;;

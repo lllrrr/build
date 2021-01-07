@@ -105,6 +105,8 @@ handle_website(){
 				rm -rf /opt/wwwroot/$website_name/config/config.php
 				rm -rf /opt/wwwroot/$website_name/redis_enabled
 			fi
+			Port_modification /opt/etc/nginx/vhost/$website_name.conf
+
 		fi
 	else
 		echo_time "网站 $website_name 已关闭"

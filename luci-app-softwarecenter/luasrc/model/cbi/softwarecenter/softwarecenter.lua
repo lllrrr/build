@@ -11,29 +11,6 @@ m = Map("softwarecenter",translate("软件中心"),translate("自动部署Entwar
 local software_status=(SYS.call("pidof nginx > /dev/null") == 0)
 if software_status then
 	m:section(SimpleSection).template = "softwarecenter/software_status"
-	local t = {
-		{Commit, Apply, reset}
-	}
-	a = m:section(Table, t)
-	o = a:option(Button, "Commit") 
-	o.inputtitle = translate("开启ONMP")
-	o.inputstyle = "apply"
-	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 11 >/dev/null 2>&1 &")
-	end
-	o = a:option(Button, "Apply")
-	o.inputtitle = translate("关闭ONMP")
-	o.inputstyle = "reset"
-	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 10 >/dev/null 2>&1 &")
-	end
-
-	o = a:option(Button, "reset")
-	o.inputtitle = translate("重启ONMP")
-	o.inputstyle = "reset"
-	o.write = function()
-		SYS.call("/usr/bin/softwarecenter/lib_functions.sh 12 >/dev/null 2>&1 &")
-	end
 end
 
 s = m:section(TypedSection,"softwarecenter",translate("设置"))
@@ -75,14 +52,6 @@ p:depends("mysql_enabled",1)
 deploy_mysql:depends("deploy_entware",1)
 
 s:tab("Partition", translate("磁盘分区"))
-p = s:taboption("Partition", Button,"_rescan",translate("扫描磁盘"),translate("重新扫描加入后没有显示的磁盘"))
-p.inputtitle = translate("开始扫描")
-p.inputstyle = "reload"
-p.forcewrite = true
-function p.write(self, section, value)
-  UTIL.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
-end
-
 p = s:taboption("Partition",ListValue,"Partition_disk",translate("可用磁盘"),translate("当加入的磁盘没有分区，此工具可简单的分区挂载"))
 local o = util.consume((fs.glob("/dev/sd[a-g]")), o)
 local size = {}
@@ -95,11 +64,18 @@ for i, a in ipairs(o) do
 	p:value(a, size[a] and "%s ( %s GB ) %s" % {a,size[a],t})
 end
 
-p = s:taboption("Partition", Button,"_add",translate(" "),translate("默认只分一个区，并格式化EXT4文件系统。如已挂载要先缷载\n<br><b style=\"color:red\">注意：分区前确认选择的磁盘没有重要数据，分区后数据不可恢复！</b>"))
+p = s:taboption("Partition", Button,"_rescan",translate("扫描磁盘"),translate("重新扫描加入后没有显示的磁盘"))
+p.inputtitle = translate("开始扫描")
+p.inputstyle = "reload"
+p.forcewrite = true
+function p.write(self, section, value)
+  UTIL.exec("echo '- - -' | tee /sys/class/scsi_host/host*/scan > /dev/null")
+end
+
+p = s:taboption("Partition", Button,"_add",translate("磁盘分区"),translate("默认只分一个区，并格式化EXT4文件系统。如已挂载要先缷载<br><b style=\"color:red\">注意：分区前确认选择的磁盘没有重要数据，分区后数据不可恢复！</b>"))
 p.inputtitle = translate("开始分区")
 p.inputstyle = "apply"
 function p.write(self, section)
-	SYS.call("cbi.apply")
 	SYS.call("/usr/bin/softwarecenter/lib_functions.sh system_check &")
 	luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 end
