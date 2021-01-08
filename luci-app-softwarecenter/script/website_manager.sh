@@ -255,14 +255,15 @@ Port_modification(){
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
 	else
-		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2000 ]; then
+		# 数值范围循环判断
+		until [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -gt 2000 -a $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2150 ]; do
 			port=""
 			name=$website_name
 			port_settings
 			sed -i "s|listen .*|listen $port;|" $1
 			echo_time "$name 端口修改完成"
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
-		fi
+		done
 	fi
 }
 
