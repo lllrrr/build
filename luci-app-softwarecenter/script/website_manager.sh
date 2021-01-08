@@ -147,7 +147,7 @@ web_installer(){
 port_settings(){
 
 	Find_port(){
-	for f in `seq 2100 2150`; do
+	for f in `seq 2100 2120`; do
 		if [ -z "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $f`" ]; then
 			port=$f
 			break
@@ -157,16 +157,17 @@ port_settings(){
 
 	if [ -n "$port" ]; then
 		if [ "`netstat -lntp | awk '{print $4}' | awk -F: '{print $2}' | grep -w $port`" ]; then
-			echo_time "$name 设置的端口 \"$port\" 已在用，查找可用端口。"
+			echo_time "$name 设置的端口 $port 已在用，查找可用端口。"
 			Find_port
+			echo_time "$name 使用空闲 $port 的端口"
 		else
 			port=$port
-			echo_time "$name 自定义 \"$port\" 的端口可用"
+			echo_time "$name 使用自定义 $port 的端口"
 		fi
 	else
 		echo_time "$name 没有设置端口，查找可用端口。"
 		Find_port
-		echo_time "$name 使用空闲 \"$port\" 的端口"
+		echo_time "$name 使用空闲 $port 的端口"
 	fi
 }
 
@@ -220,8 +221,8 @@ delete_website(){
 #说明：本函是将负责解析nginx的配置文件，输出网站文件目录和访问地址,仅接受一个参数
 vhost_config_list(){
 	if [ "$#" -eq "1" ]; then
-		path=$(awk '/wwwroot/{print $2}' $1 | sed 's/;//')
-		port=$(awk '/listen/{print $2}' $1 | sed 's/;//')
+		path=`awk '/wwwroot/{print $2}' $1 | sed 's/;//'`
+		port=`awk '/listen/{print $2}' $1 | sed 's/;//'`
 		echo "$path $localhost:$port"
 	fi
 }
@@ -237,17 +238,17 @@ vhost_list(){
 
 # 恢复网站查端口
 port_custom(){
-	port=$(awk '/listen/{print $2}' $1 | sed 's/;//')
+	port=`awk '/listen/{print $2}' $1 | sed 's/;//'`
 	name=$website_name
 	port_settings
-	sed -i -r "s|listen (.*);|listen $port;|" $1
+	sed -i "s|listen .*|listen $port;|" $1
 	echo_time "$name 恢复完成"
 }
 
 # 端口修改
 Port_modification(){
 	if [ $port ]; then
-		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -ne $port ]; then
+		if [ `awk '/listen/{print $2}' $1 | sed 's/;//'` -ne $port ]; then
 			name=$website_name
 			port_settings
 			sed -i "s|listen .*|listen $port;|" $1
@@ -255,15 +256,15 @@ Port_modification(){
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
 	else
-		# 数值范围循环判断
-		until [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -gt 2000 -a $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2150 ]; do
+		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2100 ] || [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -gt 2120 ]; then
 			port=""
 			name=$website_name
 			port_settings
+			echo_time "$name 使用空闲 $port 的端口"
 			sed -i "s|listen .*|listen $port;|" $1
 			echo_time "$name 端口修改完成"
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
-		done
+		fi
 	fi
 }
 
