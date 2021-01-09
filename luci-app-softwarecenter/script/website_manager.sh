@@ -4,6 +4,8 @@
 . /usr/bin/softwarecenter/lib_functions.sh
 
 # Web程序
+# (0) tz（雅黑PHP探针）
+url_tz="https://codeload.github.com/WuSiYu/PHP-Probe/zip/master"
 # (1) phpMyAdmin（数据库管理工具）
 url_phpMyAdmin="https://files.phpmyadmin.net/phpMyAdmin/5.0.4/phpMyAdmin-5.0.4-all-languages.zip"
 # (2) WordPress（使用最广泛的CMS）
@@ -289,20 +291,16 @@ install_custom(){
 }
 
 install_tz(){
-	name=tz
+	# 默认配置
+	filelink=$url_tz
+	name="tz"
+	dirname="PHP-Probe-master"
 
-	make_dir "/opt/wwwroot/tz" > /dev/null 2>&1
-	echo_time "开始下载雅黑PHP探针"
-	if ! wget --no-check-certificate -O /opt/wwwroot/tz/index.php https://raw.githubusercontent.com/WuSiYu/PHP-Probe/master/tz.php > /dev/null 2>&1; then
-		echo_time "下载异常"
-		rm -r /opt/wwwroot/tz
-		exit 1
-	fi
-	echo_time "正在配置雅黑PHP探针"
-	port_settings
-	add_vhost $port tz
-	sed -i "s|.*#php-fpm.*|	include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/tz.conf
-	chmod -R 777 /opt/wwwroot/tz
+	# 运行安装程序
+	web_installer
+	add_vhost $port $webdir
+	sed -i -e "s|index.php;|index.php tz.php;|g;s|.*#php-fpm.*|	include /opt/etc/nginx/conf/php-fpm.conf;|g" /opt/etc/nginx/vhost/$webdir.conf
+	echo_time "浏览器地址栏输入：$localhost:$port 即可访问"
 }
 
 # 安装phpMyAdmin
