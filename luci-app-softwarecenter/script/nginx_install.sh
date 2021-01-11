@@ -105,6 +105,7 @@ EOF
 
 # 卸载nginx
 del_nginx(){
+	nginx_manage stop
 	del_php
 	remove_soft "$pkglist_nginx"
 	rm -rf /opt/etc/nginx
@@ -318,8 +319,8 @@ del_php(){
 
 # Nginx Server管理 参数：$1:动作
 nginx_manage(){
-	/opt/etc/init.d/S47snmpd $1
-	/opt/etc/init.d/S70redis $1
-	/opt/etc/init.d/S79php7-fpm $1
-	/opt/etc/init.d/S80nginx $1
+	/opt/etc/init.d/S47snmpd $1 > /dev/null 2>&1
+	/opt/etc/init.d/S70redis $1 > /dev/null 2>&1
+	/opt/etc/init.d/S80nginx $1 > /dev/null 2>&1
+	/opt/etc/init.d/S79php7-fpm $1 > /dev/null 2>&1
 }

@@ -75,7 +75,7 @@ EOF
 
 del_mysql(){
 	# 停止MySQL
-	/opt/etc/init.d/S70mysqld stop
+	/opt/etc/init.d/S70mysqld stop > /dev/null 2>&1
 	echo_time "正在停止MySQL"
 	sleep 10
 
