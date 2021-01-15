@@ -184,38 +184,34 @@ cdg(){
 
 	[ $swap_enabled ] && config_swap_init $swap_size $swap_path || config_swap_del $swap_path
 
-	for PROC in nginx mysqld php-fpm; do
-		if [ "`pidof $PROC`" ]; then
-			echo_time "$PROC  运行中"
+_start(){
+	if [ -z "`pidof $f`" ]; then
+		/opt/etc/init.d/$p start 1> /dev/null
+		sleep 5
+		if [ "`pidof $f`" ]; then
+			echo_time "$f 启动成功"
 		else
-			[ "`which $PROC`" ] && echo_time "$PROC 没有开启" || echo_time "$PROC 没有安装"
+			echo_time "$f 启动失败"
+			[ "`which $f`" ] && echo_time "$f 没有开启" || echo_time "$f 没有安装"
 		fi
-	done
-
-	ipk_start="`ls /opt/etc/init.d | grep -E "aria2|deluge|transmission|rtorrent|qbittorrent|amuled|lighttpd"`"
-	if [ "$ipk_start" ]; then
-		for p in $ipk_start; do
-		[ $p = S81aria2 ] && f=aria2c
-		[ $p = S57amuled ] && f=amuled
-		[ $p = S80deluged ] && f=deluged
-		[ $p = S80lighttpd ] && f=lighttpd
-		[ $p = S85rtorrent ] && f=rtorrent
-		[ $p = S81deluge-web ] && f=deluge-web
-		[ $p = S89qbittorrent ] && f=qbittorrent-nox
-		[ $p = S88transmission ] && f=transmission-daemon
-			if [ "`pidof $f`" ]; then
-				echo_time "$f  运行中"
-			else
-				/opt/etc/init.d/$p start 1> /dev/null
-				sleep 5
-				if [ "`pidof $f`" ]; then
-					echo_time "$f 启动成功"
-				else
-					echo_time "$f 启动失败"
-				fi
-			fi
-		done
+	# else
+		# echo_time "$f  运行中"
 	fi
+}
+
+	for p in `ls /opt/etc/init.d`; do
+	[ $p = S81aria2 ] && f=aria2c && _start
+	[ $p = S57amuled ] && f=amuled && _start
+	[ $p = S80deluged ] && f=deluged && _start
+	[ $p = S80lighttpd ] && f=lighttpd && _start
+	[ $p = S85rtorrent ] && f=rtorrent && _start
+	[ $p = S81deluge-web ] && f=deluge-web && _start
+	[ $p = S89qbittorrent ] && f=qbittorrent-nox && _start
+	[ $p = S88transmission ] && f=transmission-daemon && _start
+	# [ $p = S80nginx ] && f=nginx && _start
+	# [ $p = S70mysqld ] && f=mysqld && _start
+	# [ $p = S79php7-fpm ] && f=php-fpm && _start
+	done
 }
 
 cdg >> /tmp/log/softwarecenter.log
