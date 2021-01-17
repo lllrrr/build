@@ -20,6 +20,8 @@ status(){
 	fi
 }
 
+#tar -czf "/tmp/opt_backup_$(date +%F_%H-%M).tgz" /opt/*
+
 make_dir(){
 	for p in "$@"; do
 		[ -d "$p" ] || { mkdir -p $p && echo_time "新建目录 $p";}
