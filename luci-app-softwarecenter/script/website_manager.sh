@@ -253,17 +253,16 @@ Port_modification(){
 		if [ `awk '/listen/{print $2}' $1 | sed 's/;//'` -ne $port ]; then
 			name=$website_name
 			port_settings
-			sed -i "s|listen .*|listen $port;|" $1
+			sed -i "s|listen.*|listen $port;|" $1
 			echo_time "$name 端口修改完成"
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
 	else
-		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2100 ] || [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -gt 2120 ]; then
+		if [ $(awk '/listen/{print $2}' $1 | sed 's/;//') -lt 2100 -o $(awk '/listen/{print $2}' $1 | sed 's/;//') -gt 2120 ]; then
 			port=""
 			name=$website_name
 			port_settings
-			echo_time "$name 使用空闲 $port 的端口"
-			sed -i "s|listen .*|listen $port;|" $1
+			sed -i "s|listen.*|listen $port;|" $1
 			echo_time "$name 端口修改完成"
 			/opt/etc/init.d/S80nginx reload > /dev/null 2>&1
 		fi
