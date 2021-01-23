@@ -144,14 +144,22 @@ if state then
 	end
 	o=font_apply .. translate("打开WebUI管理") .. font_op .. "9091" .. "')\"/>"
 	state_msg = font_green .. translate("Transmission 运行中") .. font_off
-	p.description = translate("Transmission默认WebUI端口: 9091" .. "<br>" .. state_msg .. "<br>" .. o )
+	p.description = translate("Transmission默认WebU 用启名: admin，密码: admin" .. "<br>" .. state_msg .. "<br>" .. o )
 else
 	p = s:option(Button, "_baf", translate("安装Transmission"))
-	p.inputtitle = translate("开始安装")
+	p.inputtitle = translate("开始安装 3.00")
 	p.inputstyle = "apply"
 	p.forcewrite = true
 	function p.write(self, section)
 		SYS.call("/usr/bin/softwarecenter/lib_functions.sh transmission &")
+		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
+	end
+	p = s:option(Button, "_bag", translate(" "))
+	p.inputtitle = translate("开始安装 2.77plus")
+	p.inputstyle = "apply"
+	p.forcewrite = true
+	function p.write(self, section)
+		SYS.call("/usr/bin/softwarecenter/lib_functions.sh transmi_2_77 &")
 		luci.http.redirect(luci.dispatcher.build_url("admin/services/softwarecenter/log"))
 	end
 	state_msg = font_red .. translate("Transmission 没有运行") .. font_off

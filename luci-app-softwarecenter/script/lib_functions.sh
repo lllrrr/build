@@ -573,19 +573,20 @@ EOF
 }
 
 transmission(){
-	if opkg_install transmission-daemon; then
-		ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
-		wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip
-		if [ -e "tr.zip" ]; then
+	[ $1 ] && r="transmission-cfp-cli transmission-cfp-daemon" || r="transmission-cli transmission-daemon"
+	if opkg_install $r; then
+		if wget -O tr.zip https://github.com/ronggang/transmission-web-control/archive/master.zip; then
 			unzip -d /opt/share/ tr.zip > /dev/null 2>&1 && rm tr.zip
 			make_dir /opt/share/transmission/web > /dev/null 2>&1 
 			mv -f /opt/share/transmission-web-control-master/src/* /opt/share/transmission/web
 			rm -rf /opt/share/transmission-w*
-			sed -i 's|/torrent||g' /opt/etc/transmission/settings.json
 		else
 			echo_time "下载 transmission-web-control 出错！" && opkg_install transmission-web-control
 			echo_time "使用 Entware transmission-web-control"
 		fi
+		[ -e /opt/etc/init.d/S88transmission-cfp ] && mv /opt/etc/init.d/S88transmission-cfp /opt/etc/init.d/S88transmission
+		sed -i -e 's|/torrent||g;s|root|admin|g;s|.*rpc-password.*|    "rpc-password": "admin",|g' /opt/etc/transmission/settings.json
+		ln -sf /opt/etc/transmission/settings.json /opt/etc/config/transmission.json
 	else
 		echo_time transmission 安装失败，再重试安装！ && exit 1
 	fi
@@ -603,6 +604,7 @@ transmission(){
 			rtorrent)		rtorrent >> $log;;
 			qbittorrent)	qbittorrent >> $log;;
 			transmission)	transmission >> $log;;
+			transmi_2_77)	transmission 277 >> $log;;
 			system_check)	system_check >> $log;;
 			opkg_install)	opkg_install >> $log;;
 			install_soft)	install_soft >> $log;;
