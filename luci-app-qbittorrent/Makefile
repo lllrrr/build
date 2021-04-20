@@ -31,7 +31,7 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/init.d $(1)/etc/config $(1)/usr/lib/lua/luci
 	$(CP) ./luasrc/* $(1)/usr/lib/lua/luci
 	$(INSTALL_CONF) ./root/etc/config/qbittorrent $(1)/etc/config
-	$(INSTALL_BIN) ./root/etc/init.d/qbittorrent/* $(1)/etc/init.d/
+	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
