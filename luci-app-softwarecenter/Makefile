@@ -25,11 +25,6 @@ define Package/$(PKG_NAME)/conffiles
 /etc/config/softwarecenter
 endef
 
-define Package/$(PKG_NAME)/postinst
-#!/bin/sh
-rm -f /tmp/luci-*
-endef
-
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
 	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
