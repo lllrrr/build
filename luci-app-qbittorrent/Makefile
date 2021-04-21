@@ -10,7 +10,7 @@ endef
 
 LUCI_TITLE:=LuCI support for qBittorrent
 LUCI_PKGARCH:=all
-LUCI_DEPENDS:=+qBittorrent
+LUCI_DEPENDS:=+qBittorrent +axel
 
 include $(TOPDIR)/feeds/luci/luci.mk
 
