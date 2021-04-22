@@ -59,8 +59,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/ddnsto
 	
-	$(INSTALL_DIR)	$(1)/usr/sbin/
-	$(INSTALL_BIN) ./files/ddnsto.$(PKG_ARCH_DDNSTO) $(1)/usr/sbin/ddnsto
+	$(INSTALL_DIR)	$(1)/usr/bin/
+	$(INSTALL_BIN) ./files/ddnsto.$(PKG_ARCH_DDNSTO) $(1)/usr/bin/ddnsto
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
