@@ -8,6 +8,8 @@ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://github.com/axel-download-accelerator/$(PKG_NAME)/releases/download/v$(PKG_VERSION)
 PKG_HASH:=c0d26eba6b94945cd98c5b69ca6df2744639d17bfd49047ef51a8a48f067de10
 
+PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/$(PKG_NAME)
@@ -41,14 +43,10 @@ endef
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
-	$(INSTALL_DIR) $(1)/etc
+#	$(INSTALL_DIR) $(1)/etc
 #	$(INSTALL_DATA) $(PKG_BUILD_DIR)/axelrc.example $(1)/etc/axelrc
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/configure $(1)/etc/configure
-#	echo "alternate_output = 1" >> $(1)/etc/axelrc
-endef
-
-define Package/axel/conffiles
-/etc/axelrc
+#	$(INSTALL_DATA) $(PKG_BUILD_DIR)/configure $(1)/etc/configure
+	$(ls) $(PKG_BUILD_DIR) >> $(1)/etc/axelrc
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
