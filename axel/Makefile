@@ -14,7 +14,7 @@ define Package/$(PKG_NAME)
 	SECTION:=net
 	CATEGORY:=Network
 	SUBMENU:=File Transfer
-	DEPENDS:=+libopenssl
+	DEPENDS:=+libopenssl +libpthread
 	TITLE:=axel download accelerator
 	URL:=https://github.com/axel-download-accelerator/axel
 endef
@@ -31,9 +31,23 @@ define Package/$(PKG_NAME)/description
  wget clone (and other console based programs) on byte-critical systems.
 endef
 
+# CONFIGURE_ARGS := \
+	# --prefix=/usr \
+	# --etcdir=/etc \
+	# --debug=0 \
+	# --i18n=0 \
+	# --strip=0
+
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/axelrc.example $(1)/etc/axelrc
+	echo "alternate_output = 1" >> $(1)/etc/axelrc
+endef
+
+define Package/axel/conffiles
+/etc/axelrc
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
