@@ -42,9 +42,9 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/axelrc.example $(1)/etc/axelrc
+#	$(INSTALL_DATA) $(PKG_BUILD_DIR)/axelrc.example $(1)/etc/axelrc
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/configure $(1)/etc/configure
-	echo "alternate_output = 1" >> $(1)/etc/axelrc
+#	echo "alternate_output = 1" >> $(1)/etc/axelrc
 endef
 
 define Package/axel/conffiles
