@@ -81,5 +81,5 @@ define Package/python3-libtorrent/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/python$(PYTHON3_VERSION)/site-packages/*.so $(1)/usr/lib/python$(PYTHON3_VERSION)/site-packages
 endef
 
-$(eval $(call BuildPackage,libtorrent-rasterbar))
-$(eval $(call BuildPackage,python3-libtorrent))
+#$(eval $(call BuildPackage,libtorrent-rasterbar))
+#$(eval $(call BuildPackage,python3-libtorrent))
