@@ -1,8 +1,8 @@
-#!/bin/sh
+#!/bin/sh /etc/rc.common
 
 daemon_status ()
 {
-        [ -n "`pidof deluged`" ]
+	[ -n "`pidof deluged`" ]
 }
 
 
@@ -18,35 +18,30 @@ stop() {
 
 case "$1" in
 	start)
-		if daemon_status
-		then
+		if daemon_status; then
 			echo "deluged already running"
 		else
 			start
 		fi
 		;;
 	stop)
-		if daemon_status
-		then
+		if daemon_status; then
 			stop
 		else
 			echo "deluged is not running"
 		fi
 		;;
 	restart)
-		if daemon_status
-		then
+		if daemon_status; then
 			stop
 		fi
 		sleep 4
-		if ! daemon_status
-		then
+		if ! daemon_status; then
 			start
 		fi
 		;;
 	status) 
-		if daemon_status
-		then
+		if daemon_status; then
 			echo "deluged is running"
 		else
 			echo "deluged is not running"

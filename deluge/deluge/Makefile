@@ -32,7 +32,7 @@ define Package/deluge
 	TITLE+= (console UI & daemon)
 	DEPENDS:= \
 	    +python3-chardet \
-	    +python3-libtorrent \
+	    +libtorrent \
 	    +python3-mako \
 	    +python3-markupsafe \
 	    +python3-pillow \
