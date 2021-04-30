@@ -35,5 +35,5 @@ define Package/python3-mako/description
   syntax which compiles into Python modules for maximum performance.
 endef
 
-$(eval $(call Py3Package,python3-mako))
-$(eval $(call BuildPackage,python3-mako))
+#$(eval $(call Py3Package,python3-mako))
+#$(eval $(call BuildPackage,python3-mako))
