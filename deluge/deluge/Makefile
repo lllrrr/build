@@ -94,15 +94,6 @@ define Package/deluge-ui-web/install
 	$(call Python3/FixShebang,$(1)/usr/bin/*)
 endef
 
-define Package/deluge/postinst
-#!/bin/sh
-if [ ! -f /usr/etc/deluge/.configured ]; then
-  echo "Setting default deluge ui to console ... "
-  /usr/bin/deluge -s console
-  touch /usr/etc/deluge/.configured
-fi
-endef
-
 $(eval $(call Py3Package,deluge))
 $(eval $(call BuildPackage,deluge))
 
