@@ -1,10 +1,3 @@
-#
-# Copyright (C) 2011-2021 Entware
-#
-# This is free software, licensed under the GNU General Public License v2.
-# See /LICENSE for more information.
-#
-
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=deluge
@@ -32,9 +25,9 @@ define Package/deluge
 	TITLE+= (console UI & daemon)
 	DEPENDS:= \
 	    +python3-chardet \
-	    +rblibtorrent \
 	    +python3-mako \
 	    +python3-markupsafe \
+		+python3-libtorrent \
 	    +python3-pillow \
 	    +python3-pyopenssl \
 	    +python3-pyxdg \
@@ -57,20 +50,16 @@ endef
 
 define Package/deluge/install
 	$(INSTALL_DIR) $(1)$(PYTHON3_PKG_DIR)
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON3_PKG_DIR)/* \
-	    $(1)$(PYTHON3_PKG_DIR)/
+	$(CP) $(PKG_INSTALL_DIR)$(PYTHON3_PKG_DIR)/* $(1)$(PYTHON3_PKG_DIR)/
 	rm -rf $(1)$(PYTHON3_PKG_DIR)/deluge/ui/gtk3
 	rm -rf $(1)$(PYTHON3_PKG_DIR)/deluge/ui/web
-	$(SED) "s,save_config_path('deluge'),'/usr/etc/deluge'," \
-		$(1)$(PYTHON3_PKG_DIR)/deluge/common.py
+	# $(SED) "s,save_config_path('deluge'),'/etc/deluge'," \
+		# $(1)$(PYTHON3_PKG_DIR)/deluge/common.py
 
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) \
-	    $(PKG_INSTALL_DIR)/usr/bin/* \
-	    $(1)/usr/bin/
-	$(INSTALL_DIR) $(1)/usr/etc/init.d
-	$(INSTALL_BIN) ./files/deluged $(1)/usr/etc/init.d
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/deluged $(1)/etc/init.d
 	rm -rf $(1)/usr/bin/deluge-gtk
 	rm -rf $(1)/usr/bin/deluge-web
 	$(call Python3/FixShebang,$(1)/usr/bin/* \
@@ -79,18 +68,14 @@ endef
 
 define Package/deluge-ui-web/install
 	$(INSTALL_DIR) $(1)$(PYTHON3_PKG_DIR)/deluge/ui
-	$(CP) \
-	    $(PKG_INSTALL_DIR)$(PYTHON3_PKG_DIR)/deluge/ui/web \
-	    $(1)$(PYTHON3_PKG_DIR)/deluge/ui/
+	$(CP) $(PKG_INSTALL_DIR)$(PYTHON3_PKG_DIR)/deluge/ui/web $(1)$(PYTHON3_PKG_DIR)/deluge/ui/
 
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(CP) \
-	    $(PKG_INSTALL_DIR)/usr/bin/deluge-web \
-	    $(1)/usr/bin/
-	$(INSTALL_DIR) $(1)/usr/etc/init.d
-	$(INSTALL_BIN) ./files/deluge-web $(1)/usr/etc/init.d
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/deluge-web $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./files/deluge-web $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/deluge-web-reset_password $(1)/usr/bin
-	$(INSTALL_DIR) $(1)/usr/etc/deluge/state
+	$(INSTALL_DIR) $(1)/etc/deluge/state
 	$(call Python3/FixShebang,$(1)/usr/bin/*)
 endef
 
