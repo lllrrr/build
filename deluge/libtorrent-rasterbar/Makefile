@@ -14,6 +14,7 @@ PKG_LICENSE_FILES:=COPYING
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/devel/ninja/ninja-cmake.mk
+include $(INCLUDE_DIR)/nls.mk
 include $(TOPDIR)/feeds/packages/lang/python/python3-version.mk
 
 define Package/libtorrent-rasterbar/Default
@@ -25,7 +26,7 @@ define Package/libtorrent-rasterbar
 	$(call Package/libtorrent-rasterbar/Default)
 	SECTION:=libs
 	CATEGORY:=Libraries
-	DEPENDS:=+boost-system +libopenssl +libatomic
+	DEPENDS:=+boost-system +libopenssl +libatomic $(ICONV_DEPENDS) $(INTL_DEPENDS)
 endef
 
 define Package/python3-libtorrent
@@ -34,7 +35,7 @@ define Package/python3-libtorrent
 	CATEGORY:=Languages
 	SUBMENU:=Python
 	TITLE+= (Python 3)
-	DEPENDS:=+libtorrent-rasterbar +boost-python
+	DEPENDS:=+libtorrent-rasterbar +boost-python3
 endef
 
 define Package/libtorrent-rasterbar/description
@@ -58,6 +59,16 @@ endef
 $(eval $(call Download,try_signal))
 
 PKG_UNPACK:=$(HOST_TAR) -C $(PKG_BUILD_DIR) --strip-components=1 -xzf $(DL_DIR)/$(PKG_SOURCE)
+
+#TARGET_CXXFLAGS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
+
+#TARGET_LDFLAGS += -latomic $(if $(INTL_FULL),-liconv) $(if $(INTL_FULL),-lintl)
+
+#CMAKE_OPTIONS += \
+#	-Dpython-bindings:BOOL=ON \
+#	-DPYTHON_EXECUTABLE:FILEPATH=$(STAGING_DIR_HOSTPKG)/bin/python$(PYTHON3_VERSION) \
+#	-DPYTHON_SITE_PACKAGES="/opt/lib/python$(PYTHON3_VERSION)/site-packages" \
+#	-DPYTHON_EXT_SUFFIX=""
 
 define Build/Prepare
 	$(Build/Prepare/Default)
