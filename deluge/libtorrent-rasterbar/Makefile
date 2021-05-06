@@ -1,14 +1,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libtorrent-rasterbar
-PKG_VERSION:=1.2.13
-PKG_RELEASE=1
+PKG_VERSION:=2.0.2
+PKG_RELEASE:=$(AUTORELEASE)
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE_URL:=https://github.com/arvidn/libtorrent.git
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=e00a152678fbce7903aa42bbd93e8b812f171928
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://codeload.github.com/arvidn/libtorrent/tar.gz/v$(PKG_VERSION)?
+PKG_HASH:=d5960e8c9f80f62126d723c6cc0522e7900c9c323f28994027eae3325fe03a3f
 
 PKG_MAINTAINER:=David Yang <mmyangfl@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
@@ -16,7 +14,6 @@ PKG_LICENSE_FILES:=COPYING
 
 include $(INCLUDE_DIR)/package.mk
 include $(TOPDIR)/feeds/packages/devel/ninja/ninja-cmake.mk
-include $(INCLUDE_DIR)/nls.mk
 include $(TOPDIR)/feeds/packages/lang/python/python3-version.mk
 
 define Package/libtorrent-rasterbar/Default
@@ -28,7 +25,7 @@ define Package/libtorrent-rasterbar
 	$(call Package/libtorrent-rasterbar/Default)
 	SECTION:=libs
 	CATEGORY:=Libraries
-	DEPENDS:=+boost-system +libatomic +libopenssl +libstdcpp $(ICONV_DEPENDS) $(INTL_DEPENDS)
+	DEPENDS:=+boost-system +libopenssl +libatomic
 endef
 
 define Package/python3-libtorrent
@@ -37,7 +34,7 @@ define Package/python3-libtorrent
 	CATEGORY:=Languages
 	SUBMENU:=Python
 	TITLE+= (Python 3)
-	DEPENDS:=+libtorrent-rasterbar +boost-python3
+	DEPENDS:=+libtorrent-rasterbar +boost-python
 endef
 
 define Package/libtorrent-rasterbar/description

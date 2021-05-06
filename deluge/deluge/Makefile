@@ -27,7 +27,6 @@ define Package/deluge
 	    +python3-chardet \
 	    +python3-mako \
 	    +python3-markupsafe \
-		+python3-libtorrent \
 	    +python3-pillow \
 	    +python3-pyopenssl \
 	    +python3-pyxdg \
