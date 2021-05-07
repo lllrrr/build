@@ -33,7 +33,7 @@ define Package/python3-libtorrent
 	CATEGORY:=Languages
 	SUBMENU:=Python
 	TITLE+= (Python 3)
-	DEPENDS:=+libtorrent-rasterbar +boost-python3
+	DEPENDS:=+libtorrent-rasterbar
 endef
 
 define Package/libtorrent-rasterbar/description
