@@ -32,7 +32,7 @@ define Package/libtorrent-rasterbar
 	URL:=https://libtorrent.org/
 	SECTION:=libs
 	CATEGORY:=Libraries
-	DEPENDS:=+boost-system +libstdcpp +libopenssl
+	DEPENDS:=+boost-system +libatomic +libopenssl +libstdcpp $(ICONV_DEPENDS) $(INTL_DEPENDS)
 endef
 
 define Package/python3-libtorrent
