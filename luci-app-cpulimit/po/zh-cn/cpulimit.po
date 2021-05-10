@@ -17,9 +17,6 @@ msgstr "CPU限制"
 msgid "Use cpulimit to restrict app's cpu usage."
 msgstr "利用cpulimit限制应用程序的CPU使用率"
 
-msgid "enable"
-msgstr "使用率限制"
-
 msgid "exename"
 msgstr "进程名称"
 

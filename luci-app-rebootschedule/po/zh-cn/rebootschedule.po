@@ -1,0 +1,8 @@
+msgid "Reboot schedule"
+msgstr "定时任务 Plus+"
+
+msgid ""
+msgstr ""
+
+msgid ""
+msgstr ""
