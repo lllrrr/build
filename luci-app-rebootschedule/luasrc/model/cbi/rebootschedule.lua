@@ -6,6 +6,9 @@ translate("<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\"
 translate("查看使用示例") ..
 " \" onclick=\"window.open('http://'+window.location.hostname+'/reboothelp.jpg')\"/>") ..
 translate("&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\"" ..
+ translate("查看crontab文件") ..
+" \" onclick=\"window.open('crontab')\"/>") ..
+translate("&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\"" ..
  translate("查看crontab用法") ..
 " \" onclick=\"window.open('https://tool.lu/crontab/')\"/>")
 )
