@@ -1,5 +1,5 @@
 msgid "crontabs"
-msgstr "crontab查看"
+msgstr "crontab文件"
 
 msgid "Reboot schedule"
 msgstr "定时任务 Plus+"
@@ -10,50 +10,14 @@ msgstr "查看使用示例"
 msgid "View crontab usage"
 msgstr "查看crontab用法"
 
-msgid "<font color=\"green\"><b>A plug-in that makes planning tasks easier to use, you can use-to indicate a continuous time range, use to indicate multiple discontinuous time points, and use */ to indicate cyclic execution. You can use \"Add\" to add multiple scheduled task commands. You can use \"--Custom--\" to add other parameters yourself.</font></b>"
-msgstr "<font color=\"green\"><b>让定时任务更加易用的插件，可以使用 - 表示连续的时间范围，使用 , 表示不连续的多个时间点，使用 */ 表示循环执行。可以使用“添加”来添加多条计划任务命令。可使用“--自定义--”来自行添加其它参数。</font></b>"
+msgid "<font color=\"green\"><b>A plug-in that makes timed tasks easier to use. It is modified with the original version of wulishui@gmail.com, which supports wulishui. Click below</font><font color=\"red\"> View usage example </font><font color=\"green\"> and then scan two Dimension Code Reward</font></b></br>"
+msgstr "<font color=\"green\"><b>让定时任务更加易用的插件。是用 wulishui@gmail.com 的原版修改，支持 wulishui 点击下面的 </font><font color=\"red\"> 查看使用示例 </font><font color=\"green\"> 后扫描二维码打赏</font></b></br>"
 
-msgid "*All time parameters refer to the time point in the natural unit, not the cumulative count. For example, the month can only be 1-12, the date can only be 1 to 31, the week can only be 0-6, and the hour can only be 0. -23, the minutes can only be 0-59, and the cumulative counting notation of 50 days and 48 hours cannot be used."
-msgstr "*所有时间参数都是指该自然单位中的时间点，而非累积计数，比如月份只能是1～12，日期只能是1～31，星期只能是0～6，小时只能是0～23，分钟只能是0～59，不能使用50天、48小时这种累积计数表示法。"
+msgid "The string of the CRON expression is composed of five fields separated by spaces and executed commands. </br>* * * * * [command]</br>Five asterisks indicate (minutes) (hours) (days) (months) (weeks) according to their positions. commond indicates the command to be executed</br> The allowed range of values is minute (1-59), hour (0-23), day (1-31), month (1-12), week (0-6). </br>Each field can be composed of a value within the range or a combination of the following half-width special characters:</br>"
+msgstr "CRON表达式的字符串是五个有空格分隔加执行命令字段组成。 </br>* * * * * [command]</br>五个星号按照位置分别表示 (分) (时) (日) (月) (周) commond 表示所需执行的命令</br>允许的数值范围是，分(1-59), 时(0-23), 日(1-31)，月(1-12), 周(0-6)。</br>每一个字段都可以使用范围之内的数值或者以下半角的特殊字符组合组成：</br>"
 
-msgid "* All values can be used-Connection means continuous range, such as week: 1-5 means Monday to Friday; use, means non-continuous point, such as week: 1, 3, 5 means only Monday, Wednesday, and Friday. The month, date, and time are used in the same way."
-msgstr "* 所有数值可使用 - 连接表示连续范围，比如星期：1-5 表示星期一至星期五；使用,表示不连续的点，比如星期：1,3,5 表示仅仅星期一、三、五。月份、日期、时间用法相同。"
-
-msgid "Month <font color=\" red\">(numerical range 1~12)</font>"
-msgstr "月份 <font color=\" red\">(数值范围1～12)</font>"
-
-msgid "<font color=\"gray\">* means every month, */n means every n months</br>n1-n5 are continuous, n1, n3, n5 are not continuous</font>"
-msgstr "<font color=\"gray\">* 表示每个月，*/n表示每n个月</br>n1-n5为连续，n1,n3,n5为不连续</font>"
-
-msgid "Day <font color=\" red\">(numerical range 1~31)</font>"
-msgstr "日期 <font color=\" red\">(数值范围1～31)</font>"
-
-msgid "<font color=\"gray\">* means every day, */n means every n days</br>n1-n5 are continuous, n1, n3, n5 are not continuous</font>"
-msgstr "<font color=\"gray\">* 表示每天，*/n表示每n天</br>n1-n5为连续，n1,n3,n5为不连续</font>"
-
-msgid "week <font color=\" red\">(Numerical range0~6)</font>"
-msgstr "星期 <font color=\" red\">(数值范围0～6)</font>"
-
-msgid "<font color=\"gray\">* and date is a logical AND relationship</br>n1-n5 are continuous, n1, n3, n5 are not continuous</font>"
-msgstr "<font color=\"gray\">和日期是逻辑“与”关系</br>n1-n5为连续，n1,n3,n5为不连续</font>"
-
-msgid "hour <font color=\" red\">(Numerical range0~23)</font>"
-msgstr "小时 <font color=\" red\">(数值范围0～23)</font>"
-
-msgid "<font color=\"gray\">* means every hour, */n means every n hours</br>n1-n5 are continuous, n1, n3, n5 are not continuous</font>"
-msgstr "<font color=\"gray\">* 表示每小时，*/n表示每n小时</br>n1-n5为连续，n1,n3,n5为不连续</font>"
-
-msgid "minute <font color=\" red\">(Numerical range0~59)</font>"
-msgstr "分钟 <font color=\" red\">(数值范围0～59)</font>"
-
-msgid "<font color=\"gray\">* means every minute, */n means every n minutes</br>n1-n5 continuous, n1, n3, n5 not continuous</font>"
-msgstr "<font color=\"gray\">* 表示每分钟，*/n表示每n分钟</br>n1-n5为连续，n1,n3,n5为不连续</font>"
-
-msgid "Execute the command <font color=\" red\">(multiple items connected with &&)</font>"
-msgstr "执行命令 <font color=\" red\">(多条用 && 连接)</font>"
-
-msgid "<font color=\"gray\">Press \"--Custom--\" to modify it</br> (it can also be added and modified in the scheduled task)</font>"
-msgstr "<font color=\"gray\">按“--自定义--”可进行修改</br>(亦可添加后到计划任务中修改)</font>"
+msgid "1) An asterisk (*) indicates any value. If you use * in the \"minute\" field, it means that it will be triggered every minute. </br>2) A hyphen (-) indicates a range. If 5-20 is used in the \"minute\" field, it means that it will be triggered every minute from 5 to 20 minutes. </br>3) The comma (,) represents the split value. If you use 5,20 in the \"minute\" field, it means that it will be triggered every 5 minutes and 20 minutes. </br>4) Forward slash (/) means every time period. If you use 5-45/20 in the \"minute\" field, it means that it will be triggered every 20 minutes at 5 minutes, 25 minutes, and 45 minutes. </br>"
+msgstr "1) 星号 (*) 表示任意值。如在“分钟”字段使用*, 表示每分钟都会触发一次。</br>2) 连字符 (-) 表示范围。如在“分钟”字段使用5-20，表示在从5分到20分时段每分钟触发一次。</br>3) 逗号 (,) 表示分割数值。如在“分钟”字段使用5,20，表示在每5分和20分时触发一次。</br>4) 正斜杠 (/) 表示每隔时段。如在“分钟”字段使用5-45/20，表示在5分和25分和45分每隔20分钟触发一次。</br>"
 
 msgid "Reboots"
 msgstr "重启系统"
@@ -86,10 +50,16 @@ msgid "Turn off the power"
 msgstr "关闭电源"
 
 msgid "Scheduled tasks in system crontab.<br/>You can also edit or add commands directly here."
-msgstr "系统 crontab 中的定时任务。<br/>这里也可直接编辑或添加命令。"
+msgstr "系统 crontab 文件中的要执行定时任务。<br/>这里也可直接编辑或添加命令。"
 
-msgid ""
-msgstr ""
+msgid "Command"
+msgstr "命令"
+
+msgid "Hour"
+msgstr "时"
+
+msgid "month"
+msgstr "月"
 
 msgid ""
 msgstr ""
