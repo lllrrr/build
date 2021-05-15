@@ -4,13 +4,46 @@ PKG_NAME:=luci-app-cowb-speedlimit
 PKG_VERSION:=v4.0.4
 PKG_RELEASE:=20210515
 
-PKG_LICENSE:=Apache-2.0
-PKG_MAINTAINER:=
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
-LUCI_TITLE:=A Luci module that uses wrtbwmon to track bandwidth usage
-LUCI_DEPENDS:=+tc +kmod-ifb +kmod-sched +kmod-sched-core
-LUCI_PKGARCH:=all
+include $(INCLUDE_DIR)/package.mk
 
-include $(TOPDIR)/feeds/luci/luci.mk
+define Package/$(PKG_NAME)
+  SECTION:=luci
+  CATEGORY:=LuCI
+  SUBMENU:=3. Applications
+  DEPENDS:=+tc +bash +kmod-ifb +kmod-sched +kmod-sched-core
+  TITLE:=LuCI support for speedlimit
+  PKGARCH:=all
+endef
 
-# call BuildPackage - OpenWrt buildroot signature
+define Build/Compile
+endef
+
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+rm -f /tmp/luci-*
+endef
+
+define Package/$(PKG_NAME)/conffiles
+/etc/config/speedlimit
+endef
+
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
+	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
+
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
+	
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
+	
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
+
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
+	po2lmo ./po/zh-cn/*.po $(1)/usr/lib/lua/luci/i18n/speedlimit.zh-cn.lmo
+endef
+
+$(eval $(call BuildPackage,$(PKG_NAME)))

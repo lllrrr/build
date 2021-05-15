@@ -25,6 +25,9 @@ msgstr "任务"
 msgid "month"
 msgstr "月"
 
+msgid "Hour"
+msgstr "时"
+
 msgid "weeks"
 msgstr "星期"
 
@@ -58,5 +61,5 @@ msgstr "释放内存"
 msgid "Turn off the power"
 msgstr "关闭电源"
 
-msgid ""
-msgstr ""
+msgid "Execute"
+msgstr "执行"

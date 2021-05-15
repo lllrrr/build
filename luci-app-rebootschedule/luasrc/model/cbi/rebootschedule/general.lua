@@ -12,8 +12,8 @@ translate("&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\
 
 s=m:section(TypedSection,"crontab","")
 s.template = "cbi/tblsection"
+s.anonymous = false
 s.addremove = true
-s.anonymous = true
 
 p=s:option(Flag,"enable",translate("Enable"))
 p.rmempty = false
@@ -22,24 +22,24 @@ p.default=0
 month=s:option(Value,"month",translate("month"))
 month.rmempty = false
 month.default = '*'
-month.size = 10
+month.size = 8
 
 day=s:option(Value,"day",translate("day"))
 day.rmempty = false
 day.default = '*'
-day.size = 10
+day.size = 8
 
 hour=s:option(Value,"hour",translate("Hour"))
 hour.rmempty = false
 hour.default = '5'
-hour.size = 10
+hour.size = 8
 
-minute=s:option(Value,"minute",translate("Minutes"))
+minute=s:option(Value,"minute",translate("minute"))
 minute.rmempty = false
 minute.default = '0'
-minute.size = 10
+minute.size = 8
 
-week=s:option(Value,"week",translate("Week"))
+week=s:option(Value,"week",translate("weeks"))
 week.rmempty = true
 week:value('*',translate("Every day"))
 week:value(1,translate("Monday"))
@@ -50,9 +50,9 @@ week:value(5,translate("Friday"))
 week:value(6,translate("Saturday"))
 week:value(7,translate("Sunday"))
 week.default='*'
-week.size = 10
+week.size = 8
 
-command=s:option(Value,"command",translate("Command"))
+command=s:option(Value,"command",translate("Task"))
 command:value('sleep 5 && touch /etc/banner && reboot',translate("Reboots"))
 command:value('/etc/init.d/network restart',translate("Restart network"))
 command:value('ifdown wan && ifup wan',translate("Restart wan"))
@@ -64,20 +64,17 @@ command:value('wifi up',translate("Turn on WIFI"))
 command:value('sync && echo 3 > /proc/sys/vm/drop_caches', translate("Free up memory"))
 command:value('poweroff',translate("Turn off the power"))
 command.default='sleep 5 && touch /etc/banner && reboot'
-command.size = 10
--- command.datatype="uinteger"
--- command.placeholder = "53"
 
--- p = s:option(Button, "_baa", translate("立即执行"))
--- p.inputtitle = translate("应用")
+-- p = s:option(Button, "_baa", translate("Execute"))
+-- p.inputtitle = translate("Apply")
 -- p.inputstyle = "apply"
 -- p.forcewrite = true
 -- p.write = function(self, section)
-	-- uci:get("rebootschedule", '@crontab[0]', 'command', section)
+--	 uci:get("rebootschedule", '@crontab[0]', 'command', section)
 -- end
 
-local e=luci.http.formvalue("cbi.apply")
-if e then
+local open=luci.http.formvalue("cbi.apply")
+if open then
   io.popen("/etc/init.d/rebootschedule restart")
 end
 
