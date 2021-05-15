@@ -1,14 +1,8 @@
-msgid "crontabs"
-msgstr "crontab文件"
-
 msgid "Reboot schedule"
 msgstr "定时任务 Plus+"
 
-msgid "View usage example"
-msgstr "查看使用示例"
-
-msgid "View crontab usage"
-msgstr "查看crontab用法"
+msgid "crontabs"
+msgstr "crontab文件"
 
 msgid "<font color=\"green\"><b>A plug-in that makes timed tasks easier to use. It is modified with the original version of wulishui@gmail.com, which supports wulishui. Click below</font><font color=\"red\"> View usage example </font><font color=\"green\"> and then scan two Dimension Code Reward</font></b></br>"
 msgstr "<font color=\"green\"><b>让定时任务更加易用的插件。是用 wulishui@gmail.com 的原版修改，支持 wulishui 点击下面的 </font><font color=\"red\"> 查看使用示例 </font><font color=\"green\"> 后扫描二维码打赏</font></b></br>"
@@ -18,6 +12,21 @@ msgstr "CRON表达式的字符串是五个有空格分隔加执行命令字段�
 
 msgid "1) An asterisk (*) indicates any value. If you use * in the \"minute\" field, it means that it will be triggered every minute. </br>2) A hyphen (-) indicates a range. If 5-20 is used in the \"minute\" field, it means that it will be triggered every minute from 5 to 20 minutes. </br>3) The comma (,) represents the split value. If you use 5,20 in the \"minute\" field, it means that it will be triggered every 5 minutes and 20 minutes. </br>4) Forward slash (/) means every time period. If you use 5-45/20 in the \"minute\" field, it means that it will be triggered every 20 minutes at 5 minutes, 25 minutes, and 45 minutes. </br>"
 msgstr "1) 星号 (*) 表示任意值。如在“分钟”字段使用*, 表示每分钟都会触发一次。</br>2) 连字符 (-) 表示范围。如在“分钟”字段使用5-20，表示在从5分到20分时段每分钟触发一次。</br>3) 逗号 (,) 表示分割数值。如在“分钟”字段使用5,20，表示在每5分和20分时触发一次。</br>4) 正斜杠 (/) 表示每隔时段。如在“分钟”字段使用5-45/20，表示在5分和25分和45分每隔20分钟触发一次。</br>"
+
+msgid "View usage example"
+msgstr "查看使用示例"
+
+msgid "View crontab usage"
+msgstr "查看crontab用法"
+
+msgid "Task"
+msgstr "任务"
+
+msgid "month"
+msgstr "月"
+
+msgid "weeks"
+msgstr "星期"
 
 msgid "Reboots"
 msgstr "重启系统"
@@ -48,21 +57,6 @@ msgstr "释放内存"
 
 msgid "Turn off the power"
 msgstr "关闭电源"
-
-msgid "Scheduled tasks in system crontab.<br/>You can also edit or add commands directly here."
-msgstr "系统 crontab 文件中的要执行定时任务。<br/>这里也可直接编辑或添加命令。"
-
-msgid "Command"
-msgstr "命令"
-
-msgid "Hour"
-msgstr "时"
-
-msgid "month"
-msgstr "月"
-
-msgid ""
-msgstr ""
 
 msgid ""
 msgstr ""
