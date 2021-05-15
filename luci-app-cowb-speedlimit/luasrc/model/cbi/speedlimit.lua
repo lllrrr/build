@@ -32,13 +32,12 @@ usr.size = 10
 dl = s:option(Value, "download", translate("downloads"))
 dl.rmempty = false
 dl.size = 10
+
 ul = s:option(Value, "upload", translate("uploads"))
 ul.rmempty = false
 ul.size = 10
+
 comment = s:option(Value, "comment", translate("Comment"))
 comment.size = 10
+
 return m
-
-
-
-
