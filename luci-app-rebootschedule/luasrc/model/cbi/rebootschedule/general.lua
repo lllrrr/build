@@ -1,47 +1,47 @@
-m=Map("rebootschedule",translate("Reboot schedule"),
-translate("<font color=\"green\"><b>A plug-in that makes timed tasks easier to use. It is modified with the original version of wulishui@gmail.com, which supports wulishui. Click below</font><font color=\"red\"> View usage example </font><font color=\"green\"> and then scan two Dimension Code Reward</font></b></br>") ..
-translate("The string of the CRON expression is composed of five fields separated by spaces and executed commands. </br>* * * * * [command]</br>Five asterisks indicate (minutes) (hours) (days) (months) (weeks) according to their positions. commond indicates the command to be executed</br> The allowed range of values is minute (1-59), hour (0-23), day (1-31), month (1-12), week (0-6). </br>Each field can be composed of a value within the range or a combination of the following half-width special characters:</br>") ..
-translate("1) An asterisk (*) indicates any value. If you use * in the \"minute\" field, it means that it will be triggered every minute. </br>2) A hyphen (-) indicates a range. If 5-20 is used in the \"minute\" field, it means that it will be triggered every minute from 5 to 20 minutes. </br>3) The comma (,) represents the split value. If you use 5,20 in the \"minute\" field, it means that it will be triggered every 5 minutes and 20 minutes. </br>4) Forward slash (/) means every time period. If you use 5-45/20 in the \"minute\" field, it means that it will be triggered every 20 minutes at 5 minutes, 25 minutes, and 45 minutes. </br>") ..
+m=Map("rebootschedule",translate("定时任务 Plus+"),
+translate("<font color=\"green\"><b>让定时任务更加易用的插件。是用 wulishui@gmail.com 的原版修改，支持 wulishui 点击下面的 </font><font color=\"red\"> 查看使用示例 </font><font color=\"green\"> 后扫描二维码打赏</font></b></br>") ..
+translate("CRON表达式的字符串是五个有空格分隔加执行命令字段组成。 </br>* * * * * [command]</br>五个星号按照位置分别表示 (分) (时) (日) (月) (周) commond 表示所需执行的命令</br>允许的数值范围是，分(1-59), 时(0-23), 日(1-31)，月(1-12), 周(0-6)。</br>每一个字段都可以使用范围之内的数值或者以下半角的特殊字符组合组成：</br>") ..
+translate("1) 星号 (*) 表示任意值。如在“分钟”字段使用*, 表示每分钟都会触发一次。</br>2) 连字符 (-) 表示范围。如在“分钟”字段使用5-20，表示在从5分到20分时段每分钟触发一次。</br>3) 逗号 (,) 表示分割数值。如在“分钟”字段使用5,20，表示在每5分和20分时触发一次。</br>4) 正斜杠 (/) 表示每隔时段。如在“分钟”字段使用5-45/20，表示在5分和25分和45分每隔20分钟触发一次。</br>") ..
 translate("<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\"" ..
-translate("View usage example") ..
+translate("查看使用示例") ..
 " \" onclick=\"window.open('http://'+window.location.hostname+'/reboothelp.jpg')\"/>") ..
 translate("&nbsp;&nbsp;&nbsp;<input class=\"cbi-button cbi-button-apply\" type=\"button\" value=\"" ..
- translate("View crontab usage") ..
+ translate("查看crontab用法") ..
 " \" onclick=\"window.open('https://tool.lu/crontab/')\"/>")
 )
 
 s=m:section(TypedSection,"crontab","")
 s.template = "cbi/tblsection"
-s.anonymous = false
+s.anonymous = true
 s.addremove = true
 
-p=s:option(Flag,"enable",translate("Enable"))
+p=s:option(Flag,"enable",translate("启用"))
 p.rmempty = false
 p.default=0
 
-month=s:option(Value,"month",translate("month"))
+month=s:option(Value,"month",translate("月"))
 month.rmempty = false
 month.default = '*'
 month.size = 8
 
-day=s:option(Value,"day",translate("day"))
+day=s:option(Value,"day",translate("日"))
 day.rmempty = false
 day.default = '*'
 day.size = 8
 
-hour=s:option(Value,"hour",translate("Hour"))
+hour=s:option(Value,"hour",translate("时"))
 hour.rmempty = false
 hour.default = '5'
 hour.size = 8
 
-minute=s:option(Value,"minute",translate("minute"))
+minute=s:option(Value,"minute",translate("分"))
 minute.rmempty = false
 minute.default = '0'
 minute.size = 8
 
-week=s:option(Value,"week",translate("weeks"))
+week=s:option(Value,"week",translate("周"))
 week.rmempty = true
-week:value('*',translate("Every day"))
+week:value('*',translate("每天"))
 week:value(1,translate("Monday"))
 week:value(2,translate("Tuesday"))
 week:value(3,translate("Wednesday"))
@@ -52,25 +52,25 @@ week:value(7,translate("Sunday"))
 week.default='*'
 week.size = 8
 
-command=s:option(Value,"command",translate("Task"))
-command:value('sleep 5 && touch /etc/banner && reboot',translate("Reboots"))
-command:value('/etc/init.d/network restart',translate("Restart network"))
-command:value('ifdown wan && ifup wan',translate("Restart wan"))
-command:value('killall -q pppd && sleep 5 && pppd file /tmp/ppp/options.wan', translate("Redial"))
-command:value('ifdown wan',translate("Turn off networking"))
-command:value('ifup wan',translate("Turn on networking"))
-command:value('wifi down',translate("Turn off WIFI"))
-command:value('wifi up',translate("Turn on WIFI"))
-command:value('sync && echo 3 > /proc/sys/vm/drop_caches', translate("Free up memory"))
-command:value('poweroff',translate("Turn off the power"))
+command=s:option(Value,"command",translate("执行的任务"))
+command:value('sleep 5 && touch /etc/banner && reboot',translate("重启系统"))
+command:value('/etc/init.d/network restart',translate("重启网络"))
+command:value('ifdown wan && ifup wan',translate("重启wan"))
+command:value('killall -q pppd && sleep 5 && pppd file /tmp/ppp/options.wan', translate("重新拨号"))
+command:value('ifdown wan',translate("关闭联网"))
+command:value('ifup wan',translate("打开联网"))
+command:value('wifi down',translate("关闭WIFI"))
+command:value('wifi up',translate("打开WIFI"))
+command:value('sync && echo 3 > /proc/sys/vm/drop_caches', translate("释放内存"))
+command:value('poweroff',translate("关闭电源"))
 command.default='sleep 5 && touch /etc/banner && reboot'
 
--- p = s:option(Button, "_baa", translate("Execute"))
--- p.inputtitle = translate("Apply")
+-- p = s:option(Button, "_baa", translate("立即执行"))
+-- p.inputtitle = translate("应用")
 -- p.inputstyle = "apply"
 -- p.forcewrite = true
 -- p.write = function(self, section)
---	 uci:get("rebootschedule", '@crontab[0]', 'command', section)
+	 -- uci:get("rebootschedule", '@crontab[0]', 'command', section)
 -- end
 
 local open=luci.http.formvalue("cbi.apply")
