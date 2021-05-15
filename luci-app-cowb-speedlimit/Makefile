@@ -42,8 +42,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
 
-	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
-	po2lmo ./po/zh-cn/*.po $(1)/usr/lib/lua/luci/i18n/speedlimit.zh-cn.lmo
+	# $(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
+	# po2lmo ./po/zh-cn/*.po $(1)/usr/lib/lua/luci/i18n/speedlimit.zh-cn.lmo
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
