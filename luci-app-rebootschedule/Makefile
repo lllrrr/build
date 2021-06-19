@@ -28,10 +28,11 @@ define Package/$(PKG_NAME)/conffiles
 endef
 
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/etc/init.d $(1)/etc/config $(1)/usr/lib/lua/luci
+	$(INSTALL_DIR) $(1)/etc/init.d $(1)/etc/config $(1)/usr/lib/lua/luci $(1)/www
 	$(CP) ./luasrc/* $(1)/usr/lib/lua/luci
 	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config
 	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d
+	cp -pR ./root/www/* $(1)/www/
 #	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/i18n
 #	po2lmo ./po/zh-cn/*.po $(1)/usr/lib/lua/luci/i18n/rebootschedule.zh-cn.lmo
 endef
