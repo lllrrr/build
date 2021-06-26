@@ -7,18 +7,18 @@ add_ipts() {
 	type=$(echo "$line" | awk -F ' ' '{print $2}')
 	if [ "$type" = "MAC" ]; then
 		[ -z "$(grep -w "$target" /etc/${logfile})" ] && {
-			echo "$target" >>/etc/${logfile}
+			echo "$target" >> /etc/${logfile}
 			iptables -w -A ${iptname} -m mac --mac-source ${target} -j DROP 2>/dev/null
 			ip6tables -w -A ${iptname} -m mac --mac-source ${target} -j DROP 2>/dev/null
 		}
 	elif [ "$type" = "IP4" ]; then
 		[ -z "$(grep -w "$target" /etc/${logfile})" ] && {
-			echo "$target" >>/etc/${logfile}
+			echo "$target" >> /etc/${logfile}
 			iptables -w -A ${iptname} -s ${target} -j DROP 2>/dev/null
 		}
 	elif [ "$type" = "IP6" ]; then
 		[ -z "$(grep -w "$target" /etc/${logfile})" ] && {
-			echo "$target" >>/etc/${logfile}
+			echo "$target" >> /etc/${logfile}
 			ip6tables -w -A ${iptname} -s ${target} -j DROP 2>/dev/null
 		}
 	fi
@@ -34,9 +34,9 @@ add_badhostsbnew() {
 		if [ -n "$havetarget" ]; then
 			sumtarget=$(echo ${havetarget} | awk -F ' ' '{print $1}')
 			sed -i '/'"$target"'/d' /etc/PwdHackDeny/${badhostsfile}
-			echo "$((sumtarget + 1)) ${target} " >>/etc/PwdHackDeny/${badhostsfile}
+			echo "$((sumtarget + 1)) ${target} " >> /etc/PwdHackDeny/${badhostsfile}
 		else
-			echo "1 ${target} " >>/etc/PwdHackDeny/${badhostsfile}
+			echo "1 ${target} " >> /etc/PwdHackDeny/${badhostsfile}
 		fi
 		unset MAC
 		unset IP4
@@ -60,16 +60,16 @@ add_badhostsbnew() {
 chk_log() {
 	#--------------------------chklogsize-----------------------
 	logsize=$(du /etc/PwdHackDeny/badip.log.web 2>/dev/null | awk '{print $1}') && [ "$logsize" -gt 80 ] && {
-		cat /etc/PwdHackDeny/badip.log.web >>/etc/PwdHackDeny/bak.log.web
-		echo "--------"$(date +"%Y-%m-%d %H:%M:%S")" ：日志文件过大，旧的记录已转移到 /etc/PwdHackDeny/bak.log.web 。--------" >/etc/PwdHackDeny/badip.log.web 2>/dev/null
+		cat /etc/PwdHackDeny/badip.log.web >> /etc/PwdHackDeny/bak.log.web
+		echo "--------"$(date +"%Y-%m-%d %H:%M:%S")" ：日志文件过大，旧的记录已转移到 /etc/PwdHackDeny/bak.log.web 。--------" > /etc/PwdHackDeny/badip.log.web 2>/dev/null
 	}
 	logsize=$(du /etc/PwdHackDeny/badip.log.ssh 2>/dev/null | awk '{print $1}') && [ "$logsize" -gt 80 ] && {
-		cat /etc/PwdHackDeny/badip.log.ssh >>/etc/PwdHackDeny/bak.log.ssh
-		echo "--------"$(date +"%Y-%m-%d %H:%M:%S")" ：日志文件过大，旧的记录已转移到 /etc/PwdHackDeny/bak.log.ssh 。--------" >/etc/PwdHackDeny/badip.log.ssh 2>/dev/null
+		cat /etc/PwdHackDeny/badip.log.ssh >> /etc/PwdHackDeny/bak.log.ssh
+		echo "--------"$(date +"%Y-%m-%d %H:%M:%S")" ：日志文件过大，旧的记录已转移到 /etc/PwdHackDeny/bak.log.ssh 。--------" > /etc/PwdHackDeny/badip.log.ssh 2>/dev/null
 	}
 
 	#---------------------------addlogfile----------------------
-	logread | egrep 'dropbear.*[Pp]assword|uhttpd.*login' >/tmp/PwdHackDeny/syslog
+	logread | egrep 'dropbear.*[Pp]assword|uhttpd.*login' > /tmp/PwdHackDeny/syslog
 	[ -s /tmp/PwdHackDeny/syslog ] || return 0
 
 	touch /tmp/PwdHackDeny/syslog /tmp/PwdHackDeny/syslog_
@@ -77,25 +77,25 @@ chk_log() {
 	cp -f /tmp/PwdHackDeny/syslog /tmp/PwdHackDeny/syslog_
 	[ -n "$newlog" ] || return 0
 
-	cat /proc/net/arp 2>/dev/null | grep 'lan' | awk '{if(NR!=0) print $1" "$4}' | tr '[a-z]' '[A-Z]' 2>/dev/null >/tmp/PwdHackDeny/MAC-IP.leases
+	awk '/0x2/{print $1" "$4}' /proc/net/arp | tr '[a-z]' '[A-Z]' > /tmp/PwdHackDeny/MAC-IP.leases
 	while read line; do
 		BIP=$(echo "$line" | egrep -o "(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])" | head -1) || BIP=$(echo "$line" | egrep -o "(s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)(\\.(25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)){3}))|:)))(%.+)?\\s*)" | head -1)
 		[ -n "$BIP" ] && BIP=$(grep -w "$BIP" /tmp/PwdHackDeny/MAC-IP.leases | awk -F ' ' '{print $2}') && { [ "$(echo "$BIP" | wc -l)" -gt 1 ] && BIP=$(echo "$BIP" | head -1) && BARP=" ，此客户端在进行ARP欺骗！"; }
 		sshwrong=$(echo "$line" | grep -o "Bad password attempt")
 		webwrong=$(echo "$line" | grep -o "failed login on")
 		if [ -n "$sshwrong" -o -n "$webwrong" ]; then
-			echo ""$line" (Login Host : "$BIP" "$BARP")  <---------异常登录！！！" >>/tmp/PwdHackDeny/syslog.tmp
+			echo ""$line" (Login Host : "$BIP" "$BARP")  <---------异常登录！！！" >> /tmp/PwdHackDeny/syslog.tmp
 		else
-			echo ""$line" (Login Host : "$BIP" "$BARP") " >>/tmp/PwdHackDeny/syslog.tmp
+			echo ""$line" (Login Host : "$BIP" "$BARP") " >> /tmp/PwdHackDeny/syslog.tmp
 		fi
 		unset BIP
 		unset BARP
-	done <<<"$newlog"
+	done <<< "$newlog"
 	unset newlog
 
 	[ -s /tmp/PwdHackDeny/syslog.tmp ] || return 0
-	egrep 'dropbear.*[Pp]assword' /tmp/PwdHackDeny/syslog.tmp >>/etc/PwdHackDeny/badip.log.ssh
-	egrep 'uhttpd.*login' /tmp/PwdHackDeny/syslog.tmp >>/etc/PwdHackDeny/badip.log.web
+	egrep 'dropbear.*[Pp]assword' /tmp/PwdHackDeny/syslog.tmp >> /etc/PwdHackDeny/badip.log.ssh
+	egrep 'uhttpd.*login' /tmp/PwdHackDeny/syslog.tmp >> /etc/PwdHackDeny/badip.log.web
 	sum=$(uci get PwdHackDeny.PwdHackDeny.sum 2>/dev/null) || sum=5
 
 	#----------------------------addbadsshlog------------------

@@ -7,7 +7,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=luci-app-cowbping
 PKG_VERSION=v1.6
-PKG_RELEASE:=v1.6-20200421
+PKG_RELEASE:=v1.6-202105025
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -39,8 +39,8 @@ define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
 	
-	$(INSTALL_DIR) $(1)/etc
-	$(INSTALL_BIN) ./root/etc/cowbping.sh $(1)/etc/cowbping.sh
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./root/usr/bin/cowbpingd $(1)/usr/bin/cowbpingd
 	
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
@@ -50,5 +50,3 @@ define Package/$(PKG_NAME)/install
 endef
 
 $(eval $(call BuildPackage,$(PKG_NAME)))
-
-

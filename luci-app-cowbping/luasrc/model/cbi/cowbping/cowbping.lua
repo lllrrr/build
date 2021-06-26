@@ -1,15 +1,9 @@
 local sys = require "luci.sys"
-local utl = require "luci.util"
-local ipc = require "luci.ip"
-local nt  = require "luci.sys".net
 local fs  = require "nixio.fs"
-local net = require "luci.model.network".init()
-local uci = luci.model.uci.cursor()
-local ifaces = sys.net:devices()
 local button = ""
 local state_msg = ""
 local a,m,s,n
-local running=(luci.sys.call("ps|grep 'cowbpingd'|grep -v grep > /dev/null") == 0)
+local running=(luci.sys.call("ps | grep 'cowbpingd' | grep -v grep > /dev/null") == 0)
 local relaymode=(luci.sys.call("[ `grep -c 'work_mode .6.' /etc/config/cowbping 2>/dev/null` -ge 1 ] ") == 0)
 
 if running then
@@ -18,7 +12,7 @@ else
         state_msg = "<b><font color=\"red\">" .. translate("没有运行") .. "</font></b>"
 end
 
-m = Map("cowbping", translate("CowBping"))
+m = Map("cowbping", translate("网络检测"))
 m.description = translate("<font style='color:black'>定期ping一个网站以检测网络是否通畅，否则执行相关动作以排除故障。网站一与网站二是“与”关系，丢包率与延迟是“或”关系。</font>" .. button .. "<br/><br/>" .. translate("运行状态").. " : "  .. state_msg .. "<br />")
 
 s = m:section(NamedSection, "cowbping")

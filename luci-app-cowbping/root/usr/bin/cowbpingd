@@ -3,7 +3,7 @@
 #20190805-202105025
 
 log() {
-	echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >>/tmp/log/cowbping.log
+	echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >> /tmp/log/cowbping.log
 }
 
 L_L() {
@@ -14,57 +14,62 @@ L_L() {
 
 P_G() {
 	FAIL=0
-	PING1=$(ping -c "$CYL" "$ADDR1") || Err1=1
-	PING2=$(ping -c "$CYL" "$ADDR2") || Err2=1
-	[ "$Err1" == 1 -a "$Err2" == 1 ] && {
-		FAIL=1
-		log "网络不通 ！！！"
-	}
+	PING1=$(ping -c "$CYL" "$ADDR1" 1>/dev/null 2>&1) || Err1=1
+	PING2=$(ping -c "$CYL" "$ADDR2" 1>/dev/null 2>&1) || Err2=1
+	[ "$Err1" == 1 -a "$Err2" == 1 ] && { FAIL=1; log "网络不通 ！！！"; }
 	if [ "$FAIL" != 1 -a "$pkglost" != 0 ]; then
-		loss1=$(echo "$PING1" | grep -o '[0-9.]*%' | awk -F '[%.]' '{print $1}')
+		loss1=`echo "$PING1" | grep -o '[0-9.]*%'| awk -F '[%.]' '{print $1}'`
 		[ -z "$loss1" ] && loss1=100
-		loss2=$(echo "$PING2" | grep -o '[0-9.]*%' | awk -F '[%.]' '{print $1}')
+		loss2=`echo "$PING2" | grep -o '[0-9.]*%'| awk -F '[%.]' '{print $1}'`
 		[ -z "$loss2" ] && loss2=100
-		[ "$loss1" -ge "$pkglost" -a "$loss2" -ge "$pkglost" ] && FAIL=1 && log "丢包率过高："$(((loss1 + loss2) / 2))"%"
+		[ "$loss1" -ge "$pkglost" -a "$loss2" -ge "$pkglost" ] && FAIL=1 && log "丢包率过高："$(((loss1+loss2)/2))"%"
 	fi
 	if [ "$FAIL" != 1 -a "$pkgdelay" != 0 ]; then
-		delay1=$(echo "$PING1" | grep -o 'time=[0-9.]*' | awk -F '[=]' '{sum+=$2} END {print sum/NR}' | awk -F '.' '{print $1}')
+		delay1=`echo "$PING1" | grep -o 'time=[0-9.]*' | awk -F '[=]' '{sum+=$2} END {print sum/NR}' | awk -F '.' '{print $1}'`
 		[ -z "$delay1" ] && delay1=10000
-		delay2=$(echo "$PING2" | grep -o 'time=[0-9.]*' | awk -F '[=]' '{sum+=$2} END {print sum/NR}' | awk -F '.' '{print $1}')
+		delay2=`echo "$PING2" | grep -o 'time=[0-9.]*' | awk -F '[=]' '{sum+=$2} END {print sum/NR}' | awk -F '.' '{print $1}'`
 		[ -z "$delay2" ] && delay2=10000
-		[ "$delay1" -ge "$pkgdelay" -a "$delay2" -ge "$pkgdelay" ] && FAIL=1 && log "延迟过高："$(((delay1 + delay2) / 2))"ms"
+		[ "$delay1" -ge "$pkgdelay" -a "$delay2" -ge "$pkgdelay" ] && FAIL=1 && log "延迟过高："$(((delay1+delay2)/2))"ms"
 	fi
 	unset PING1 PING2 Err1 Err2 delay1 delay2 loss1 loss2
 	[ "$FAIL" == 1 ] || return
 	L_L
 	case "$work_mode" in
-	"1")
+	1)
 		reboot
+		f="重启系统"
 		;;
-	"2")
+	2)
 		killall -q pppd
 		sleep 5
 		pppd file /tmp/ppp/options.wan
+		f="重新拨号"
 		;;
-	"3")
+	3)
 		wifi down
 		wifi up
+		f="重启WIFI"
 		;;
-	"4")
+	4)
 		/etc/init.d/network restart
+		f="重启网络"
 		;;
-	"5")
+	5)
 		kill -9 $(busybox ps -w | grep 'cbp_cmd' | grep -v 'grep' | awk '{print $1}') 2>/dev/null
 		[ -s /etc/config/cbp_cmd ] && bash /etc/config/cbp_cmd 2>/dev/null &
+		f="自定义命令"
 		;;
-	"6")
+	6)
 		wifi down
 		wifi up
+		f="自动中继"
 		;;
-	"7")
+	7)
 		poweroff
+		f="关机睡觉"
 		;;
 	esac
+	log `echo "执行--${work_mode}.${f}--"`
 }
 
 G_E() {
