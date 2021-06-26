@@ -14,8 +14,8 @@ L_L() {
 
 P_G() {
 	FAIL=0
-	PING1=$(ping -c "$CYL" "$ADDR1" 1>/dev/null 2>&1) || Err1=1
-	PING2=$(ping -c "$CYL" "$ADDR2" 1>/dev/null 2>&1) || Err2=1
+	PING1=$(ping -c "$CYL" "$ADDR1") || Err1=1
+	PING2=$(ping -c "$CYL" "$ADDR2") || Err2=1
 	[ "$Err1" == 1 -a "$Err2" == 1 ] && { FAIL=1; log "网络不通 ！！！"; }
 	if [ "$FAIL" != 1 -a "$pkglost" != 0 ]; then
 		loss1=`echo "$PING1" | grep -o '[0-9.]*%'| awk -F '[%.]' '{print $1}'`
