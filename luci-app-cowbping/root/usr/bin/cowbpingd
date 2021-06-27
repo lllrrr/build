@@ -3,7 +3,7 @@
 #20190805-202105025
 
 log() {
-	echo "$(date "+%Y-%m-%d %H:%M:%S") $1" >> /tmp/log/cowbping.log
+	echo "$(date "+%Y-%m-%d %H:%M:%S": ) $1" >> /tmp/log/cowbping.log
 }
 
 L_L() {

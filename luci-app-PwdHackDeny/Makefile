@@ -1,18 +1,49 @@
-# Copyright (C) 2016 Openwrt.org
-#
-# This is free software, licensed under the Apache License, Version 2.0 .
-#
-
 include $(TOPDIR)/rules.mk
 
-LUCI_TITLE:=LuCI support for password hack deny by wulishui
-LUCI_DEPENDS:=+gawk +ipset +ip6tables
-LUCI_PKGARCH:=all
+PKG_NAME:=luci-app-PwdHackDeny
 PKG_VERSION:=v6.0.5
 PKG_RELEASE:=20210314
 
-include $(TOPDIR)/feeds/luci/luci.mk
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
-# call BuildPackage - OpenWrt buildroot signature
+include $(INCLUDE_DIR)/package.mk
 
+define Package/$(PKG_NAME)
+  SECTION:=luci
+  CATEGORY:=LuCI
+  SUBMENU:=3. Applications
+  DEPENDS:=+gawk +ipset +ip6tables +diffutils
+  TITLE:=LuCI support for password hack deny by wulishui
+  PKGARCH:=all
+endef
 
+define Build/Compile
+endef
+
+define Package/$(PKG_NAME)/postinst
+#!/bin/sh
+rm -f /tmp/luci-*
+endef
+
+define Package/$(PKG_NAME)/conffiles
+/etc/config/PwdHackDeny
+endef
+
+define Package/$(PKG_NAME)/install
+	$(INSTALL_DIR) $(1)/usr/lib/lua/luci
+	cp -pR ./luasrc/* $(1)/usr/lib/lua/luci
+
+	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_BIN) ./root/etc/init.d/* $(1)/etc/init.d/
+
+	$(INSTALL_DIR) $(1)/etc/
+	$(INSTALL_BIN) ./root/etc/PwdHackDeny.sh $(1)/etc/PwdHackDeny.sh
+	
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
+	$(INSTALL_BIN) ./root/etc/uci-defaults/* $(1)/etc/uci-defaults/
+	
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./root/etc/config/* $(1)/etc/config/
+endef
+
+$(eval $(call BuildPackage,$(PKG_NAME)))
