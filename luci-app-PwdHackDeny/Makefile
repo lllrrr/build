@@ -12,7 +12,7 @@ define Package/$(PKG_NAME)
   SECTION:=luci
   CATEGORY:=LuCI
   SUBMENU:=3. Applications
-  DEPENDS:=+gawk +ipset +ip6tables +diffutils
+  DEPENDS:=+gawk +ipset +ip6tables +iptables-mod-iprange +diffutils
   TITLE:=LuCI support for password hack deny by wulishui
   PKGARCH:=all
 endef
