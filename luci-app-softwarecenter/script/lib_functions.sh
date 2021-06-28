@@ -32,11 +32,12 @@ make_dir(){
 # entware环境设定 参数：$1:安装位置 $2:设备底层架构 说明：此函数用于写入新配置
 entware_set(){
 	entware_unset
-	[ "$1" ] && USB_PATH="$1"
+	[ "$1" ] && USB_PATH="$1" || { echo_time "未选择安装路径！" && exit 1; }
 	[ "$2" ] || { echo_time "未选择CPU架构！" && exit 1; }
 	system_check $USB_PATH
 	echo_time "安装基本软件" && install_soft "$pkglist_base"
-	make_dir "$USB_PATH/opt" "/opt" && mount -o bind $USB_PATH/opt /opt
+	make_dir "$USB_PATH/opt" "/opt"
+	mount -o bind $USB_PATH/opt /opt
 
 	Kernel_V=$(expr substr `uname -r` 1 3)
 	if [ "$2" = "mips" ]; then
@@ -46,11 +47,14 @@ entware_set(){
 			INST_URL=http://bin.entware.net/mipselsf-k3.4/installer/generic.sh
 		fi
 	fi
-	[ "$2" = "x86_64" ] && INST_URL=http://bin.entware.net/x64-k3.2/installer/generic.sh
-	[ "$2" = "x86_32" ] && INST_URL=http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh
-	[ "$2" = "armv5*" ] && INST_URL=http://bin.entware.net/armv5sf-k3.2/installer/generic.sh
-	[ "$2" = "aarch64" ] && INST_URL=http://bin.entware.net/aarch64-k3.10/installer/generic.sh
-	[ "$2" = "armv7l" ] && INST_URL=http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh
+
+	case $2 in
+		x86_64)		INST_URL=http://bin.entware.net/x64-k3.2/installer/generic.sh;;
+		x86_32)		INST_URL=http://pkg.entware.net/binaries/x86-32/installer/entware_install.sh;;
+		armv5*)		INST_URL=http://bin.entware.net/armv5sf-k3.2/installer/generic.sh;;
+		aarch64)	INST_URL=http://bin.entware.net/aarch64-k3.10/installer/generic.sh;;
+		armv7l)		INST_URL=http://bin.entware.net/armv7sf-k${Kernel_V}/installer/generic.sh;;
+	esac
 
 	if [ $INST_URL ]; then
 		wget -t 5 -qcNO - $INST_URL | /bin/sh
@@ -59,7 +63,10 @@ entware_set(){
 		exit 1
 	fi
 
-	[ "ls /opt/etc/init.d 2>/dev/null | wc -l" = 0 ] && echo_time "安装 Entware 出错，请重试！" && exit 1
+	[ -s /opt/etc/init.d ] || {
+	 echo_time "安装 Entware 出错，请重试！"
+	 exit 1
+	 }
 
 cat > "/etc/init.d/entware" <<-\ENTWARE
 #!/bin/sh /etc/rc.common
@@ -92,15 +99,15 @@ stop;start
 }
 ENTWARE
 
-	chmod a+x /etc/init.d/entware
+	chmod +x /etc/init.d/entware
 	/etc/init.d/entware enable
 	echo "export PATH=/opt/bin:/opt/sbin:/sbin:/bin:/usr/sbin:/usr/bin:$PATH" >> /etc/profile
 
-	if wget -qcNO- -t 5 http://pkg.entware.net/sources/i18n_glib223.tar.gz \
-	| tar xvz -C /opt/usr/share/ > /dev/null; then
-	echo_time "添加 zh_CN.UTF-8"
-	/opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
-	sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile; fi
+	if wget -qcNO- -t 5 http://pkg.entware.net/sources/i18n_glib223.tar.gz && tar xvz -C /opt/usr/share/ > /dev/null; then
+    echo_time "添加 zh_CN.UTF-8"
+    /opt/bin/localedef.new -c -f UTF-8 -i zh_CN zh_CN.UTF-8
+    sed -i 's/en_US.UTF-8/zh_CN.UTF-8/g' /opt/etc/profile
+	fi
 
 	echo_time "Entware 安装成功！\n"
 }

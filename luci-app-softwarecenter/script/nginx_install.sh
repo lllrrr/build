@@ -16,13 +16,7 @@ phpmod="php7-mod-mysqli php7-mod-pdo php7-mod-pdo-mysql php7-mod-calendar php7-m
 # PHP初始化
 init_php(){
 	# 安装php
-	if [ "`grep x64-k3.2 /opt/etc/opkg.conf`" ]; then
-		sed -i 's|src/gz.*|src/gz entware http://test.qdjfkj.com/entware/x64-k3.2/2019|' /opt/etc/opkg.conf
-	fi
 	install_soft $pkglist_php7 $phpmod
-	if [ "`awk -F/ '/entware/{print $6}' /opt/etc/opkg.conf`" = "x64-k3.2" ]; then
-		sed -i 's|src/gz.*|src/gz entware http://bin.entware.net/x64-k3.2|' /opt/etc/opkg.conf
-	fi
 	make_dir /opt/usr/php/tmp/ > /dev/null 2>&1 && chmod -R 777 /opt/usr/php/tmp/
 
 	sed -i "/^doc_root/d" /opt/etc/php.ini
